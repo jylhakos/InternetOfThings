@@ -68,7 +68,7 @@ curl http://localhost:8000/notes \
     --request "GET"
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/HTTP_GET.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_GET.png?raw=true)
 
 A handler returns data from a GET request.
 
@@ -85,7 +85,7 @@ Use curl command to make a request to the running web service.
 $ curl http://localhost:8000/notes/2
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/HTTP_GET_ID.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_GET_ID.png?raw=true)
 
 **POST**
 
@@ -141,28 +141,9 @@ $ curl http://localhost:8000/notes \
     --data '{"id": "4","content": "POST is used to add data to REST API","date": "2019-06-15T20:40:22.098Z","important": false}'
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/HTTP_POST.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_POST.png?raw=true)
 
 A link to Golang Gin documents.
 
 https://gin-gonic.com/docs/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
