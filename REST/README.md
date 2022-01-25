@@ -1,10 +1,12 @@
 # RESTful API (REST)
 
-We are building RESTful (Representational State Transfer) APIs with the Gin framework.
+The application consists of RESTful (Representational State Transfer) APIs with Golang and the Gin framework.
 
 The goal of RESTful model is that a resource, for example a document, is transferred via client and server interactions.
 
 The starting point for the RESTful model is using Hypertext Transfer Protocol (HTTP) as a transport system for remote interactions.
+
+Each HTTP request from the client to the server contains all of the information necessary to complete the request.
 
 A server will expose an endpoint at some Uniform Resource Identifier (URI).
 
@@ -49,9 +51,9 @@ var fields = [] field {
     {<FIELD>: "<CHARACTERS>"}, 
 }
 
-**HTTP**
+## HTTP
 
-We need to use GET verb to request to retrieve the resource.
+The application uses GET verb to request to retrieve a resource.
 
 **GET**
 
@@ -89,7 +91,7 @@ $ curl http://localhost:8000/notes/2
 
 **POST**
 
-We need to use POST verb to submit the request to change state.
+The POST verb is used to submit the request to change state of a resource.
 
 The Context.IndentedJSON serializes the data structure into JSON and adds it to the response.
 
@@ -142,6 +144,49 @@ $ curl http://localhost:8000/notes \
 
 ```
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_POST.png?raw=true)
+
+**OPTIONS**
+
+The OPTIONS method requests describes permitted communication options for a given URL.
+
+**CORS**
+
+The same-origin restrictions to network requests prevent a client-side application running from one origin from obtaining data retrieved from another origin.
+
+The CORS protocol consists of a set of headers that indicates whether a response can be shared cross-origin.
+
+A browser first sends an `OPTIONS` request to a different domain than it is originated from a resource to validate that the resource is expecting requests from external source.
+
+The `Origin` request header indicates where a request originates from.
+
+Import Gin middleware from "github.com/gin-contrib/cors" to enable CORS and use Default() function to allow all origins.
+
+CORS is a net/http handler implementing Cross Origin Resource Sharing in Golang.
+
+An HTTP response to a CORS request can include the `Access-Control-Allow-Origin` headers.
+
+```
+
+func main() {
+
+    router := gin.Default()
+
+    router.Use(cors.Default())
+
+    router.GET("/notes", getNotes)
+
+    router.POST("/notes", postNotes)
+
+    router.Run("localhost:8000")
+
+```
+Download and install cors from "github.com/gin-contrib/cors" repository.
+
+```
+
+$ go get .
+
+```
 
 A link to Golang Gin documents.
 

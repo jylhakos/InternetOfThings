@@ -2,9 +2,15 @@ package main
 
 import (
 
+    "fmt"
+
+    "strconv"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+    "github.com/gin-contrib/cors"
 )
 
 type note struct {
@@ -17,12 +23,12 @@ type note struct {
 var notes = [] note {
     { ID: "1", Content: "Browser can execute only Javascript", Date: "2019-05-30T17:30:31.098Z", Important: true },
     { ID: "2", Content: "GET and POST are important methods of HTTP protocol", Date: "2019-05-30T18:39:34.091Z", Important: false },
-    { ID: "3", Content: "A proper dinosaur codes with Java", Date: "2019-05-30T19:20:14.298Z", Important: true },
+    { ID: "3", Content: "The Principles of Object-Oriented JavaScript", Date: "2019-05-30T19:20:14.298Z", Important: true },
 }
 
 func getNotes(c *gin.Context) {
 
-	c.IndentedJSON(http.StatusOK, notes)
+    c.IndentedJSON(http.StatusOK, notes)
 }
 
 func getNoteByID(c *gin.Context) {
@@ -50,7 +56,15 @@ func postNotes(c *gin.Context) {
         return
     }
 
+    var notes_length = len(notes)
+
+    fmt.Println(newNote, notes_length)
+
+    newNote.ID =  strconv.Itoa(notes_length + 1)
+
     notes = append(notes, newNote)
+
+    fmt.Println(notes)
 
     c.IndentedJSON(http.StatusCreated, newNote)
 }
@@ -58,6 +72,8 @@ func postNotes(c *gin.Context) {
 func main() {
 
 	router := gin.Default()
+
+    router.Use(cors.Default())
 
 	router.StaticFile("/favicon.ico", "./public/favicon.ico")
 
