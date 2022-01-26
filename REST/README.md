@@ -18,9 +18,13 @@ The server then will return a document giving the client that information.
 
 Go has its own package manager, and it is handled through the go.mod file.
 
+```
+
 $ go mod init <SERVICE>
 
 go: creating new go.mod: module service/web-service
+
+```
 
 Create a file called main.go in the web-service directory. 
 
@@ -111,7 +115,7 @@ func postNotes(c *gin.Context) {
 }
 
 ```
-Use go get command to install Gin packages.
+Use go get command to install Gin packages and dependencies.
 
 ```
 
@@ -151,9 +155,11 @@ The OPTIONS method requests describes permitted communication options for a give
 
 **CORS**
 
-The same-origin restrictions to network requests prevent a client-side application running from one origin from obtaining data retrieved from another origin.
+The same-origin restrictions policy forbids cross-origin access to resources, but Cross-Origin Resource Sharing (CORS) lets web servers the ability to inform a client-side application that they want to allow cross-origin access to their resources.
 
 The CORS protocol consists of a set of headers that indicates whether a response can be shared cross-origin.
+
+The CORS protocol also relies on actions by which browsers make a preflight request to the web server hosting the cross-origin resource, in order to check that the web server will permit the actual request.
 
 A browser first sends an `OPTIONS` request to a different domain than it is originated from a resource to validate that the resource is expecting requests from external source.
 
@@ -161,7 +167,7 @@ The `Origin` request header indicates where a request originates from.
 
 Import Gin middleware from "github.com/gin-contrib/cors" to enable CORS and use Default() function to allow all origins.
 
-CORS is a net/http handler implementing Cross Origin Resource Sharing in Golang.
+The CORS protocol uses net/http handler to implement the CORS protocol using Golang.
 
 An HTTP response to a CORS request can include the `Access-Control-Allow-Origin` headers.
 
