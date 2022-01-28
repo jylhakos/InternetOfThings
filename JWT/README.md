@@ -8,7 +8,7 @@ A client uses JWT for authorization to make requests to a server.
 
 JWT consists of header, payload and signature.
 
-A signature is generated using the header, payload and secret to verify the sent JWT in a request.
+A signature is generated using the header, the payload and the secret to verify the sent JWT in a request.
 
 If the signature matches the one on the JWT, then the JWT is considered valid because without knowing the secret, there is no way to generate a valid signature.
 
@@ -24,7 +24,7 @@ import (
 )
 
 ```
-Define a secret to export the secret key to an environment variable.
+Define a secret to export the secret or a private key to an environment variable.
 
 ```
 
@@ -42,7 +42,7 @@ Creating, signing, and encoding a JWT token using the HMAC with SHA-256 algorith
 
 Claims are used to provide authentication to the party receiving the token.
 
-Create an unsigned token from the claims and sign the token using a secret or private key. 
+Create an unsigned token from the claims and sign the token using the secret or a private key. 
 
 ```
 
@@ -53,7 +53,7 @@ func createToken() (string, error) {
       "nbf": time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
     })
 
-  ss, err := token.SignedString(secretKey)
+  ss, err := token.SignedString(secret)
 
   return ss, err
 }
@@ -63,7 +63,7 @@ The client sends POST request to login and receives a token or an error in a res
 
 ```
 
-$ curl -X POST http://localhost:8000/login -v
+$ curl -v -X POST http://localhost:8000/login
 
 ```
 
@@ -83,4 +83,25 @@ $ curl http://localhost:8000/notes \
 ```
 You can verify a token at https://jwt.io/ web page.
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
+**Login**
+
+When the server receives login request, then the server can decode the username and password from the Authorization header.
+
+If the request uses HTTP Basic Authentication, then BasicAuth function returns the username and password provided in the request's Authorization header.
+
+If the credentials are not valid, then the server can return 401 Unauthorized response.
+
+Extract the username and password from the request Authorization header by BasicAuth function.
+
+```
+
+$ curl -v -X POST \
+  http://localhost:8000/login \
+  -H 'content-type: application/json' \
+  -d '{ "user": "dummy" }'
+
+```
+
+
+
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/server/JWT.png?raw=true)
