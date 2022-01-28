@@ -98,7 +98,7 @@ Extract the username and password from the request Authorization header by Basic
 $ curl -v -X POST \
   http://localhost:8000/login \
   -H 'content-type: application/json' \
-  -d '{ "user": "dummy" }'
+  -d '{ "username": "dummy", "password": "12345" }'
 
 ```
 

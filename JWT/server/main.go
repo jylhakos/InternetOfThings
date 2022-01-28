@@ -47,8 +47,13 @@ type Claims struct {
   Password string `json:"password"`
 }
 
+type Login struct {
+  Username  string `json:"username"`
+  Password  string `json:"password"`
+}
+
 var users = map[string]string{
-  "user": "password",
+  "username": "password",
 }
 
 func createToken() (string, error) {
@@ -104,6 +109,18 @@ func validateToken(c *gin.Context) (*jwt.Token, error) {
 
 func login(c *gin.Context) {
 
+  var json Login
+
+  if err := c.ShouldBindJSON(&json); err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    return
+  }
+
+  if json.Username != "dummy" || json.Password != "12345" {
+    c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
+    return
+  }
+
   token, err := createToken()
 
   if err != nil {
@@ -111,7 +128,9 @@ func login(c *gin.Context) {
      return
   }
 
-  c.JSON(http.StatusOK, token)
+  c.JSON(http.StatusOK, gin.H{"token": token})
+
+  //c.JSON(http.StatusOK, token)
 }
 
 func getNotes(c *gin.Context) {
