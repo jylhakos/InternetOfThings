@@ -104,4 +104,4 @@ $ curl -v -X POST \
 
 
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/server/JWT.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
