@@ -98,10 +98,23 @@ Extract the username and password from the request Authorization header by Basic
 $ curl -v -X POST \
   http://localhost:8000/login \
   -H 'content-type: application/json' \
-  -d '{ "username": "dummy", "password": "12345" }'
+  -d '{ "username": "anonymous", "password": "12345" }'
 
 ```
+**React app**
 
+The app has a login form on the top of the page.
 
+The app state has fields for username and password to store the data from the form.
+
+The form fields have an event handler to synchronize changes in the field to the state of the App component.
+
+The app uses an HTTP POST method to send username and password in the request to the login endpoint of REST API to create resource on the server.
+
+If the login is successful then a token and the user details extracted from the server response is saved to the application's state.
+
+The value of token can be changed with a function setToken and the token is stored in the browser's local storage.
+
+The token is set to the Authorization header as third parameter of the post method in Axios.
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)

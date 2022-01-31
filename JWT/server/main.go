@@ -116,7 +116,7 @@ func login(c *gin.Context) {
     return
   }
 
-  if json.Username != "dummy" || json.Password != "12345" {
+  if json.Username != "anonymous" || json.Password != "12345" {
     c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
     return
   }
