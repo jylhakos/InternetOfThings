@@ -204,7 +204,10 @@ func main() {
 
   router.StaticFile("/favicon.ico", "./public/favicon.ico")
 
+  router.LoadHTMLGlob("./public/*.html")
+
   router.GET("/", func(c *gin.Context) {
+
       c.HTML(http.StatusOK, "index.html", nil)
   })
 
