@@ -6,9 +6,9 @@ The database/sql package includes types and functions for connecting to database
 
 ## Prerequisites
 
-[ ] An installation of the PostgreSQL relational database management system (DBMS).
+An installation of the PostgreSQL relational database management system (DBMS).
 
-[ ] An installation of Golang.
+An installation of Golang.
 
 ### Create a folder for your code
 

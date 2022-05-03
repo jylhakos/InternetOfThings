@@ -75,6 +75,23 @@ func main() {
     
     fmt.Printf("Album found: %v\n", alb)
 
+    err = updateAlbum(Album{
+        Title:  "The Modern Sound of Betty Carter",
+        Artist: "Gerry Mulligan",
+        Price:  19.99,
+    })
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Album %v updated\n", "Gerry Mulligan")
+
+    err = deleteAlbum(1)
+
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 
 func albumsByArtist(name string) ([]Album, error) {
@@ -132,7 +149,7 @@ func addAlbum(alb Album) (int64, error) {
 
 	var lastInsertId int64
 
-	sqlStatement := `INSERT INTO album (title, artist, price) VALUES ($1, $2, $3) RETURNING id`
+	sqlStatement := `INSERT INTO album (title, artist, price) VALUES ($1, $2, $3) RETURNING id;`
 
     err := db.QueryRow(sqlStatement, alb.Title, alb.Artist, alb.Price).Scan(&lastInsertId)
 
@@ -147,4 +164,36 @@ func addAlbum(alb Album) (int64, error) {
     }
 
     return lastInsertId, nil
+}
+
+func updateAlbum(alb Album) (error) {
+
+    fmt.Printf("Artist: %v Price: %f\n", alb.Artist, alb.Price)
+
+    sqlStatement := `UPDATE album SET price = $2 WHERE artist = $1;`
+
+    result, err := db.Exec(sqlStatement, alb.Artist, alb.Price)
+
+    fmt.Printf("Updated: %v %v\n", result, err)
+
+    rows, err := result.RowsAffected()
+
+    fmt.Printf("RowsAffected: %v %v\n", rows, err)
+
+    return nil
+}
+
+func deleteAlbum(id int64) (error) {
+
+    sqlStatement := `DELETE FROM album WHERE id = $1;`
+
+    result, err := db.Exec(sqlStatement, id)
+
+    if err != nil {
+        return fmt.Errorf("%v", err)
+    }
+
+    fmt.Printf("Deleted: %v\n", result)
+
+    return nil
 }
