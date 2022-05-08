@@ -8,7 +8,7 @@ Concurrency in Golang is the ability for functions to run independent of each ot
 
 Goroutine is a function that runs concurrently with other functions.
 
-When to use Goroutines in GoLang?
+When to use Goroutines in Golang?
 
 * Running background operations in a program.
 
@@ -16,9 +16,9 @@ When to use Goroutines in GoLang?
 
 * A task can be split into different segments.
 
-Code that runs in a goroutine can run concurrently with other code.
+Code that runs in a Goroutine can run concurrently with other code.
 
-The evaluation of f, x, y, and z happens in the current goroutine and the execution of f happens in the new goroutine.
+The evaluation of f, x, y, and z happens in the current goroutine and the execution of f happens in the new Goroutine.
 
 Use the go keyword followed by the function to create goroutines.
 
@@ -27,16 +27,21 @@ Use the go keyword followed by the function to create goroutines.
 go f(x, y, z)
 
 ```
+The main function doesn’t wait before Goroutines get a chance to execute until the main function uses the sleep method in the main.go file.
 
-The main function doesn’t wait before Goroutines get a chance to execute until the program uses the sleep method.
+Goroutines have one of three states: waiting, runnable or executing.
+
+Go scheduler is part of the Go runtime, and the Go scheduler runs in user space.
+
+Once a new Goroutine is created, it gives the scheduler an opportunity to make a scheduling decision.
 
 ### Synchronization
 
 Goroutines run in the same address space, therefore access to shared memory must be synchronized.
 
-If goroutines share no data, then the program needn’t synchronizing.
+If Goroutines share no data, then the program needn’t synchronizing.
 
-WaitGroup is used to wait for the program to finish goroutines.
+WaitGroup is used to wait for the program to finish Goroutines.
 
 ```
 
@@ -54,8 +59,8 @@ func main() {
     wg.Add(1)
  
     go print(&wg)
- 
- 	fmt.Println("Hello")
+
+    fmt.Println("Hello")
 
     wg.Wait()
 }
@@ -103,4 +108,4 @@ func main() {
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Concurrency/goroutines.png?raw=true)
 
-Figure: Goroutines (G) are taking turns in a local queue (LRQ) sharing their thread (M) that runs on a processor (P).
+Figure: Goroutines (G) take turns being context switched on and off a local run queue (LRQ) sharing their thread (M) that runs on a processor (P).
