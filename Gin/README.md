@@ -1,15 +1,89 @@
 # Go, Gin, MongoDB, React and Axios
 
-https://go.dev/doc/tutorial/web-service-gin
-
 ## Go
+
+Use go get command to add the github.com/gin-gonic/gin etc. modules as a dependency for your module.
+
+```
+
+$ go get .
+
+```
 
 ## Gin
 
+Gin is a web framework written in Golang (Go).
+
+An incoming HTTP request can be handled by a chain of middlewares.
+
+Gin can parse and validate the content of JSON from a request
+
+Install and import Gin in your code.
+
+```
+
+$ go get github.com/gin-gonic/gin
+
+```
+
+## Environment Variables
+
+```
+
+$ go get github.com/spf13/viper
+
+```
+
 ## MongoDB
+
+You can start the mongod process by issuing the following command.
+
+```
+
+$ sudo systemctl start mongod
+
+```
+
+
+```
+
+$ go get go.mongodb.org/mongo-driver/mongo
+
+```
+
+## JWT
+
+JWT (JSON Web Token) token is a cryptographically signed token which the server generates and sends to the client. 
+
+JWT consists of three parts which are header, payload and signature.
+
+An access token is used for authenticating the requests sent to the server and a client uses JWT for making requests to the server.
+
+To verify a JWT, the server generates the signature once again using the header and payload from the incoming JWT, and its secret key.
+
+If the newly generated signature matches the one on the JWT, then the JWT is considered valid.
+
+```
+
+$ go get github.com/golang-jwt/jwt/v4
+
+```
 
 ## React
 
 ## Axios
 
 ![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Gin/framework.png?raw=true)
+
+## References
+
+Gin https://go.dev/doc/tutorial/web-service-gin
+
+Golang, MongoDB https://www.mongodb.com/languages/golang
+
+MongoDB https://www.mongodb.com/docs/manual/tutorial
+
+Viper https://github.com/spf13/viper
+
+JWT https://github.com/golang-jwt/jwt
+
