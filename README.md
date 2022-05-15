@@ -6,4 +6,4 @@ Internet of Things (IoT) consists of several layers which play a role in the rou
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/iot.png?raw=true)
 
-Figure: [reference model](https://www.itu.int/rec/T-REC-Y.2060-201206-I)
+Figure: [Reference model](https://www.itu.int/rec/T-REC-Y.2060-201206-I)

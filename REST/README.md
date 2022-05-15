@@ -197,4 +197,3 @@ $ go get .
 A link to Golang Gin documents.
 
 https://gin-gonic.com/docs/
-
