@@ -6,8 +6,6 @@ import (
     "github.com/spf13/viper"
 )
 
-const project = "web"
-
 func GetEnvVar(key string) string {
 
     viper.SetConfigFile(".env")

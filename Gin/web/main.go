@@ -26,7 +26,7 @@ func main() {
 
     routes.UserRoutes(router)
 
-    router.Use(middleware.Authentication())
+    router.Use(middleware.Authorization())
 
     router.GET("/api", func(c *gin.Context) {
 

@@ -6,9 +6,9 @@ import (
     controller "web/service/controllers"
 )
 
-func UserRoutes(incomingRoutes *gin.Engine) {
+func UserRoutes(userRoutes *gin.Engine) {
 
-    incomingRoutes.POST("/users/signup", controller.SignUp())
+    userRoutes.POST("/users/signup", controller.SignUp())
 
-    incomingRoutes.POST("/users/login", controller.Login())
+    userRoutes.POST("/users/login", controller.Login())
 }

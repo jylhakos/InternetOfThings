@@ -103,7 +103,7 @@ func SignUp() gin.HandlerFunc {
 
         if count > 0 {
 
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "this email already exists"})
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "E-mail already exists."})
             
             return
         }
@@ -163,7 +163,7 @@ func Login() gin.HandlerFunc {
 
         if err != nil {
 
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "login or passowrd is incorrect"})
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "E-mail or password is incorrect."})
             
             return
         }
@@ -184,6 +184,5 @@ func Login() gin.HandlerFunc {
         helper.UpdateAllTokens(token, refreshToken, foundUser.User_id)
 
         c.JSON(http.StatusOK, foundUser)
-
     }
 }

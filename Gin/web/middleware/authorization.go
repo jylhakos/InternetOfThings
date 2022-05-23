@@ -10,11 +10,11 @@ import (
 
 )
 
-func Authentication() gin.HandlerFunc {
+func Authorization() gin.HandlerFunc {
 
     return func(c *gin.Context) {
 
-        clientToken := c.Request.Header.Get("token")
+        clientToken := c.Request.Header.Get("Authorization")
 
         if clientToken == "" {
 
@@ -43,6 +43,5 @@ func Authentication() gin.HandlerFunc {
         c.Set("uid", claims.Uid)
 
         c.Next()
-
     }
 }
