@@ -50,6 +50,13 @@ $ sudo systemctl start mongod
 $ go get go.mongodb.org/mongo-driver/mongo
 
 ```
+## Functions
+
+The functions with names that start with an uppercase letter (Camel case) will be exported to other packages. 
+
+If the function name starts with a lowercase letter, it won't be exported to other packages.
+
+If the function name consists of multiple words, each word after the first word should be capitalized.
 
 ## JWT
 
@@ -73,11 +80,13 @@ $ go get github.com/golang-jwt/jwt/v4
 
 ## Axios
 
-![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Gin/framework.png?raw=true)
+![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Frameworks/Backend/Gin/framework.png?raw=true)
 
 ## References
 
 Gin https://go.dev/doc/tutorial/web-service-gin
+
+Go https://go.dev/ref/spec
 
 Golang, MongoDB https://www.mongodb.com/languages/golang
 

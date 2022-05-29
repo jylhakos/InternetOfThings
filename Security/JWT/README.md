@@ -1,4 +1,4 @@
-# JSON Web Token (JWT)
+# JWT
 
 JSON Web Token (JWT) can be sent through a URL to represent claims between two parties.
 

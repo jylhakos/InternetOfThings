@@ -19,4 +19,4 @@ $ npm start
 
 ```
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/React/REACT_AXIOS_POST.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Frameworks/Frontend/React/REACT_AXIOS_POST.png?raw=true)
