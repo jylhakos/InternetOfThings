@@ -8,7 +8,7 @@ TLS is a cryptographic protocol that provides end-to-end security of data sent b
 
 Figure: [Message Flow for TLS Handshake](https://datatracker.ietf.org/doc/html/rfc8446) 
 
-References
+## References
 
 Transport Layer Security https://www.internetsociety.org/deploy360/tls/basics/
 
