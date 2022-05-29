@@ -18,7 +18,7 @@ $ go get github.com/nats-io/nats-server
 
 ```
 
-![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/NATS/NATS.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/NATS/NATS.png?raw=true)
 
 Figure: NATS client application connects with a NATS service, and then subscribes or publishes messages to subjects.
 
