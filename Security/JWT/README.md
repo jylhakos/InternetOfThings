@@ -117,4 +117,9 @@ The value of token can be changed with a function setToken and the token is stor
 
 The token is set to the Authorization header as third parameter of the post method in Axios.
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Security/JWT/JWT.png?raw=true)
+
+## References
+
+JWT https://cloud.google.com/iot/docs/how-tos/credentials/jwts
+
