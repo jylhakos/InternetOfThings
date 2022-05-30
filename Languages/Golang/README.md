@@ -66,7 +66,7 @@ module hello
 go 1.17
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Golang/go.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/go.png?raw=true)
 
 Create hello.go file in which to write Golang code.
 
@@ -89,7 +89,7 @@ $ go run .
 
 ```
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Golang/hello.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/hello.png?raw=true)
 
 **A module**
 
@@ -110,7 +110,7 @@ func Hello() string {
 }
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Golang/greetings.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/greetings.png?raw=true)
 
 Call your code from hello.go module with the path to the greetings module.
 

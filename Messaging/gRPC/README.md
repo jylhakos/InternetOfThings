@@ -8,7 +8,6 @@ By default, gRPC uses Protocol Buffers for serializing structured data.
 
 Figure: In gRPC, a client application can directly call a method on a server application on a different machine as if it were a local object.
 
-
 ## References
 
 gRPC https://grpc.io/

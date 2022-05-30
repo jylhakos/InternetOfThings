@@ -302,4 +302,4 @@ $ go run .
 
 ```
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Database/database.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Databases/PostgreSql/database.png?raw=true)
