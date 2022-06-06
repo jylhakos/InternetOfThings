@@ -24,13 +24,13 @@ func main() {
 
     router.Use(gin.Logger())
 
-    routes.UserRoutes(router)
+    routes.Routes(router)
 
     router.Use(middleware.Authorization())
 
     router.GET("/api", func(c *gin.Context) {
 
-        c.JSON(200, gin.H{"success": "Access granted for api"})
+        c.JSON(200, gin.H{"success": "Access granted for /api"})
 
     })
 
