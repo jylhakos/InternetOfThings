@@ -1,12 +1,22 @@
 package album
 
+import (
+    "context"
+    "fmt"
+    "log"
+
+    database "web/service/database"
+    
+    models "web/service/models"
+)
+
+var albumCollection *mongo.Collection = database.Collection(database.Client, "album")
+
 func GetAlbums(c *gin.Context) {
 
     var albums []Album
 
-    //var albums []primitive.M
-
-    cur, err := collection.Find(context.Background(), bson.D{{}})
+    cur, err := albumCollection.Find(context.Background(), bson.D{{}})
 
     if err != nil {
         log.Fatal(err)
@@ -37,7 +47,37 @@ func GetAlbums(c *gin.Context) {
 
 func AlbumsByArtist(name string) ([]Album, error) {
     
-	var albums []Album
+    var albums []Album
+
+    filter := bson.D{{"Artist": album.Artist}}
+
+    cur, err := albumCollection.Find(context.Background(), filter)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for cur.Next(context.Background()) {
+
+        var album bson.M
+
+        e := cur.Decode(&album)
+
+        if e != nil {
+            log.Fatal(e)
+        }
+
+        albums = append(albums, album)
+
+    }
+
+    if err := cur.Err(); err != nil {
+        log.Fatal(err)
+    }
+
+    cur.Close(context.Background())
+    
+    return albums, nil
 
 	/*
 
@@ -66,9 +106,6 @@ func AlbumsByArtist(name string) ([]Album, error) {
     }
     
     */
-
-    return albums, nil
-
 }
 
 func AlbumByID(id int64) (Album, error) {
