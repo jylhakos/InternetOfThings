@@ -16,13 +16,13 @@ func GetAlbums(c *gin.Context) {
 
     var albums []Album
 
-    cur, err := albumCollection.Find(context.Background(), bson.D{{}})
+    cur, err := albumCollection.Find(c.Context(), bson.D{{}})
 
     if err != nil {
         log.Fatal(err)
     }
 
-    for cur.Next(context.Background()) {
+    for cur.Next(c.Context()) {
 
         var album bson.M
 
@@ -40,24 +40,28 @@ func GetAlbums(c *gin.Context) {
         log.Fatal(err)
     }
 
-    cur.Close(context.Background())
+    cur.Close(c.Context())
     
     return albums, nil
 }
 
-func AlbumsByArtist(name string) ([]Album, error) {
-    
+func AlbumsByArtist(c *gin.Context) ([]Album, error) {
+
     var albums []Album
 
-    filter := bson.D{{"Artist": album.Artist}}
+    artist := c.Params("artist")
 
-    cur, err := albumCollection.Find(context.Background(), filter)
+    filter := bson.D{{"Artist": artist}}
+
+    //cur, err := albumCollection.Find(context.Background(), filter)
+
+    cur, err := albumCollection.Find(c.Context(), filter)
 
     if err != nil {
         log.Fatal(err)
     }
 
-    for cur.Next(context.Background()) {
+    for cur.Next(c.Context()) {
 
         var album bson.M
 
@@ -68,14 +72,13 @@ func AlbumsByArtist(name string) ([]Album, error) {
         }
 
         albums = append(albums, album)
-
     }
 
     if err := cur.Err(); err != nil {
         log.Fatal(err)
     }
 
-    cur.Close(context.Background())
+    cur.Close(c.Context())
     
     return albums, nil
 
@@ -108,32 +111,36 @@ func AlbumsByArtist(name string) ([]Album, error) {
     */
 }
 
-func AlbumByID(id int64) (Album, error) {
+func AlbumByID(c *gin.Context) (Album, error) {
 
-    var alb Album
+    var album Album
 
-    /*
+    id := c.Params("id")
 
-    row := db.QueryRow("SELECT * FROM album WHERE id = $1", id)
-    
-    if err := row.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
-        
-        if err == sql.ErrNoRows {
+    filter := bson.D{{"ID": id}}
 
-            return alb, fmt.Errorf("albumsById %d: no such album", id)
-        }
+    err := albumCollection.FindOne(c.Context(), filter).Decode(album)
 
-        return alb, fmt.Errorf("albumsById %d: %v", id, err)
+    if err != nil {
+
+        log.Fatal(err)
     }
 
-    */
-
-    return alb, nil
+    return album, nil
 }
 
-func AddAlbum(alb Album) (int64, error) {
+func AddAlbum(c *gin.Context) (int64, error) {
 
 	var lastInsertId int64
+
+    var album Album
+
+    if err := c.ShouldBindJSON(&album); err != nil {
+
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+        return
+    }
 
 	/*
 
@@ -156,7 +163,7 @@ func AddAlbum(alb Album) (int64, error) {
     return lastInsertId, nil
 }
 
-func UpdateAlbum(alb Album) (error) {
+func UpdateAlbum(c *gin.Context) (error) {
 
     fmt.Printf("Artist: %v Price: %f\n", alb.Artist, alb.Price)
 
@@ -177,9 +184,11 @@ func UpdateAlbum(alb Album) (error) {
     return nil
 }
 
-func DeleteAlbum(id int64) (error) {
+func DeleteAlbum(c *gin.Context) (error) {
 
-    sqlStatement := `DELETE FROM album WHERE id = $1;`
+    id := c.Params("id")
+
+    filter := bson.D{{"ID": id}}
 
     /*
 
