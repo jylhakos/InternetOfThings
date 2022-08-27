@@ -2,25 +2,32 @@ package user
 
 import (
     "context"
+
     "fmt"
+
     "log"
 
     "net/http"
+
     "time"
 
     "github.com/gin-gonic/gin"
+
     "github.com/go-playground/validator/v10"
 
     "go.mongodb.org/mongo-driver/bson"
+
     "go.mongodb.org/mongo-driver/bson/primitive"
+
     "go.mongodb.org/mongo-driver/mongo"
+
     "golang.org/x/crypto/bcrypt"
 
-    database "web/service/database"
+    database "web/database"
     
-    models "web/service/models"
+    models "web/models/user"
 
-    helper "web/service/utils/tokenizer"
+    helper "web/utils/tokenizer"
     
 )
 
@@ -51,6 +58,8 @@ func VerifyPassword(userPassword string, providedPassword string) (bool, string)
     if err != nil {
 
         msg = fmt.Sprintf("login or passowrd is incorrect")
+
+        fmt.Errorf("login or passowrd is incorrect", providedPassword, userPassword)
         
         check = false
     }
@@ -126,7 +135,7 @@ func SignUp() gin.HandlerFunc {
         
         if insertErr != nil {
 
-            msg := fmt.Sprintf("User was not created")
+            msg := fmt.Sprintf("User was not created", insertErr)
             
             c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
             
@@ -153,6 +162,8 @@ func Login() gin.HandlerFunc {
         if err := c.BindJSON(&user); err != nil {
 
             c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+            fmt.Errorf("Login error", err)
             
             return
         }
@@ -163,8 +174,10 @@ func Login() gin.HandlerFunc {
 
         if err != nil {
 
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "E-mail or password is incorrect."})
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "E-mail is not found from MongoDB."})
             
+            fmt.Errorf("E-mail is not found from MongoDB.", err)
+
             return
         }
 
@@ -175,6 +188,8 @@ func Login() gin.HandlerFunc {
         if passwordIsValid != true {
 
             c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+
+            fmt.Errorf("Password is incorrect.")
             
             return
         }
@@ -182,6 +197,8 @@ func Login() gin.HandlerFunc {
         token, refreshToken, _ := helper.GenerateAllTokens(*foundUser.Email, *foundUser.Name, foundUser.User_id)
 
         helper.UpdateAllTokens(token, refreshToken, foundUser.User_id)
+
+        fmt.Sprintf("The token has value ", token)
 
         c.JSON(http.StatusOK, foundUser)
     }

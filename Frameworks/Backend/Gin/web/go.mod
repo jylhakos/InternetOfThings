@@ -1,4 +1,4 @@
-module web/service
+module web
 
 go 1.18
 

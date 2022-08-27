@@ -3,16 +3,19 @@ package routes
 import (
     "github.com/gin-gonic/gin"
 
-    userController "web/service/controllers/user"
-
-    albumController "web/service/controllers/album"
+    userController "web/controllers/user"
+    
+    albumController "web/controllers/album"
 )
 
-func Routes(routes *gin.Engine) {
+func UserRoutes(routes *gin.Engine) {
 
     routes.POST("/users/signup", userController.SignUp())
 
     routes.POST("/users/login", userController.Login())
+}
+
+func AlbumRoutes(routes *gin.Engine) {
 
     routes.GET("/albums", albumController.GetAlbums())
 

@@ -1,4 +1,10 @@
-$ curl http://localhost:8080/api/users/signup \
+$ curl http://localhost:8001/api/users/signup \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "POST" \
+    --data '{"name": "Test","email": "test@test.com","password": "123465789"}'
+
+$ curl http://localhost:8001/api/users/login \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \

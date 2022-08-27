@@ -58,6 +58,10 @@ If the function name starts with a lowercase letter, it won't be exported to oth
 
 If the function name consists of multiple words, each word after the first word should be capitalized.
 
+## BSON
+
+The process of converting Golang value to BSON is called marshalling, while the reverse process is called unmarshalling.
+
 ## JWT
 
 JWT (JSON Web Token) token is a cryptographically signed token which the server generates and sends to the client. 
@@ -91,6 +95,8 @@ Go https://go.dev/ref/spec
 Golang, MongoDB https://www.mongodb.com/languages/golang
 
 MongoDB https://www.mongodb.com/docs/manual/tutorial
+
+BSON https://www.mongodb.com/docs/drivers/go/current/fundamentals/bson/
 
 Viper https://github.com/spf13/viper
 

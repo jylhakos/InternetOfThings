@@ -5,11 +5,11 @@ import (
 
     _ "github.com/heroku/x/hmetrics/onload"
 
-    getenv "web/service/utils/getenv"
+    getenv "web/utils/getenv"
 
-    middleware "web/service/middleware"
+    middleware "web/middleware/authorization"
 
-    routes "web/service/routes"
+    routes "web/routes"
 )
 
 func main() {
@@ -24,15 +24,17 @@ func main() {
 
     router.Use(gin.Logger())
 
-    routes.Routes(router)
-
-    router.Use(middleware.Authorization())
-
     router.GET("/api", func(c *gin.Context) {
 
         c.JSON(200, gin.H{"success": "Access granted for /api"})
 
     })
+
+    routes.UserRoutes(router)
+
+    router.Use(middleware.Authorization())
+
+    routes.AlbumRoutes(router)
 
     router.Run(":" + port)
 }

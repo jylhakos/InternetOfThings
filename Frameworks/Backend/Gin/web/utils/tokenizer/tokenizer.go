@@ -2,20 +2,26 @@ package tokenizer
 
 import (
     "context"
+
     "fmt"
+
     "log"
+    
     "time"
 
     jwt "github.com/golang-jwt/jwt"
     
     "go.mongodb.org/mongo-driver/bson"
+
     "go.mongodb.org/mongo-driver/bson/primitive"
+
     "go.mongodb.org/mongo-driver/mongo"
+
     "go.mongodb.org/mongo-driver/mongo/options"
 
-    getenv "web/service/utils/getenv"
+    getenv "web/utils/getenv"
 
-    database "web/service/database"
+    database "web/database"
 )
 
 type SignedDetails struct {
