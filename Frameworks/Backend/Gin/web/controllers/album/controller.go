@@ -9,9 +9,11 @@ import (
 
     "time"
 
+    "net/http"
+
     "github.com/gin-gonic/gin"
 
-    "github.com/go-playground/validator/v10"
+    //"github.com/go-playground/validator/v10"
 
     "go.mongodb.org/mongo-driver/bson"
 
@@ -68,21 +70,33 @@ func GetAlbums(c *gin.Context) ([]models.Album, error) {
     return albums, nil
 }
 
-func AlbumsByArtist(c *gin.Context) ([]models.Album, error) {
+func AlbumsByArtist(c *gin.Context) ([]bson.M, error) {
 
     var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    var albums []models.Album
+    //var albums []models.Album
+    var albums []bson.M
 
-    artist := c.Params.ByName("artist")
+    //artist := c.Params.ByName("artist")
 
-    fmt.Sprintf(artist)
+    //fmt.Sprintf(artist)
 
-    filter := bson.M{{"Artist": artist}}
+    var album models.Album
 
-    if err != nil {
-        log.Fatal(err)
+    if err := c.BindJSON(&album); err != nil {
+
+        fmt.Println(err)
+
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+     
+        return nil, err
     }
+
+    fmt.Println(album)
+
+    filter := bson.M{"artist": album.Artist}
+
+    fmt.Println(filter)
 
     //cur, err := albumCollection.Find(context.Background(), filter)
 
@@ -91,6 +105,9 @@ func AlbumsByArtist(c *gin.Context) ([]models.Album, error) {
     defer cancel()
 
     if err != nil {
+
+        fmt.Println(err)
+
         log.Fatal(err)
     }
 
@@ -104,16 +121,22 @@ func AlbumsByArtist(c *gin.Context) ([]models.Album, error) {
             log.Fatal(e)
         }
 
+        fmt.Println(album)
+
         albums = append(albums, album)
     }
 
     if err := cur.Err(); err != nil {
+
         log.Fatal(err)
+
         fmt.Errorf("AlbumsByArtist error", err)
     }
 
-    cur.Close(c.Context())
+    cur.Close(ctx)
     
+    fmt.Println(albums)
+
     return albums, nil
 
 	/*
@@ -145,17 +168,28 @@ func AlbumsByArtist(c *gin.Context) ([]models.Album, error) {
     */
 }
 
-func AlbumByID(c *gin.Context) (Album, error) {
+func AlbumByID(c *gin.Context) (models.Album, error) {
 
     var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    var album Album
+    var album models.Album
 
-    id := c.Params("id")
+    //id := c.Params("id")
 
-    filter := bson.D{{"ID": id}}
+    if err := c.BindJSON(&album); err != nil {
 
-    err := albumCollection.FindOne(ctx, filter).Decode(album)
+        fmt.Println(err)
+
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+     
+        return album, err
+    }
+
+    filter := bson.M{"id": album.ID}
+
+    fmt.Println(filter)
+
+    err := albumCollection.FindOne(ctx, filter).Decode(&album)
 
     defer cancel()
 
@@ -169,20 +203,22 @@ func AlbumByID(c *gin.Context) (Album, error) {
     return album, nil
 }
 
-func AddAlbum(c *gin.Context) (int64, error) {
+func AddAlbum(c *gin.Context) (string, error) {
 
     var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-	var lastInsertId int64
-
-    var album Album
+    var album models.Album
 
     if err := c.ShouldBindJSON(&album); err != nil {
 
-    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 
-        return
+        return "-1", err
     }
+
+    result, err := albumCollection.InsertOne(ctx, album)
+
+    defer cancel()
 
 	/*
 
@@ -192,21 +228,22 @@ func AddAlbum(c *gin.Context) (int64, error) {
 
     */
 
-    defer cancel()
-
     if err != nil {
-        return 0, fmt.Errorf("addAlbum: %v", err)
+
+        fmt.Errorf("addAlbum: %v", err)
+
+        c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+
+        return "-1", err
     }
+
+    id := result.InsertedID.(primitive.ObjectID).String()
 
     //id, err := result.LastInsertId()
 
-    if err != nil {
-        return 0, fmt.Errorf("addAlbum: %v", err)
-    }
+    fmt.Sprintf("Album objectId", id)
 
-    fmt.Sprintf("Added Album ", lastInsertId)
-
-    return lastInsertId, nil
+    return id, nil
 }
 
 func UpdateAlbum(c *gin.Context) (error) {
@@ -215,26 +252,30 @@ func UpdateAlbum(c *gin.Context) (error) {
 
     var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    var album Album
+    var album models.Album
 
     if err := c.ShouldBindJSON(&album); err != nil {
 
-    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+        return err
     }
 
     fmt.Printf("Artist: %v Price: %f\n", album.Artist, album.Price)
 
     update := bson.M{"id":album.ID,"title": album.Title, "artist":album.Artist, "price":album.Price}
 
-    result, err := albumCollection.UpdateOne(c, bson.M{"artist": album.Artist}, bson.M{"$set": update})
+    result, err := albumCollection.UpdateOne(ctx, bson.M{"artist": album.Artist}, bson.M{"$set": update})
     
     defer cancel()
 
     if err != nil {
-        c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "Error", Data: map[string]interface{}{"data": err.Error()}})
+
+        c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+
         fmt.Errorf("UpdateAlbum error", err)
-        return
+
+        return err
     }
 
     /*
@@ -247,10 +288,6 @@ func UpdateAlbum(c *gin.Context) (error) {
 
     fmt.Printf("Updated: %v %v\n", result, err)
 
-    rows, err := result.RowsAffected()
-
-    fmt.Printf("RowsAffected: %v %v\n", rows, err)
-
     return nil
 }
 
@@ -258,9 +295,18 @@ func DeleteAlbum(c *gin.Context) (error) {
 
     var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    id := c.Params("id")
+    var album models.Album
 
-    filter := bson.D{{"ID": id}}
+    //id := c.Params("id")
+
+    if err := c.ShouldBindJSON(&album); err != nil {
+
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        
+        return err
+    }
+
+    filter := bson.M{"id": album.ID}
 
     /*
 
@@ -272,7 +318,13 @@ func DeleteAlbum(c *gin.Context) (error) {
 
     */
 
+    result, err := albumCollection.DeleteOne(ctx, filter) 
+
     defer cancel()
+
+    if err != nil {
+        return fmt.Errorf("%v", err)
+    }
 
     fmt.Printf("Deleted: %v\n", result)
 
