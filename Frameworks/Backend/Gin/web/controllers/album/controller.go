@@ -28,305 +28,325 @@ import (
 
 var albumCollection *mongo.Collection = database.Collection(database.Client, "album")
 
-func GetAlbums(c *gin.Context) ([]models.Album, error) {
+ 
+func GetAlbums() gin.HandlerFunc {
 
-    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+    return func(c *gin.Context) {
 
-    var albums []models.Album
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    filter := bson.D{{}}
+        var albums []models.Album
 
-    cur, err := albumCollection.Find(ctx, filter)
+        filter := bson.D{{}}
 
-    defer cancel()
+        cur, err := albumCollection.Find(ctx, filter)
 
-    if err != nil {
-        log.Fatal(err)
+        defer cancel()
+
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        for cur.Next(ctx) {
+
+            var album models.Album
+
+            e := cur.Decode(&album)
+
+            if e != nil {
+                log.Fatal(e)
+            }
+
+            fmt.Sprintf(album.ID, album.Title, album.Artist, album.Price)
+
+            albums = append(albums, album)
+
+        }
+
+        if err := cur.Err(); err != nil {
+
+            log.Fatal(err)
+
+            fmt.Errorf("GetAlbums error", err)
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        cur.Close(ctx)
+        
+        c.JSON(http.StatusOK, albums)
     }
+}
 
-    for cur.Next(ctx) {
+func AlbumsByArtist() gin.HandlerFunc { 
+
+    return func(c *gin.Context) {
+
+        //([]bson.M, error) {
+
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+        //var albums []models.Album
+        var albums []bson.M
+
+        //artist := c.Params.ByName("artist")
+
+        //fmt.Sprintf(artist)
 
         var album models.Album
 
-        e := cur.Decode(&album)
+        if err := c.BindJSON(&album); err != nil {
 
-        if e != nil {
-            log.Fatal(e)
-        }
+            fmt.Println(err)
 
-        fmt.Sprintf(album.ID, album.Title, album.Artist, album.Price)
-
-        albums = append(albums, album)
-
-    }
-
-    if err := cur.Err(); err != nil {
-        log.Fatal(err)
-        fmt.Errorf("GetAlbums error", err)
-    }
-
-    cur.Close(ctx)
-    
-    return albums, nil
-}
-
-func AlbumsByArtist(c *gin.Context) ([]bson.M, error) {
-
-    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-
-    //var albums []models.Album
-    var albums []bson.M
-
-    //artist := c.Params.ByName("artist")
-
-    //fmt.Sprintf(artist)
-
-    var album models.Album
-
-    if err := c.BindJSON(&album); err != nil {
-
-        fmt.Println(err)
-
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-     
-        return nil, err
-    }
-
-    fmt.Println(album)
-
-    filter := bson.M{"artist": album.Artist}
-
-    fmt.Println(filter)
-
-    //cur, err := albumCollection.Find(context.Background(), filter)
-
-    cur, err := albumCollection.Find(ctx, filter)
-
-    defer cancel()
-
-    if err != nil {
-
-        fmt.Println(err)
-
-        log.Fatal(err)
-    }
-
-    for cur.Next(ctx) {
-
-        var album bson.M
-
-        e := cur.Decode(&album)
-
-        if e != nil {
-            log.Fatal(e)
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         }
 
         fmt.Println(album)
 
-        albums = append(albums, album)
-    }
+        filter := bson.M{"artist": album.Artist}
 
-    if err := cur.Err(); err != nil {
+        fmt.Println(filter)
 
-        log.Fatal(err)
+        //cur, err := albumCollection.Find(context.Background(), filter)
 
-        fmt.Errorf("AlbumsByArtist error", err)
-    }
+        cur, err := albumCollection.Find(ctx, filter)
 
-    cur.Close(ctx)
-    
-    fmt.Println(albums)
+        defer cancel()
 
-    return albums, nil
+        if err != nil {
 
-	/*
+            fmt.Println(err)
 
-    rows, err := db.Query("SELECT * FROM album WHERE artist = $1", name)
+            log.Fatal(err)
 
-    if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
 
-        return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
-    }
+        for cur.Next(ctx) {
 
-    defer rows.Close()
+            var album bson.M
 
-    for rows.Next() {
+            e := cur.Decode(&album)
 
-        var alb Album
+            if e != nil {
 
-       if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+                log.Fatal(e)
+
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            }
+
+            fmt.Println(album)
+
+            albums = append(albums, album)
+        }
+
+        if err := cur.Err(); err != nil {
+
+            log.Fatal(err)
+
+            fmt.Errorf("AlbumsByArtist error", err)
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        cur.Close(ctx)
+        
+        fmt.Println(albums)
+
+        c.JSON(http.StatusOK, albums)
+
+    	/*
+
+        rows, err := db.Query("SELECT * FROM album WHERE artist = $1", name)
+
+        if err != nil {
+
             return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
         }
 
-        albums = append(albums, alb)
-    }
+        defer rows.Close()
 
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
-    }
-    
-    */
-}
+        for rows.Next() {
 
-func AlbumByID(c *gin.Context) (models.Album, error) {
+            var alb Album
 
-    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+           if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+                return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
+            }
 
-    var album models.Album
+            albums = append(albums, alb)
+        }
 
-    //id := c.Params("id")
-
-    if err := c.BindJSON(&album); err != nil {
-
-        fmt.Println(err)
-
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-     
-        return album, err
-    }
-
-    filter := bson.M{"id": album.ID}
-
-    fmt.Println(filter)
-
-    err := albumCollection.FindOne(ctx, filter).Decode(&album)
-
-    defer cancel()
-
-    if err != nil {
-
-        log.Fatal(err)
-
-        fmt.Errorf("AlbumByID error", err)
-    }
-
-    return album, nil
-}
-
-func AddAlbum(c *gin.Context) (string, error) {
-
-    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-
-    var album models.Album
-
-    if err := c.ShouldBindJSON(&album); err != nil {
-
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-
-        return "-1", err
-    }
-
-    result, err := albumCollection.InsertOne(ctx, album)
-
-    defer cancel()
-
-	/*
-
-    sqlStatement := `INSERT INTO album (title, artist, price) VALUES ($1, $2, $3) RETURNING id;`
-
-    err := db.QueryRow(sqlStatement, alb.Title, alb.Artist, alb.Price).Scan(&lastInsertId)
-
-    */
-
-    if err != nil {
-
-        fmt.Errorf("addAlbum: %v", err)
-
-        c.JSON(http.StatusInternalServerError, gin.H{"message": err})
-
-        return "-1", err
-    }
-
-    id := result.InsertedID.(primitive.ObjectID).String()
-
-    //id, err := result.LastInsertId()
-
-    fmt.Sprintf("Album objectId", id)
-
-    return id, nil
-}
-
-func UpdateAlbum(c *gin.Context) (error) {
-
-    //var lastInsertId int64
-
-    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-
-    var album models.Album
-
-    if err := c.ShouldBindJSON(&album); err != nil {
-
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-
-        return err
-    }
-
-    fmt.Printf("Artist: %v Price: %f\n", album.Artist, album.Price)
-
-    update := bson.M{"id":album.ID,"title": album.Title, "artist":album.Artist, "price":album.Price}
-
-    result, err := albumCollection.UpdateOne(ctx, bson.M{"artist": album.Artist}, bson.M{"$set": update})
-    
-    defer cancel()
-
-    if err != nil {
-
-        c.JSON(http.StatusInternalServerError, gin.H{"message": err})
-
-        fmt.Errorf("UpdateAlbum error", err)
-
-        return err
-    }
-
-    /*
-
-    sqlStatement := `UPDATE album SET price = $2 WHERE artist = $1;`
-
-    result, err := db.Exec(sqlStatement, alb.Artist, alb.Price)
-
-    */
-
-    fmt.Printf("Updated: %v %v\n", result, err)
-
-    return nil
-}
-
-func DeleteAlbum(c *gin.Context) (error) {
-
-    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-
-    var album models.Album
-
-    //id := c.Params("id")
-
-    if err := c.ShouldBindJSON(&album); err != nil {
-
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        if err := rows.Err(); err != nil {
+            return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
+        }
         
-        return err
+        */
     }
+}
 
-    filter := bson.M{"id": album.ID}
+func AlbumByID() gin.HandlerFunc { 
 
-    /*
+    return func(c *gin.Context) {
 
-    result, err := db.Exec(sqlStatement, id)
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    if err != nil {
-        return fmt.Errorf("%v", err)
+        var album models.Album
+
+        //id := c.Params("id")
+
+        if err := c.BindJSON(&album); err != nil {
+
+            fmt.Println(err)
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        filter := bson.M{"id": album.ID}
+
+        fmt.Println(filter)
+
+        err := albumCollection.FindOne(ctx, filter).Decode(&album)
+
+        defer cancel()
+
+        if err != nil {
+
+            log.Fatal(err)
+
+            fmt.Errorf("AlbumByID error", err)
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        c.JSON(http.StatusOK, album)
     }
+}
 
-    */
+func AddAlbum() gin.HandlerFunc { 
 
-    result, err := albumCollection.DeleteOne(ctx, filter) 
+    return func(c *gin.Context) {
 
-    defer cancel()
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-    if err != nil {
-        return fmt.Errorf("%v", err)
+        var album models.Album
+
+        if err := c.ShouldBindJSON(&album); err != nil {
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        result, err := albumCollection.InsertOne(ctx, album)
+
+        defer cancel()
+
+    	/*
+
+        sqlStatement := `INSERT INTO album (title, artist, price) VALUES ($1, $2, $3) RETURNING id;`
+
+        err := db.QueryRow(sqlStatement, alb.Title, alb.Artist, alb.Price).Scan(&lastInsertId)
+
+        */
+
+        if err != nil {
+
+            fmt.Errorf("addAlbum: %v", err)
+
+            c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+        }
+
+        id := result.InsertedID.(primitive.ObjectID).String()
+
+        //id, err := result.LastInsertId()
+
+        fmt.Sprintf("Album objectId", id)
+
+        c.JSON(http.StatusOK, id)
     }
+}
 
-    fmt.Printf("Deleted: %v\n", result)
+func UpdateAlbum() gin.HandlerFunc { 
 
-    return nil
+    return func(c *gin.Context) {
+
+        //var lastInsertId int64
+
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+        var album models.Album
+
+        if err := c.ShouldBindJSON(&album); err != nil {
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        fmt.Printf("Artist: %v Price: %f\n", album.Artist, album.Price)
+
+        update := bson.M{"id":album.ID,"title": album.Title, "artist":album.Artist, "price":album.Price}
+
+        result, err := albumCollection.UpdateOne(ctx, bson.M{"artist": album.Artist}, bson.M{"$set": update})
+        
+        defer cancel()
+
+        if err != nil {
+
+            fmt.Errorf("UpdateAlbum error", err)
+
+            c.JSON(http.StatusInternalServerError, gin.H{"message": err})  
+        }
+
+        /*
+
+        sqlStatement := `UPDATE album SET price = $2 WHERE artist = $1;`
+
+        result, err := db.Exec(sqlStatement, alb.Artist, alb.Price)
+
+        */
+
+        fmt.Printf("Updated: %v %v\n", result, err)
+
+        c.JSON(http.StatusOK, "OK")
+    }
+}
+
+func DeleteAlbum() gin.HandlerFunc {
+
+    return func(c *gin.Context) {
+
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+        var album models.Album
+
+        //id := c.Params("id")
+
+        if err := c.ShouldBindJSON(&album); err != nil {
+
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        filter := bson.M{"id": album.ID}
+
+        /*
+
+        result, err := db.Exec(sqlStatement, id)
+
+        if err != nil {
+            return fmt.Errorf("%v", err)
+        }
+
+        */
+
+        result, err := albumCollection.DeleteOne(ctx, filter) 
+
+        defer cancel()
+
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        }
+
+        fmt.Printf("Deleted: %v\n", result)
+
+        c.JSON(http.StatusOK, "OK")
+    }
 }
