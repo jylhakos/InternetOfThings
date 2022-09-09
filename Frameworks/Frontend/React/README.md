@@ -1,4 +1,4 @@
-# React
+# React, Redux, JSX, HTML, CSS, Axios, Node.js
 
 React is a way to represent the user interface of an application and to alter that as data changes.
 

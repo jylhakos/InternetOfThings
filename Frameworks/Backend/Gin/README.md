@@ -1,4 +1,4 @@
-# Go, Gin, MongoDB, React and Axios
+# Go, Gin, Gorm, MongoDB, PostgreSQL
 
 ## Go
 
