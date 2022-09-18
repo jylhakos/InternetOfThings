@@ -7,9 +7,9 @@ import (
 
     "log"
 
-    "net/http"
-
     "time"
+
+    "net/http"
 
     "github.com/gin-gonic/gin"
 
@@ -70,6 +70,8 @@ func VerifyPassword(userPassword string, providedPassword string) (bool, string)
 func SignUp() gin.HandlerFunc {
 
     return func(c *gin.Context) {
+
+        fmt.Println("SignUp()")
 
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
         

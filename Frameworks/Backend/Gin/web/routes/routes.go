@@ -18,15 +18,15 @@ func UserRoutes(routes *gin.Engine) {
 
 func AlbumRoutes(routes *gin.Engine) {
 
-    routes.GET("/:albums", albumController.GetAlbums())
+    routes.GET("/albums", albumController.GetAlbums())
 
-    routes.GET("/:albums/:artist", albumController.AlbumsByArtist())
+    routes.GET("/albums/:artist", albumController.AlbumsByArtist())
 
-    routes.GET("/:albums/:artist/:id", albumController.AlbumByID())
+    routes.GET("/albums/:artist/:id", albumController.AlbumByID())
 
-    routes.POST("/:albums", albumController.AddAlbum())
+    routes.POST("/albums", albumController.AddAlbum())
 
-    routes.PUT("/:albums", albumController.UpdateAlbum())
+    routes.PUT("/albums", albumController.UpdateAlbum())
 
-    routes.DELETE("/:albums/:id", albumController.DeleteAlbum())
+    routes.DELETE("/albums/:id", albumController.DeleteAlbum())
 }

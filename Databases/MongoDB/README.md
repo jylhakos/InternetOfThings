@@ -1,5 +1,15 @@
 # Non-Sql Database
 
+## MongoDB
+
+You can start the mongod process by issuing systemctl start command.
+
+```
+
+$ sudo systemctl start mongod
+
+```
+
 ### A struct object
 
 In order to get the MongoDB data returned by the API call, it’s important to first declare a struct object.
@@ -92,3 +102,8 @@ filter := bson.D{{}}
 ```
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Databases/MongoDB/mongodb.png?raw=true)
+
+
+## References
+
+MongoDB https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/

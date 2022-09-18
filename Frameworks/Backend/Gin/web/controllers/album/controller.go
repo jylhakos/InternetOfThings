@@ -33,6 +33,8 @@ func GetAlbums() gin.HandlerFunc {
 
     return func(c *gin.Context) {
 
+        fmt.Println("GetAlbums()")
+
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
         var albums []models.Album
@@ -82,6 +84,11 @@ func AlbumsByArtist() gin.HandlerFunc {
 
     return func(c *gin.Context) {
 
+        // Parsing data by query string parameters
+        artist := c.Params.ByName("artist")
+
+        fmt.Println("AlbumsByArtist()", artist)
+
         //([]bson.M, error) {
 
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -95,6 +102,7 @@ func AlbumsByArtist() gin.HandlerFunc {
 
         var album models.Album
 
+        // Parsing data from HTTP request body
         if err := c.BindJSON(&album); err != nil {
 
             fmt.Println(err)
@@ -190,6 +198,8 @@ func AlbumByID() gin.HandlerFunc {
 
     return func(c *gin.Context) {
 
+        fmt.Println("AlbumByID()")
+
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
         var album models.Album
@@ -227,6 +237,8 @@ func AlbumByID() gin.HandlerFunc {
 func AddAlbum() gin.HandlerFunc { 
 
     return func(c *gin.Context) {
+
+        fmt.Println("AddAlbum()")
 
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 

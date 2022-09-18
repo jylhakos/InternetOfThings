@@ -137,6 +137,60 @@ $ go install
 
 ```
 
+**Errors**
+
+The error type is an interface type.
+
+```
+
+type error interface {
+    Error() string
+}
+
+```
+
+An error variable represents a value as a string.
+
+The fmt package can be used to add value to the error.
+
+Errors can be returned as nil value.
+
+```
+
+package main
+
+import (
+
+    "errors"
+
+    // "fmt"
+)
+
+func Test() error {
+
+    return errors.New("Error")
+
+    // return fmt.Errorf("Error")
+
+    // return nil
+}
+
+func main() {
+
+err := Test()
+
+// fmt.Println(err)
+
+}
+
+```
+
+## References
+
 A link to Golang
 
 https://go.dev/learn/
+
+Error handling
+
+https://go.dev/blog/error-handling-and-go

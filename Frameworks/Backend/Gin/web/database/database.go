@@ -13,6 +13,10 @@ import (
 
     "go.mongodb.org/mongo-driver/mongo/options"
 
+    "go.mongodb.org/mongo-driver/bson"
+
+    "go.mongodb.org/mongo-driver/mongo/readpref"
+
     getenv "web/utils/getenv"
 
 )
@@ -34,8 +38,31 @@ func MongoDB() *mongo.Client {
     err = client.Connect(ctx)
 
     if err != nil {
+
+        fmt.Println(err)
+
         log.Fatal(err)
     }
+
+    err = client.Ping(ctx, readpref.Primary())
+
+    if err != nil {
+
+        fmt.Println(err)
+
+        log.Fatal(err)
+    }   
+
+    databases, err := client.ListDatabaseNames(ctx, bson.M{})
+
+    if err != nil {
+
+        fmt.Println(err)
+
+        log.Fatal(err)
+    }
+
+    fmt.Println(databases)
 
     return client
 }

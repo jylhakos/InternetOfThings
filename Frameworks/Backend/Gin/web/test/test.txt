@@ -1,11 +1,52 @@
-$ curl http://localhost:8001/api/users/signup \
+// GET /api
+$ curl http://localhost:8001/api \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET"
+
+// POST /users/signup 
+$ curl http://localhost:8001/users/signup \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
     --data '{"name": "Test","email": "test@test.com","password": "123465789"}'
 
-$ curl http://localhost:8001/api/users/login \
+// POST /users/login
+$ curl http://localhost:8001/users/login \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
     --data '{"name": "Test","email": "test@test.com","password": "123465789"}'
+
+// GET /albums
+$ curl http://localhost:8001/albums \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET"
+
+// POST /albums
+$ curl http://localhost:8001/albums \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "POST" \
+    --data '{"title": "test","artist": "test","price": 1.0}'
+
+// POST /albums
+$ curl http://localhost:8001/albums \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "POST" \
+    --data '{"title": "test2","artist": "test","price": 1.1}'
+
+// GET /albums/:artist
+$ curl http://localhost:8001/albums/:test \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET" \
+    --data '{"artist": "test"}'
+
+// GET /albums/:artist
+$ curl http://localhost:8001/albums/:test \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET" \
