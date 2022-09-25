@@ -36,7 +36,7 @@ A client can subscribe to a topic in the broker.
 
 To send a message (publish) we need to use the method client.Publish with parameters.
 
-![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Messaging/MQTT/MQTT.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/MQTT/MQTT.png?raw=true)
 
 Figure: Golang application sending and receiving messages using MQTT.
 
