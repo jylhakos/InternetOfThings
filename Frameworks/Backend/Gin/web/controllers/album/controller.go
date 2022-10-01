@@ -206,6 +206,8 @@ func AlbumByID() gin.HandlerFunc {
 
         //id := c.Params("id")
 
+        //id, _ := primitive.ObjectIDFromHex(id)
+
         if err := c.BindJSON(&album); err != nil {
 
             fmt.Println(err)
@@ -243,6 +245,8 @@ func AddAlbum() gin.HandlerFunc {
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
         var album models.Album
+
+        album.ID := primitive.NewObjectID()
 
         if err := c.ShouldBindJSON(&album); err != nil {
 

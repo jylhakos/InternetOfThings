@@ -16,7 +16,7 @@ $ go get github.com/eclipse/paho.mqtt.golang
 
 ```
 
-### Connect to the MQTT broker
+### Connect to MQTT broker
 
 A client sends MQTT messages (publish) and the same way, another client can receive MQTT messages (subscribe).
 
@@ -26,8 +26,6 @@ All the options needed depends on the broker we are connected.
 
 The MQTT broker can be configured to require client authentication using a username and password before a connection is permitted.
 
-To test the Go application, we need to connect a MQTT server, either using own for example, Mosquitto or use a public MQTT server. 
-
 ### Subscription
 
 A client can subscribe to a topic in the broker. 
@@ -36,9 +34,13 @@ A client can subscribe to a topic in the broker.
 
 To send a message (publish) we need to use the method client.Publish with parameters.
 
+### MQTT broker
+
+To test the Golang application, we need to connect a MQTT broker, either using our deployed MQTT broker for example, Mosquitto or use a public MQTT broker. 
+
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/MQTT/MQTT.png?raw=true)
 
-Figure: Golang application sending and receiving messages using MQTT.
+Figure: Sending and receiving messages by MQTT clients.
 
 ## References
 
