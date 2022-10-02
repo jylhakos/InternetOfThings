@@ -59,7 +59,7 @@ func GetAlbums() gin.HandlerFunc {
                 log.Fatal(e)
             }
 
-            fmt.Sprintf(album.ID, album.Title, album.Artist, album.Price)
+            fmt.Sprintf("%v %s %s %s", album.ID, album.Title, album.Artist, album.Price)
 
             albums = append(albums, album)
 
@@ -94,50 +94,76 @@ func AlbumsByArtist() gin.HandlerFunc {
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
         //var albums []models.Album
-        var albums []bson.M
+        //var albums []bson.M
+
+        var results []models.Album
 
         //artist := c.Params.ByName("artist")
 
         //fmt.Sprintf(artist)
 
+        // Parsing data from HTTP request body
+
+        /*
         var album models.Album
 
-        // Parsing data from HTTP request body
         if err := c.BindJSON(&album); err != nil {
 
-            fmt.Println(err)
+            fmt.Println("Error", err)
 
-            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+
+            defer cancel()
         }
 
         fmt.Println(album)
 
         filter := bson.M{"artist": album.Artist}
+        */
+
+        filter := bson.M{"artist": artist}
 
         fmt.Println(filter)
 
         //cur, err := albumCollection.Find(context.Background(), filter)
 
-        cur, err := albumCollection.Find(ctx, filter)
+        //cur, err := albumCollection.Find(ctx,filter)
 
-        defer cancel()
+        cursor, err := albumCollection.Find(ctx, filter)
+
+        //defer cancel()
 
         if err != nil {
 
-            fmt.Println(err)
+            fmt.Println("Error", err)
 
             log.Fatal(err)
 
             c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         }
 
-        for cur.Next(ctx) {
+        if err = cursor.All(ctx, &results); err != nil {
+            fmt.Println(err)
+            panic(err)
+        }
+
+        for _, result := range results {
+            fmt.Println(result)
+        }
+
+        defer cancel()
+        
+        c.JSON(http.StatusOK, results)
+
+        /*for cur.Next(ctx) {
 
             var album bson.M
 
             e := cur.Decode(&album)
 
             if e != nil {
+
+                fmt.Println("Error", e)
 
                 log.Fatal(e)
 
@@ -163,6 +189,8 @@ func AlbumsByArtist() gin.HandlerFunc {
         fmt.Println(albums)
 
         c.JSON(http.StatusOK, albums)
+
+        */
 
     	/*
 
@@ -246,7 +274,9 @@ func AddAlbum() gin.HandlerFunc {
 
         var album models.Album
 
-        album.ID := primitive.NewObjectID()
+        album.ID = primitive.NewObjectID()
+
+        fmt.Println("album.ID %s", album.ID.String())
 
         if err := c.ShouldBindJSON(&album); err != nil {
 

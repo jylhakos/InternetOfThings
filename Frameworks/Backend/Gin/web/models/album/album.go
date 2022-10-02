@@ -15,7 +15,7 @@ type Album struct {
 
 type Album struct {
     //ID string  `json:"id"`
-    ID      primitive.ObjectID `json:"id,omitempty"
+    ID      primitive.ObjectID `bson:"_id" json:"id,omitempty"`
     Title   string  `json:"title"`
     Artist  string  `json:"artist"`
     Price   float64 `json:"price"`
