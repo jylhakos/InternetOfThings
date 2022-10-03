@@ -85,22 +85,14 @@ func AlbumsByArtist() gin.HandlerFunc {
     return func(c *gin.Context) {
 
         // Parsing data by query string parameters
+
         artist := c.Params.ByName("artist")
 
-        fmt.Println("AlbumsByArtist()", artist)
-
-        //([]bson.M, error) {
+        fmt.Println("artist", artist)
 
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-        //var albums []models.Album
-        //var albums []bson.M
-
         var results []models.Album
-
-        //artist := c.Params.ByName("artist")
-
-        //fmt.Sprintf(artist)
 
         // Parsing data from HTTP request body
 
@@ -116,18 +108,14 @@ func AlbumsByArtist() gin.HandlerFunc {
             defer cancel()
         }
 
-        fmt.Println(album)
-
-        filter := bson.M{"artist": album.Artist}
+        fmt.Println("album.Artist", album.Artist)
         */
 
-        filter := bson.M{"artist": artist}
+        //filter := bson.M{"artist": bson.M{"$regex": artist}}
 
-        fmt.Println(filter)
+        filter := bson.M{"artist": bson.M{"$eq": artist}}
 
-        //cur, err := albumCollection.Find(context.Background(), filter)
-
-        //cur, err := albumCollection.Find(ctx,filter)
+        fmt.Println("filter", filter)
 
         cursor, err := albumCollection.Find(ctx, filter)
 
@@ -154,43 +142,6 @@ func AlbumsByArtist() gin.HandlerFunc {
         defer cancel()
         
         c.JSON(http.StatusOK, results)
-
-        /*for cur.Next(ctx) {
-
-            var album bson.M
-
-            e := cur.Decode(&album)
-
-            if e != nil {
-
-                fmt.Println("Error", e)
-
-                log.Fatal(e)
-
-                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-            }
-
-            fmt.Println(album)
-
-            albums = append(albums, album)
-        }
-
-        if err := cur.Err(); err != nil {
-
-            log.Fatal(err)
-
-            fmt.Errorf("AlbumsByArtist error", err)
-
-            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        }
-
-        cur.Close(ctx)
-        
-        fmt.Println(albums)
-
-        c.JSON(http.StatusOK, albums)
-
-        */
 
     	/*
 

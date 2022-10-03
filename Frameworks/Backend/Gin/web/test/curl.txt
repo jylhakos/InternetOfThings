@@ -29,24 +29,24 @@ $ curl http://localhost:8001/albums \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
-    --data '{"title": "test","artist": "test","price": 1.0}'
+    --data '{"title": "test3", "artist": "test3","price": 1.1}'
 
 // POST /albums
 $ curl http://localhost:8001/albums \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
-    --data '{"title": "test2","artist": "test","price": 1.1}'
+    --data '{"title": "test2", "artist": "test", "price": 1.1}'
 
 // GET /albums/:artist
-$ curl http://localhost:8001/albums/:test \
+$ curl http://localhost:8001/albums/test \
     --include \
     --header "Content-Type: application/json" \
     --request "GET" \
     --data '{"artist": "test"}'
 
 // GET /albums/:artist
-$ curl http://localhost:8001/albums/:test \
+$ curl http://localhost:8001/albums/test \
     --include \
     --header "Content-Type: application/json" \
-    --request "GET" \
+    --request "GET"
