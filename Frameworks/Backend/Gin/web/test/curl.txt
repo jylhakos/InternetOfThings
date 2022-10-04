@@ -4,6 +4,12 @@ $ curl http://localhost:8001/api \
     --header "Content-Type: application/json" \
     --request "GET"
 
+// GET /albums
+$ curl http://localhost:8001/albums \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET"
+
 // POST /users/signup 
 $ curl http://localhost:8001/users/signup \
     --include \
@@ -18,18 +24,12 @@ $ curl http://localhost:8001/users/login \
     --request "POST" \
     --data '{"name": "Test","email": "test@test.com","password": "123465789"}'
 
-// GET /albums
-$ curl http://localhost:8001/albums \
-    --include \
-    --header "Content-Type: application/json" \
-    --request "GET"
-
 // POST /albums
 $ curl http://localhost:8001/albums \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
-    --data '{"title": "test3", "artist": "test3","price": 1.1}'
+    --data '{"title": "test4", "artist": "test4","price": 0.1}'
 
 // POST /albums
 $ curl http://localhost:8001/albums \
@@ -50,3 +50,36 @@ $ curl http://localhost:8001/albums/test \
     --include \
     --header "Content-Type: application/json" \
     --request "GET"
+
+// GET /albums/:artist
+$ curl http://localhost:8001/albums/none \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET"
+
+// GET /album/:id
+$ curl http://localhost:8001/album/633914a3844c33f3030d3ed2 \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET"
+
+// GET /album:id
+$ curl http://localhost:8001/album/id \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET" \
+    --data '{"id": "633914a3844c33f3030d3ed2"}'
+
+// PUT /album:id
+$ curl http://localhost:8001/album/:id \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "PUT" \
+    --data '{"ID": "633b8f30ed8d5752438d0819", "artist": "test4", "title": "test4", "price": 1.1}'
+
+// DELETE /album:id
+$ curl http://localhost:8001/album/:id \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "DELETE" \
+    --data '{"ID": "633b8f30ed8d5752438d0819"}'
