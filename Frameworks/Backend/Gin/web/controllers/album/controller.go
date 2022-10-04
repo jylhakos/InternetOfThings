@@ -298,8 +298,6 @@ func UpdateAlbumByID() gin.HandlerFunc {
             return
         }
 
-        //_id, _ := primitive.ObjectIDFromHex(album.ID)
-
         fmt.Println("_id", album.ID)
 
         fmt.Printf("_id: %v, Artist: %s Title: %s Price: %s\n", album.ID, album.Artist, album.Title, album.Price)
