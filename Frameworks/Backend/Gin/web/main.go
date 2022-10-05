@@ -3,6 +3,8 @@ package main
 import (
     "github.com/gin-gonic/gin"
 
+    "github.com/gin-contrib/cors"
+
     _ "github.com/heroku/x/hmetrics/onload"
 
     "errors"
@@ -34,6 +36,16 @@ func main() {
     }
 
     router := gin.New()
+
+    router.Use(cors.New(cors.Config {
+        AllowOrigins:     []string{"http://localhost:19006"},
+        AllowMethods:     []string{"GET","POST","OPTIONS"},
+        AllowHeaders:     []string{"Content-Type","Content-Length","Authorization"},
+        AllowCredentials: true,
+        //AllowOriginFunc: func(origin string) bool {
+        //  return origin == "https://localhost"
+        //},
+    }))
 
     router.Use(gin.Logger())
 
