@@ -80,7 +80,7 @@ $ go get github.com/golang-jwt/jwt/v4
 
 ```
 
-![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Frameworks/Backend/Gin/albums.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Frameworks/Backend/Gin/albums.png?raw=true)
 
 Figure: REST methods and CRUD operations
 
