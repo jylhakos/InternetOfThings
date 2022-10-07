@@ -247,35 +247,39 @@ func AddAlbum() gin.HandlerFunc {
 
         album.ID = primitive.NewObjectID()
 
-        fmt.Println("album.ID %s", album.ID.String())
+        fmt.Println("album.ID", album.ID.String())
 
-        if err := c.ShouldBindJSON(&album); err != nil {
+        if error := c.ShouldBindJSON(&album); error != nil {
 
-            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            fmt.Println("album", album, "error", error)
+            
+            c.JSON(http.StatusBadRequest, gin.H{"Error": error.Error()})
 
             return
         }
 
-        result, err := albumCollection.InsertOne(ctx, album)
+        result, error := albumCollection.InsertOne(ctx, album)
 
         defer cancel()
 
-        if err != nil {
+        if error != nil {
 
-            fmt.Errorf("addAlbum: %v", err)
+            fmt.Errorf("addAlbum: %v", error)
 
-            c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+            c.JSON(http.StatusInternalServerError, gin.H{"Error": error})
 
             return
         }
 
-        id := result.InsertedID.(primitive.ObjectID).String()
+        fmt.Sprintf("result", result)
+        
+        //id := result.InsertedID.(primitive.ObjectID).String()
 
         //id, err := result.LastInsertId()
 
-        fmt.Sprintf("Album objectId", id)
+        fmt.Sprintf("Album", album)
 
-        c.JSON(http.StatusOK, id)
+        c.JSON(http.StatusOK, album)
     }
 }
 

@@ -29,7 +29,7 @@ $ curl http://localhost:8001/albums \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
-    --data '{"title": "test4", "artist": "test4","price": 0.1}'
+    --data '{"title": "test4", "artist": "test4", "price": 0.1}'
 
 // POST /albums
 $ curl http://localhost:8001/albums \

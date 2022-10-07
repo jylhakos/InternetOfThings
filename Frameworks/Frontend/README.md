@@ -22,8 +22,25 @@ $ expo run:<OS>
 
 where OS is either android or ios option.
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Frameworks/Frontend/comparison.png?raw=true)
+## The mongo Shell
 
+The mongo shell is an interactive JavaScript interface to MongoDB. 
+
+```
+
+$ mongo
+
+> use <DB>
+
+> show collections
+
+> db.<COLLECTION>.drop()
+
+```
+
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Frameworks/Frontend/ReactNative/albums.png?raw=true)
+
+Figure: An interface for rendering flat lists
 
 ### References
 

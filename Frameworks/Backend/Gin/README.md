@@ -80,11 +80,9 @@ $ go get github.com/golang-jwt/jwt/v4
 
 ```
 
-## React
+![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Frameworks/Backend/Gin/albums.png?raw=true)
 
-## Axios
-
-![alt text](https://github.com/jylhakos/miscellaneous/blob/main/InternetOfThings/Frameworks/Backend/Gin/framework.png?raw=true)
+Figure: REST methods and CRUD operations
 
 ## References
 
