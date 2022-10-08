@@ -37,10 +37,13 @@ $ mongo
 > db.<COLLECTION>.drop()
 
 ```
+### FlatList
+
+The renderItem is required to render data into the list.
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Frameworks/Frontend/ReactNative/albums.png?raw=true)
 
-Figure: An interface for rendering flat lists
+Figure: An interface for rendering data into the React Native component.
 
 ### References
 
