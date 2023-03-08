@@ -10,7 +10,7 @@ When A sends an IP packet to B, the IP header contains A's IP address as the sou
 
 For an application that uses TCP, data passes between the application and the TCP module.
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/HTTP/layers.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/TCP/layers.png?raw=true)
 
 Figure: TCP/IP in the layered protocol architecture.
 
