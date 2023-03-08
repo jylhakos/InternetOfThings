@@ -16,7 +16,7 @@ Handle and HandleFunc add handlers to DefaultServeMux
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/HTTP/GET.png?raw=true)
 
-Figure: HTTP Get reponse from the Golang server.
+Figure: HTTP Get reponse from the Golang.
 
 ## References
 

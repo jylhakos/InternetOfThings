@@ -1,0 +1,12 @@
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "OpenSSL Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+subjectAltName = @alt_names
+[alt_names]
+IP.1 = 10.0.0.2
+DNS.1 = computer
+DNS.2 = localhost
