@@ -15,7 +15,7 @@ const (
 )
 
 func main() {
-	fmt.Println("main()")
+	fmt.Println("server")
 	listen, err := net.Listen(TYPE, HOST+":"+PORT)
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +39,8 @@ func handleRequest(conn net.Conn) {
 		log.Fatal(err)
 	}
 	time := time.Now().Format(time.RFC850)
-	responseStr := fmt.Sprintf("Request: %vDate: %v", string(buffer[:]), time)
+	responseStr := fmt.Sprintf("Request: %v Date: %v", string(buffer[:]), time)
+	fmt.Println(responseStr)
 	conn.Write([]byte(responseStr))
 	conn.Close()
 }

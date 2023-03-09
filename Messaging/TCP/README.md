@@ -18,9 +18,17 @@ Figure: TCP/IP in the layered protocol architecture.
 
 Golang net package provides an interface for network I/O, including TCP/IP, UDP, domain name resolution, and Unix domain sockets.
 
-The Listen function creates server and Accept waits for and returns the next connection to the listener.
+The Listen function creates a server and Accept waits for and returns the next connection to the listener.
 
-The DialTCP function acts like Dial for TCP networks.
+ResolveTCPAddr returns an address of TCP end point for example localhost:80 or 127.0.0.1:80.
+
+For TCP and UDP networks, the address has the form "host:port". 
+
+The host must be a literal IP address, or a host name that can be resolved to IP addresses. 
+
+The port must be a literal port number or a service name.
+
+The DialTCP function connects to the remote address on the TCP networks.
 
 A goroutine is a lightweight thread managed by the Go runtime and each incoming request is handled in its own goroutine.
 
