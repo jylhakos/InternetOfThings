@@ -1,4 +1,29 @@
-# GCP
+# Google Cloud Platform (GCP)
+
+Google's public cloud computing service, offering services like virtual machines, containerized applications, and serverless computing.
+
+## Examples of GCP services
+
+App Engine: 
+
+A platform for developing, building and hosting web applications.
+
+BigQuery: 
+
+A serverless, enterprise-level data warehouse.
+
+Cloud Run: 
+
+Creates containers without virtual machines.
+
+Compute Engine: 
+
+Provides virtual machines.
+
+Google Kubernetes Engine (GKE): 
+
+A managed Kubernetes service. 
+
 
 ## Utilizing GCP cloud for deploying and managing applications.
 
