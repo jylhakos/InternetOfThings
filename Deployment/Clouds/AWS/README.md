@@ -1,8 +1,8 @@
 # Amazon Web Services (AWS)
 
-## Deploying and managing Go applications on the AWS cloud.
+## Managing and deploying applications in the AWS cloud environment.
 
-Deploying and managing Go applications on AWS can be accomplished through various services such as Elastic Beanstalk, CodeDeploy, and App Runner. 
+Deploying and managing applications on AWS can be accomplished through various services such as Elastic Beanstalk, CodeDeploy, and App Runner. 
 
 Elastic Beanstalk provides a managed platform for deploying and managing Go applications, while CodeDeploy offers automated deployments, and App Runner is a container-based service for deploying applications without managing infrastructure.
 

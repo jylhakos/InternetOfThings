@@ -2,12 +2,14 @@
 
 The table outlines Google's GCP services alongside their equivalent offerings in Amazon Web Services (AWS) and Microsoft Azure.
 
-| Service Type      | Service Description                                   | GCP         | AWS                   | Azure                 |
-|-------------------|-------------------------------------------------------|-------------|-----------------------|-----------------------|
-| API management    | Design, secure, analyze  and scale APIs               | Apigee      | Amazon Publisher      | Azure API  Management |
-| API security      | Help to protect your APIs  From security threats      | Advanced    |                       | Defender              |
-| Cost Optimization | Optimize cloud usage with  actionable recommendations | Recommender | AWS Cost Optimization | Azure Cost Management |
-
+| _Service Type_     | _Service Description_                                 | **GCP**                | **AWS**                   | **Azure**            |
+|--------------------|-------------------------------------------------------|------------------------|---------------------------|----------------------|
+| API management     | Design, secure, analyze  and scale APIs               | Apigee                 | Amazon Publisher          | Azure API Management |
+| API security       | Help to protect your APIs  From security threats      | Advanced               |                           | Defender             |
+| Cost Optimization  | Optimize cloud usage with  actionable recommendations | Recommender            | AWS Cost Optimization     | Cost Management      |
+| Compute            | Block storage For VM instances                        | Google Cloud Hyperdisk | Elastic Block Store (EBS) | Managed Disks        |
+| Deployment         | Configure and deploy                                  | Workload Manager       | Launch Wizard             | Center for SAP       |
+| Container services | CI/CD                                                 | Cloud Deploy           | CodeDeploy                | DevOps               |
 
 ## Deploying and managing applications across AWS, Azure and GCP
 
