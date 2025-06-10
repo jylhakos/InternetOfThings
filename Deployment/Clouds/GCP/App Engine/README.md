@@ -1,12 +1,20 @@
 # App Engine
 
+What are the steps to deploy applications from a local computer to Google Cloud Platform (GCP)?
+
 To deploy applications on Google App Engine (GAE) using Google Cloud Platform (GCP), you'll need to set up a GCP project, enable the necessary APIs, configure your application, and deploy the application.
+
+To deploy an application to App Engine on Google Cloud Platform (GCP), you'll use the Google Cloud CLI with the gcloud app deploy command. 
+
+The gcloud app deploy command will build a container image of your application using Cloud Build and then deploy it to App Engine.
 
 Here's a step-by-step guide
 
-1. Set up a GCP project
+1. Set up your GCP project and authentication
 
-Create a Project: 
+Ensure you have a Google Cloud project and that the Google Cloud CLI is configured to authenticate with your account.
+
+Create a Project:
 
 If you don't have one, create a new GCP project in the Google Cloud Console.
 
@@ -28,6 +36,8 @@ Configure the CLI to connect to your GCP project.
 
 3. Configure your App Engine application
 
+You'll need an app.yaml file to configure your application, which is a YAML file that specifies runtime, handlers, and other settings. 
+
 Create an app.yaml file:
 
 This file specifies the runtime environment and configurations for example your Python, Go or Node.js applications. 
@@ -44,13 +54,21 @@ If your app includes static assets (HTML, CSS, JavaScript, images), place them i
 
 4. Deploy your application
 
+Navigate to the directory containing your app.yaml or your application's source code.
+
+The Google Cloud CLI will automatically build the container image (if applicable) and deploy it to App Engine. 
+
 Use the gcloud app deploy command: 
 
 Deploy your application using the gcloud app deploy command.
 
-Navigate to your project's root directory: Run the deployment command from the directory containing your app.yaml file.
+Navigate to your project's root directory: 
 
-Confirm Deployment: The command will prompt you for confirmation before deploying.
+Run the deployment command from the directory containing your app.yaml file.
+
+Confirm Deployment: 
+
+The command will prompt you for confirmation before deploying.
 
 5. Update your application (Optional)
 

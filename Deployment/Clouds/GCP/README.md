@@ -1,6 +1,13 @@
 # Google Cloud Platform (GCP)
 
-Google's public cloud computing service, offering services like virtual machines, containerized applications, and serverless computing.
+Google's public cloud service provides a range of solutions, including virtual machines, containerized applications, and serverless computing.
+
+What are the steps to deploy a web application from a local computer to Google Cloud Platform (GCP)?
+
+To deploy a web application from a computer to GCP, you can use various services depending on your application type and deployment needs.
+
+You can deploy to Compute Engine (VM instances), Cloud Run (containerized apps), or App Engine (managed application environment).
+
 
 ## Examples of GCP services
 
@@ -8,22 +15,53 @@ App Engine:
 
 A platform for developing, building and hosting web applications.
 
-BigQuery: 
-
-A serverless, enterprise-level data warehouse.
+App Engine offers a managed environment and simplifies deployment with commands like gcloud app deploy.
 
 Cloud Run: 
 
 Creates containers without virtual machines.
 
-Compute Engine: 
+For Cloud Run, you can use the gcloud run deploy command to deploy from source code, and GCP will handle the Docker build. 
+
+Compute Engine:
 
 Provides virtual machines.
 
+For Compute Engine, you can SSH into the VM and deploy your application as you would on any computer.
+
+Create a VM:
+
+https://accounts.google.com/
+      
+In the Google Cloud Console, navigate to Compute Engine and create a new VM instance.
+
+Choose an image and size:
+
+Select a Linux image (e.g., Ubuntu) and choose an appropriate machine type based on your application's needs.
+
+Configure networking:
+
+Set up the VM's network, including a public IP address. 
+
+You may need to create a firewall rule to allow HTTP/HTTPS traffic.
+
+SSH into the VM: 
+
+Connect to the VM using SSH through the console. 
+
+Deploy the application: 
+
+Follow deployment procedures (e.g., using web servers like Apache, Nginx, or deploying a Docker container).
+      
+Copy your web application files (HTML, CSS, JavaScript, etc.) to the web server's document root (e.g., /var/www/html).
+
 Google Kubernetes Engine (GKE): 
 
-A managed Kubernetes service. 
+A managed Kubernetes service.
 
+BigQuery: 
+
+A serverless, enterprise-level data warehouse.
 
 ## Utilizing GCP cloud for deploying and managing applications.
 
@@ -37,7 +75,9 @@ The Google Cloud console and the Google Cloud SDK (gcloud) are key tools for dep
 
 Deployment:
 
-Use the gcloud app deploy command to deploy your application to App Engine. This command builds your application into a container image and deploys it to either the Standard or Flexible environments.
+Use the gcloud app deploy command to deploy your application to App Engine, which will upload your code and configure the application environment. 
+
+This command builds your application into a container image and deploys it to either the Standard or Flexible environments.
 
 Management:
 
@@ -53,9 +93,17 @@ Suitable for web applications, APIs, and other applications that require a manag
 
 Deployment:
 
-Deploy your application using a container image. 
+Create a Dockerfile to package your web application into a container image.
+
+Deploy your application using a container image.
+
+Build and deploy:
+
+Use the gcloud run deploy command to deploy your container from source code, or from a specified container image.
 
 You can either use the Cloud Run console or the gcloud CLI to deploy.
+
+Cloud Run automatically handles building and deploying the image if a Dockerfile is present.
 
 Management:
 
@@ -74,6 +122,22 @@ Deployment:
 Deploy your application by creating Kubernetes deployments, services, and other resources. 
 
 You can use the gcloud CLI or the Kubernetes control plane to manage your cluster.
+
+Create a GKE cluster:
+
+In the Google Cloud Console, navigate to Kubernetes Engine and create a new cluster.
+
+Package your application: 
+
+Containerize your application using Docker.
+
+Create Kubernetes manifests:
+
+Define how your application should be deployed within the cluster, including deployments, services, and ingress.
+
+Use kubectl apply to deploy your application to the GKE cluster.
+
+Configure a Kubernetes service to expose your application to external traffic.
 
 Management:
 

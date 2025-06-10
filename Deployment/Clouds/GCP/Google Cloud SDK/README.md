@@ -2,6 +2,10 @@
 
 To set up the Google Cloud SDK (gcloud CLI) on Linux and deploy web applications to App Engine, you'll need to install the SDK, initialize it, configure your project, and then deploy your application using the gcloud commands.
 
+Google Cloud SDK fo Go
+
+https://cloud.google.com/sdk
+
 Here's a step-by-step guide:
 
 1. Install the Google Cloud SDK
@@ -23,6 +27,8 @@ Download the gcloud CLI for your operating system from the Google Cloud document
 Unpack the archive and run the installation script.
 
 2. Initialize the gcloud CLI
+
+Use the gcloud command for interacting with GCP.
 
 Run gcloud init to authenticate your account and set up your default project.
 

@@ -18,6 +18,8 @@ This is crucial for Cloud Build to interact with other GCP services.
 
 3. Create a Build Configuration File
 
+Create a cloudbuild.yaml file (or cloudbuild.json) that defines the steps for your build process, including Docker builds, push to Artifact Registry, and deployments.
+
 Create a cloudbuild.yaml or cloudbuild.json file.
 
 This file contains instructions for Cloud Build, including build steps, source code location, and target deployment.
@@ -36,9 +38,17 @@ An example cloudbuild.yaml file
 
 4. Submit the Build
 
-Use the gcloud builds submit command.
+Manual submission:
+
+Use the gcloud builds submit command to trigger a build.
 
 This initiates the build process using the Cloud Build service.
+
+Build triggers: 
+
+Configure build triggers to automatically initiate builds based on events like code pushes to a repository.
+    
+For example, you can create triggers based on specific branches or tags in your code repository.
 
 5. View Build details
 
@@ -62,9 +72,15 @@ Update your cloudbuild.yaml file to include steps for deploying to Cloud Run.
 
 ### Building and pushing Docker images:
 
-Configure Build: Specify the Dockerfile location and build context in your cloudbuild.yaml.
+Configure Build: 
 
-Push to Artifact Registry: Add a step to push the built image to Artifact Registry.
+Specify the Dockerfile location and build context in your cloudbuild.yaml.
+
+Push to Artifact Registry: 
+
+Add a step to push the built image to Artifact Registry.
+
+Build artifacts can be pushed to Artifact Registry (for Docker images) or deployed to other GCP services like Cloud Run.
 
 ### Automating Builds with Triggers:
 
@@ -79,6 +95,7 @@ Connect your repository (e.g., GitHub, Bitbucket) to Cloud Build.
 Configure Trigger: 
 
 Specify the branch or tags that should trigger a build. 
+
 
 References
 
