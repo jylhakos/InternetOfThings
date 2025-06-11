@@ -1,5 +1,37 @@
 # Amazon Web Services (AWS)
 
+What are the services in AWS?
+
+Some of the key services categories in AWS include:
+
+Compute: 
+ 
+ EC2, Lambda, Elastic Beanstalk, and Lightsail that provide scalable computing capacity and serverless options to run applications.  
+ 
+Storage: 
+ 
+ S3, EFS, and Glacier that offer object, file and archive storage with high durability and availability.  
+ 
+Databases: 
+ 
+ RDS, DynamoDB, ElastiCache, Neptune, and Timestream for relational, NoSQL, in-memory, and time series data.  
+ 
+Networking: 
+ 
+ VPC, Direct Connect, and Route 53 that provide networking capabilities and connectivity options for resources.  
+ 
+Analytics: 
+
+ EMR, Athena, Kinesis, and QuickSight that enable big data analytics and insights from data.  
+ 
+Security: 
+ 
+ IAM, GuardDuty, Inspector, Macie that provide identity management, threat detection, security assessments, and data security.  
+ 
+Management Tools: 
+ 
+CloudWatch, CloudTrail, Config, OpsWorks, and Service Catalog that enable governance, auditing, automation and management of AWS resources.
+
 ## Managing and deploying applications in the AWS cloud environment.
 
 Deploying and managing applications on AWS can be accomplished through various services such as Elastic Beanstalk, CodeDeploy, and App Runner. 
