@@ -76,6 +76,124 @@ Use triggers:
 
 Set up Cloud Build triggers to automatically start builds based on events (e.g., commits, pull requests). 
 
+## The building, deploying, and running pipeline
+
+To create a CI/CD pipeline for building, deploying, and running a web app on GCP from a local computer, you'll need to define and configure a pipeline that integrates your local development environment with GCP services. 
+
+This typically involves setting up a source repository, defining build and deploy steps, and automating testing. 
+
+Here's a breakdown of the key steps:
+
+1. Define the Pipeline Stages
+
+Source:
+
+Your local development environment serves as the source of your application code. You'll need to push your code to a source repository on GCP, such as Cloud Source Repositories.
+
+Build:
+
+This stage involves building your application's executable artifacts (e.g., Docker images) using tools like Docker or Cloud Build.
+
+Test:
+
+Integrate automated tests (unit tests, integration tests) to verify the functionality of your application before deployment.
+
+Deploy:
+
+This stage deploys your built application to a chosen platform on GCP, such as App Engine, Cloud Run, or Kubernetes Engine.
+
+Run:
+
+Once deployed, your application will be running on GCP, serving your web pages to users.
+
+2. Choose Your Tools and Technologies
+
+Source Control:
+
+Use a version control system like Git, and a repository on GCP like Cloud Source Repositories or a third-party service like GitHub or GitLab.
+
+Build Tool:
+
+Cloud Build is a good option within GCP for managing build processes and deploying applications.
+
+Deployment Platform:
+
+Consider App Engine for a managed environment, Cloud Run for containerized deployments, or Kubernetes Engine for more control and flexibility.
+
+Testing Frameworks:
+
+Choose testing frameworks based on your application's needs (e.g., Jest, Jasmine, JUnit).
+
+CI/CD Tool:
+
+You can use Cloud Build as a CI/CD tool, or integrate it with other services like GitLab CI. 
+
+3. Configure the Pipeline
+
+Enable Required Services:
+
+Ensure you have enabled necessary services like Cloud Build, Cloud Source Repositories, and your chosen deployment platform (App Engine, Cloud Run, etc.). 
+
+Set up a Service Account:
+
+Create a Service Account with the necessary permissions to interact with GCP services (e.g., Cloud Build, deployment platform). 
+
+Define Build and Deploy Scripts:
+
+Write shell scripts or build configurations (e.g., dockerfile, build.sh) to build and deploy your application. 
+
+Configure Triggers:
+
+Set up triggers in Cloud Build to automatically initiate builds and deployments when code changes are pushed to your repository. 
+
+Automate Testing:
+
+Integrate your tests into the build process, so they are run automatically during each build. 
+
+Configure Service Connections (if using a CI/CD tool like GitLab):
+
+If you're using a third-party CI/CD service like GitLab, you'll need to configure service connections to connect to your GCP project. 
+
+4. Example scenario (Cloud Build and Cloud Run)
+
+Source Code: 
+
+Push your code to a Cloud Source Repository. 
+
+Build: 
+
+Configure a Cloud Build trigger that is activated when new code is pushed to your repository.
+
+Build Script: 
+
+Your build script will:
+
+Build a Docker image of your application. 
+
+Push the image to Artifact Registry (GCP's container registry). 
+
+Deploy: 
+
+The build script will then deploy the Docker image to Cloud Run. 
+
+Testing: 
+
+You can integrate tests into your build process by running them within the build script. 
+
+5. Tools & Technologies
+
+GCP: 
+
+gcloud CLI, Cloud Console, Cloud Build, Cloud Source Repositories, Artifact Registry, App Engine, Cloud Run, Kubernetes Engine.
+
+CI/CD: 
+
+GitLab CI, CircleCI, Jenkins.
+
+Docker: 
+
+For creating containerized applications. 
+
 References
 
 Step-by-Step instructions for creating the CI/CD pipeline
