@@ -204,10 +204,39 @@ Security:
 
 Follow AWS practices for security, including using IAM roles, Secrets Manager, and OAC.
 
+Amazon Cognito provides authentication, authorization, and user management for web and mobile apps.
+
+## An Example to deploy Serverless mobile app
+
+Amazon Cognito authenticates app users and authorizes them to access the app.
+
+Amazon DynamoDB is a NoSQL database service that provides fast, predictable, and scalable performance.
+
+To create and fetch data, AWS AppSync uses a GraphQL API to interact with the frontend app and a backend DynamoDB table.
+
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Serverless/React_Native.png?raw=true)
+
+The diagram shows an example architecture for running a React Native mobile app’s backend in the AWS cloud.
+
+The code for the sample application that’s used in this pattern is available in the GitHub aws-amplify-react-native-ios-todo-app repository.
 
 References
 
 Serverless services on AWS
 
 https://aws.amazon.com/serverless/
+
+Serverless
+
+https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/serverless-pattern-list.html
+
+Build a serverless mobile app by using AWS Amplify
+
+https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/build-a-serverless-react-native-mobile-app-by-using-aws-amplify.html
+
+Build a Serverless Mobile (React Native) App using AWS Amplify
+
+https://github.com/aws-samples/aws-amplify-react-native-ios-todo-app
+
+
 

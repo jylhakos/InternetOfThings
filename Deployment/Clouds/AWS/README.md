@@ -32,6 +32,30 @@ Management Tools:
  
 CloudWatch, CloudTrail, Config, OpsWorks, and Service Catalog that enable governance, auditing, automation and management of AWS resources.
 
+## Create an AWS account
+
+How to sign up for an AWS account?
+
+If you do not have an AWS account, complete the following steps to create one.
+
+1. To sign up for an AWS account
+
+Open https://portal.aws.amazon.com/billing/signup page.
+
+2. Follow the online instructions.
+
+Part of the sign-up procedure involves receiving a phone call and entering a verification code on the phone keypad.
+
+When you sign up for an AWS account, an AWS account root user is created. 
+
+The root user has access to all AWS services and resources in the account. 
+
+AWS sends you a confirmation email after the sign-up process is complete. 
+
+3. Secure your AWS account root user
+
+After you sign up for an AWS account, secure your AWS account root user, enable AWS IAM Identity Center, and create an administrative user so that you don't use the root user for everyday tasks.
+
 ## Managing and deploying applications in the AWS cloud environment.
 
 Deploying and managing applications on AWS can be accomplished through various services such as Elastic Beanstalk, CodeDeploy, and App Runner. 
@@ -139,3 +163,12 @@ Edit the code, synthesize a new template, and redeploy to make changes to the in
 4. Deploy your application: Use the eb deploy command to deploy your application to an Elastic Beanstalk environment.
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
+
+
+References
+
+Sign up for AWS
+
+https://signin.aws.amazon.com/signup?request_type=register
+
+

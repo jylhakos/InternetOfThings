@@ -1,9 +1,11 @@
 # Databases
 
 
-## RDS (Relational Database Service):
+## Amazon RDS (Relational Database Service)
 
-A managed relational database service that supports popular database engines like MySQL, PostgreSQL, and MariaDB. It simplifies database management by handling tasks like backups, patching, and high availability.
+A managed relational database service that supports popular database engines like MySQL, PostgreSQL, and MariaDB. 
+
+Amazon RDS simplifies database management by handling tasks like backups, patching, and high availability.
 
 ### Integrate with RDS
 
@@ -25,11 +27,14 @@ Create RDS Proxy (Optional):
 
 Use an RDS Proxy for better connection management and security.
 
-Connect to RDS: 
-
-Connect to the database using the necessary credentials and connection parameters.
+You can connect a Lambda function to an Amazon Relational Database Service (Amazon RDS) database directly and through an Amazon RDS Proxy.
 
 Interact with Database: 
 
 Perform database operations (e.g., querying or inserting data) from your Lambda function.
 
+References
+
+Using AWS Lambda with Amazon RDS
+
+https://docs.aws.amazon.com/lambda/latest/dg/services-rds.html
