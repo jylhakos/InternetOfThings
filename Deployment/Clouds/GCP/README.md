@@ -2,12 +2,59 @@
 
 Google's public cloud service provides a range of solutions, including virtual machines, containerized applications, and serverless computing.
 
-What are the steps to deploy a web application from a local computer to Google Cloud Platform (GCP)?
+## Sign up Google Cloud Platform
 
-To deploy a web application from a computer to GCP, you can use various services depending on your application type and deployment needs.
+To sign up for a Google Cloud Platform (GCP) account and get the $300 free trial, you can follow these steps: 
 
-You can deploy to Compute Engine (VM instances), Cloud Run (containerized apps), or App Engine (managed application environment).
+1. Navigate to the Google Cloud Page:
 
+Go to the official Google Cloud Free Program page. 
+
+You can find it by searching for "Google Cloud Free Program" or by visiting the link: cloud.google.com/free. 
+
+2. Click "Get Started for Free" or "Start Free":
+
+Look for the button that initiates the free trial sign-up process. 
+
+It might be labeled "Get Started for Free" or "Start Free".
+
+3. Sign in with your Google Account:
+
+You will be prompted to sign in with your Google Account (Gmail ID). If you don't have one, create a new one first.
+
+4. Fill in Account Details and Payment Information:
+
+You'll need to provide details like your country, name, and address. 
+
+You'll also need to provide a credit card or other payment method for identity verification purposes. 
+
+Why Google Cloud Platform?
+
+Google Cloud Platform users can take advantage of a 90-day trial period that includes 300 dollars in free Cloud Billing credits.
+
+Free Tier provides limited access to many common Google Cloud services:
+
+- App Engine
+
+- Artifact Registry
+
+- BigQuery
+
+- Cloud Build
+
+- Cloud Deploy
+
+- Compute Engine
+
+- Google Kubernetes Engine
+
+- Cloud Run
+
+- Cloud Shell
+
+- Cloud Storage
+
+- Workflows
 
 ## Examples of GCP services
 
@@ -338,10 +385,27 @@ Fill in other deployment fields as needed.
 
 Use the Application Servers window in Cloud Code to monitor the deployment progress.
 
+### An example to deploy a web application
+
+What are the steps to deploy a web application from a local computer to Google Cloud Platform (GCP)?
+
+To deploy a web application from a computer to GCP, you can use various services depending on your application type and deployment needs.
+
+You can deploy to Compute Engine (VM instances), Cloud Run (containerized apps), or App Engine (managed application environment).
+
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
 
 References
+
+Free to sign up
+
+https://cloud.google.com/free?hl=en
+
+Free Tier 
+
+https://cloud.google.com/free/docs/free-cloud-features
+
 
 Google Cloud Setup
 
