@@ -164,6 +164,185 @@ Edit the code, synthesize a new template, and redeploy to make changes to the in
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
 
+### Example: Deploying Golang (Go) backend application with Docker container on AWS
+
+Terraform as your IaC tool: 
+
+You'll write Terraform code to define your infrastructure, including the VPC, subnets, RDS database, ELB, and ECS cluster, tasks, and services.
+
+ECS for container orchestration: 
+
+ECS will manage your containerized web application, running it on either Fargate (serverless) or EC2 instances.
+
+Choose between ECS Fargate (serverless) or ECS with EC2 instances. 
+
+Fargate simplifies management as AWS handles the underlying infrastructure.
+
+RDS for your database: 
+
+Terraform can provision and configure your RDS database instance to store your web application's data.
+
+ELB for load balancing: 
+
+An Application Load Balancer (ALB) or Network Load Balancer (NLB) can be provisioned via Terraform to distribute traffic to your ECS tasks, ensuring scalability and high availability.
+
+VPC for network isolation: 
+
+A VPC with public and private subnets will provide a secure and isolated network environment for your application.
+
+S3 for Storage: 
+
+You can use S3 to store your Terraform state files, provide storage for the web application, or other static assets. 
+
+CloudFront: 
+
+A content delivery network (CDN) that helps you distribute your static and dynamic web content to users.
+
+IAM (Identity and Access Management): 
+
+Create IAM roles and policies to grant necessary permissions to your ECS tasks to access other AWS services like ECR, RDS, and S3. 
+
+Deploying a Golang backend application on AWS with ECS, Fargate, RDS, ELB, VPC, S3, CloudFront, Route53, and Terraform requires following essential steps. 
+
+1. Developing the Golang Application
+
+Build your backend application: 
+
+Create your Golang project, focusing on core logic, API endpoints, and database interactions.
+
+Connect to RDS: 
+
+Integrate your application with an AWS RDS database, handling database connections and queries within your Go code.
+
+2. Containerizing the Application with Docker
+
+Create a Dockerfile: 
+
+Write a Dockerfile to define the environment for your Golang application, including the base image, dependencies, and build commands.
+
+Build the Docker image: 
+
+Use the docker build command to build the Docker image based on your Dockerfile.
+
+Tag the image: 
+
+Tag the image appropriately, including the ECR repository URI for easy identification.
+
+3. Deploying to AWS with Terraform
+
+Set up Terraform: 
+
+Ensure you have Terraform installed and configured to interact with your AWS account.
+
+Define AWS resources with Terraform: 
+
+Create Terraform configuration files (e.g., .tf files) to define and manage the following AWS resources:
+
+VPC: 
+
+Define your Virtual Private Cloud (VPC) for network isolation.
+
+Subnets: 
+
+Create subnets within your VPC to segregate resources.
+
+Internet Gateway: 
+
+Configure an Internet Gateway to allow external access to resources within your VPC.
+
+Route Tables: 
+
+Set up route tables to control network traffic within your VPC.
+
+Security Groups: 
+
+Define security groups to control inbound and outbound traffic for your resources.
+
+ECR Repository: 
+
+Create an Amazon Elastic Container Registry (ECR) repository to store your Docker images.
+
+ECS Cluster: 
+
+Create an ECS cluster to manage your containerized applications.
+
+Task Definition: 
+
+Define an ECS Task Definition to specify the container image, resource requirements (CPU and memory), and other configuration for your application.
+
+ECS Service: 
+
+Create an ECS Service to run and manage your application tasks, ensuring the desired number of tasks are running.
+
+Application Load Balancer (ALB): 
+
+Configure an ALB to distribute incoming traffic across your application tasks.
+
+Route53: 
+
+Set up Route53 to manage your domain name and point it to your ALB.
+
+CloudFront: 
+
+Integrate CloudFront for content delivery and caching, improving performance and reducing latency.
+
+RDS Database: 
+
+Provision an RDS database instance for your application's data storage.
+
+S3 Bucket: 
+
+Create an S3 bucket to store static assets or other application data.
+
+Apply Terraform configuration: 
+
+Run terraform init, terraform plan, and terraform apply to provision the AWS infrastructure defined in your Terraform files.
+
+4. Building and pushing Docker image to ECR:
+
+Build the Docker image: 
+
+Follow the steps in section 2 to build your Docker image.
+
+Authenticate with ECR: 
+
+Authenticate your Docker client with your ECR repository.
+
+Push the image to ECR: 
+
+Use the docker push command to push your Docker image to the ECR repository.
+
+5. Deploying and managing the application:
+
+Update the ECS Service: 
+
+Update your ECS Service to use the new task definition with the updated Docker image.
+
+Monitor and scale: 
+
+Utilize CloudWatch for monitoring your application and configure auto-scaling policies to handle changes in traffic load.
+
+Considerations
+
+IAM Roles: 
+
+Configure appropriate IAM roles for your EC2 instances and ECS tasks to grant necessary permissions to interact with other AWS services.
+
+Security Groups: 
+
+Define security groups to control inbound and outbound traffic to your application, ensuring only necessary ports are open.
+
+HTTPS: 
+
+Implement HTTPS for secure communication by using an ALB with an ACM certificate.
+
+CI/CD pipeline: 
+
+Setting up a CI/CD pipeline using services like GitHub Actions or AWS CodePipeline to automate the build, testing, and deployment process.
+
+Logging and Monitoring: 
+
+Integrate CloudWatch for logging and monitoring your application's performance and health.
 
 References
 
