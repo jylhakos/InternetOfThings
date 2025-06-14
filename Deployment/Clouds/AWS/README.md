@@ -40,7 +40,7 @@ If you do not have an AWS account, complete the following steps to create one.
 
 1. To sign up for an AWS account
 
-Open https://portal.aws.amazon.com/billing/signup page.
+Open [signup](https://portal.aws.amazon.com/billing/signup) page.
 
 2. Follow the online instructions.
 
@@ -52,9 +52,19 @@ The root user has access to all AWS services and resources in the account.
 
 AWS sends you a confirmation email after the sign-up process is complete. 
 
+Start building on AWS
+
+Creating [an account](https://aws.amazon.com/resources/create-account/) is the starting point to provide access to AWS.
+
 3. Secure your AWS account root user
 
 After you sign up for an AWS account, secure your AWS account root user, enable AWS IAM Identity Center, and create an administrative user so that you don't use the root user for everyday tasks.
+
+4. Trying Free Tier services
+
+Instances, containers, and serverless computing for free of charge on AWS.
+
+Navigate to the  [AWS Free Tier](http://aws.amazon.com/free/) page.
 
 ## Managing and deploying applications in the AWS cloud environment.
 
