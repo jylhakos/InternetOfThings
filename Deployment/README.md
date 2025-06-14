@@ -5,7 +5,7 @@ The table outlines Google's GCP services alongside their equivalent offerings in
 | _Service Type_     | _Service Description_                                 | **GCP**                | **AWS**                   | **Azure**            |
 |--------------------|-------------------------------------------------------|------------------------|---------------------------|----------------------|
 | API management     | Design, secure, analyze  and scale APIs               | Apigee                 | Amazon Publisher          | Azure API Management |
-| API security       | Help to protect your APIs  From security threats      | Advanced               |                           | Defender             |
+| API security       | Help to protect your APIs  From security threats      | Advanced               | API Gateway               | Defender             |
 | Cost Optimization  | Optimize cloud usage with  actionable recommendations | Recommender            | AWS Cost Optimization     | Cost Management      |
 | Compute            | Block storage For VM instances                        | Google Cloud Hyperdisk | Elastic Block Store (EBS) | Managed Disks        |
 | Deployment         | Configure and deploy                                  | Workload Manager       | Launch Wizard             | Center for SAP       |

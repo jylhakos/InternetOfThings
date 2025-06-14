@@ -1,10 +1,12 @@
 # Elastic Beanstalk
 
-AWS Elastic Beanstalk simplifies application deployment and management by automating infrastructure provisioning, scaling, and deployment processes.
+AWS Elastic Beanstalk is a compute service on Amazon Web Services (AWS) which simplifies application deployment and management by automating infrastructure provisioning, scaling, and deployment processes.
 
 AWS Elastic Beanstalk provides a platform-as-a-service (PaaS) approach, allowing developers to focus on application code without managing servers.
 
-Here's how to utilize Elastic Beanstalk:
+AWS Elastic Beanstalk uses other AWS services like EC2 (for compute), ECS (for container orchestration), Auto Scaling (for scaling), and Elastic Load Balancing (for distributing traffic).
+
+Here's how to utilize Elastic Beanstalk.
 
 1. Creating an Application:
 
