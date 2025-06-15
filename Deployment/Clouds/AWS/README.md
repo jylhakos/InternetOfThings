@@ -222,7 +222,7 @@ Alternatively, you can create a credentials file in your $HOME/.aws directory, o
 
 ### Example: You can use the AWS SDK in your Go projects.
 
-Here's [an example to list S3 buckets](/https://github.com/jylhakos/InternetOfThingsIOT/blob/main/Languages/Golang/S3/list.go) from AWS:
+Here's [an example to list S3 buckets](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/S3/list.go) from AWS:
 
 ```
 
@@ -525,4 +525,4 @@ https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 
 AWS SDK for Go
 
-https://docs.aws.amazon.com/cloud9/latest/user-guide/sample-go.html
+https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
