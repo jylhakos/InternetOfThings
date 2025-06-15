@@ -64,7 +64,58 @@ After you sign up for an AWS account, secure your AWS account root user, enable 
 
 Instances, containers, and serverless computing for free of charge on AWS.
 
+When you sign up for a new AWS account, the Free Tier is automatically active.
+
 Navigate to the  [AWS Free Tier](http://aws.amazon.com/free/) page.
+
+## AWS CLI
+
+To install AWS CLI on Ubuntu, you can use the installer which involves downloading the installer zip, unzipping it, and then running the install script.
+
+1. Update package manager
+
+Open a terminal and run sudo apt update command.
+
+2. Install required packages
+
+Install unzip and curl with sudo apt install unzip curl -y commands.
+
+3. Download the installer
+
+Use curl to download the AWS CLI installer zip file: 
+
+```
+
+	$ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+
+```
+
+4. Unzip the installer
+
+Extract the downloaded zip file: 
+
+```
+
+	$ unzip awscliv2.zip
+
+```
+
+5. Run the install script
+
+Execute the installation script with the command.
+
+```
+
+	$ sudo ./aws/install
+
+```
+
+6. Verify installation
+
+Check the installation with aws --version command. 
+
+You should see the AWS CLI version. 
+
 
 ## Managing and deploying applications in the AWS cloud environment.
 
@@ -72,7 +123,7 @@ Deploying and managing applications on AWS can be accomplished through various s
 
 Elastic Beanstalk provides a managed platform for deploying and managing Go applications, while CodeDeploy offers automated deployments, and App Runner is a container-based service for deploying applications without managing infrastructure.
 
-1. Using AWS Elastic Beanstalk:
+1. Using AWS Elastic Beanstalk
 
 AWS Elastic Beanstalk automates the process of deploying and managing applications, allowing you to focus on your code rather than infrastructure.
 
@@ -82,7 +133,7 @@ Deployment: You can deploy Go applications to Elastic Beanstalk using the EB CLI
 
 Management: Elastic Beanstalk provides tools to manage your application, including monitoring, logging, and scaling.
 
-2. Using AWS CodeDeploy:
+2. Using AWS CodeDeploy
 
 Deployment: CodeDeploy automates deployments to Amazon EC2 instances, on-premises instances, and other AWS services.
 
@@ -90,7 +141,7 @@ Management: CodeDeploy offers features like blue/green deployments, canary deplo
 
 Integration: CodeDeploy can be integrated with CI/CD systems like GitHub Actions.
 
-3. Using AWS App Runner:
+3. Using AWS App Runner
 
 Deployment: App Runner simplifies deployment by handling infrastructure management for containerized applications.
 
@@ -98,9 +149,117 @@ Management: App Runner provides features like automatic scaling, monitoring, and
 
 Go Runtime: App Runner supports Go applications, and you can configure build and run commands.
 
-4. Additional considerations:
+4. Additional considerations
 
 AWS SDK for Go:
+
+To install the AWS SDK for Go on Ubuntu, use the go get command to retrieve the SDK's source code. 
+
+Ensure you have Go installed and configured correctly. The SDK will be installed in your $GOPATH/src directory.
+
+Here's a step-by-step guide:
+
+1. Install Go
+
+If you don't have Go installed, follow the instructions on The Go Programming Language website to install it.
+
+2. Set up your Go workspace
+
+Ensure your GOPATH environment variable is set. 
+
+If GOPATH is not set, you can set it by adding the following line to your .bashrc or .profile file:
+
+```
+
+    export GOPATH=$HOME/go
+
+```
+
+Then, source the file to apply the changes: 
+
+```
+
+    $ source ~/.bashrc  # Or source ~/.profile
+
+```
+
+Create the src directory inside your GOPATH:
+
+```
+
+    $ mkdir -p $GOPATH/src
+
+```
+
+3. Install the AWS SDK for Go
+
+Use the go get command to download and install the AWS SDK for Go:
+
+```
+
+    $ go get -u github.com/aws/aws-sdk-go/...
+
+```
+
+Verify installation
+
+You can verify the installation by checking the contents of your $GOPATH/src directory.
+
+4. Configure AWS credentials
+
+You'll need to configure your AWS credentials to use the SDK. 
+
+You can do this by setting environment variables, using an AWS configuration file, or using an IAM role. For example, to set environment variables:
+
+```
+    export AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY"
+    export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
+    export AWS_REGION="YOUR_REGION" # e.g., us-west-2
+
+```
+
+Alternatively, you can create a credentials file in your $HOME/.aws directory, or use the AWS CLI to configure your credentials.
+
+### Example: You can use the AWS SDK in your Go projects.
+
+Here's [an example to list S3 buckets](/https://github.com/jylhakos/InternetOfThingsIOT/blob/main/Languages/Golang/S3/list.go) from AWS:
+
+```
+
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/aws/aws-sdk-go-v2/aws"
+    "github.com/aws/aws-sdk-go-v2/config"
+    "github.com/aws/aws-sdk-go-v2/service/s3"
+)
+
+func main() {
+    cfg, err := config.LoadDefaultConfig(context.TODO())
+    if err != nil {
+        log.Fatalf("Error: failed to load configuration, %v", err)
+    }
+
+    client := s3.NewFromConfig(cfg)
+
+    result, err := client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+    if err != nil {
+        log.Fatalf("Error: failed to list S3 buckets, %v", err)
+    }:
+
+    fmt.Println("The S3 buckets:")
+    for _, bucket := range result.Buckets {
+        fmt.Printf("* %s\n", *bucket.Name)
+    }
+}
+
+```
+
+### To deploy an application using the AWS SDK
 
 To deploy an application using the AWS SDK, you need to configure your SDK with credentials and region, establish a session or client for AWS services, and then use the SDK's API calls to interact with AWS resources.
 
@@ -360,4 +519,10 @@ Sign up for AWS
 
 https://signin.aws.amazon.com/signup?request_type=register
 
+AWS CLI
 
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+AWS SDK for Go
+
+https://docs.aws.amazon.com/cloud9/latest/user-guide/sample-go.html
