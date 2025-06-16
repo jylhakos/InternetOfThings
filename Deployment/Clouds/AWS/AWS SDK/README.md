@@ -44,11 +44,13 @@ For instance, you might use the S3 client to upload files, create buckets, etc.
 
 Handle Responses:
 
-The AWS SDK provides structs to represent input and output parameters for each operation. You'll typically pass in an input struct and receive an output struct with the API response. 
+The AWS SDK provides structs to represent input and output parameters for each operation. 
 
-4. An example to interact with S3
+You'll pass in an input struct and receive an output struct with the API response. 
 
-``` 
+4. An example to interact with S3 using AWS SDK
+
+```
 package main
 
 import (
@@ -84,7 +86,7 @@ func main() {
 }
 ```
 
-5. Deployment options:
+5. Deployment options
 
 Amazon EC2:
 

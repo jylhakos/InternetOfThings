@@ -2,6 +2,32 @@
 
 Amazon Elastic Container Service (Amazon ECS) is a container orchestration service that helps you deploy, manage, and scale containerized applications.
 
+## ECS on EC2
+
+Running ECS on EC2 instances would require you to:
+
+Manage the EC2 instances yourself, including provisioning, scaling, and patching.
+
+Configure networking and security groups for the instances.
+
+Potentially deal with the complexities of autoscaling groups. 
+
+## ECS with Fargate
+
+Why ECS with Fargate is a good choice for Go programs?
+
+Simplified Infrastructure Management:
+
+Fargate abstracts away the complexities of managing EC2 instances, allowing you to focus on your application code.
+
+Serverless Compute:
+
+Fargate's serverless nature means you only pay for the resources your containers consume, making it cost-effective for many workloads.
+
+Integration with ECS:
+
+Fargate is designed to work seamlessly with ECS, providing a robust container orchestration platform. 
+
 ## Example: Terraform, Docker and ECS
 
 How to use Terraform with Golang application deployed with Docker on AWS with ECS?
