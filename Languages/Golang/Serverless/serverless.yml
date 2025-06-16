@@ -1,0 +1,20 @@
+service: my-go-lambda
+frameworkVersion: ">=2.0.0"
+provider:
+  name: aws
+  runtime: go1.x
+  region: us-east-1  # Replace with your desired region
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource: "arn:aws:logs:*:*:*"
+functions:
+  hello:
+    handler: handler # The name of your Go function (without .go)
+    events:
+      - http:
+          path: /hello
+          method: get

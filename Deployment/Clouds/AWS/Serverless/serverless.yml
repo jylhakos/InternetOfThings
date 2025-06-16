@@ -1,0 +1,45 @@
+service: my-go-lambda
+
+provider:
+  name: aws
+  runtime: go1.x  # Or use provided.al2 for newer runtimes
+  region: us-east-1 # Choose your desired AWS region
+  architecture: arm64 # Optional: Use ARM architecture for cost and performance improvements
+  environment:
+    ENVIRONMENT: dev # Example environment variable
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource: "arn:aws:logs:*:*:*"
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+        - "s3:PutObject"
+        - "s3:DeleteObject"
+      Resource:
+        - "arn:aws:s3:::your-bucket-name/*" # Replace with your bucket name
+  memorySize: 128 # Adjust memory as needed
+  timeout: 30 # Adjust timeout as needed
+
+functions:
+  hello:
+    handler: handler # Matches the name of the function in your go code
+    events:
+      - http:
+          path: /hello
+          method: get
+    package:
+       individually: true
+       artifact: bin/function # Path to the compiled binary
+    environment:
+       TABLE_NAME: my-table # Example environment variable
+
+package:
+  individually: true
+  exclude:
+    - ./**
+  include:
+    - ./bin/**

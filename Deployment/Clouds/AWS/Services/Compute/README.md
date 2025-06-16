@@ -88,9 +88,9 @@ Find the invoke URL for your deployed API.
 
 Use this URL to test your API with tools like curl or Postman.
 
-## Lambda
+## AWS Lambda
 
-Lambda is serverless, event-driven compute service that allows you to run code without provisioning or managing servers. 
+AWS Lambda is serverless, event-driven compute service that allows you to run code without provisioning or managing servers. 
 
 You can execute code in response to events like S3 uploads or API Gateway requests. 
 
@@ -98,15 +98,15 @@ You write functions, upload them to Lambda, and they are executed in response to
 
 AWS handles the underlying infrastructure, scaling, and maintenance.
 
-While the programming model defines how Lambda interacts with your code, Execution environment is where Lambda actually runs your function.
+While the programming model defines how Lambda interacts with your code, Execution environment is where AWS Lambda actually runs your function.
 
-Lambda runs your code with language specific runtimes (like Node.js or Python) in execution environments that package your runtime, layers, and extensions.
+AWS Lambda runs your code with language specific runtimes (like Node.js or Python) in execution environments that package your runtime, layers, and extensions.
 
-Lambda function is a block of code that runs in response to events.
+AWS Lambda function is a block of code that runs in response to events.
 
-Lambda function handler is the method in your function code that processes events.
+AWS Lambda function handler is the method in your function code that processes events.
 
-When should you utilize Lambda for executing code on AWS?
+When should you utilize AWS Lambda for executing code on AWS?
 
 - Web applications
 
@@ -114,13 +114,13 @@ When should you utilize Lambda for executing code on AWS?
 
 - Mobile backends
 
-Key Features and Benefits
+Key features and benefits
 
 Serverless: 
 
 You don't need to provision or manage servers. 
 
-Event-Driven: 
+Event-driven: 
 
 Functions are triggered by events, making them ideal for handling dynamic workloads. 
 
@@ -128,7 +128,7 @@ Pay-as-you-go:
 
 You only pay for the compute time your functions use.
 
-Automatic Scaling: 
+Automatic scaling: 
 
 Lambda scales up or down automatically based on demand.
 
@@ -157,6 +157,10 @@ Amazon RDS sends notifications to an Amazon Simple Notification Service (Amazon 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Compute/lambda_rds.png?raw=true)
 
 References
+
+Get started with Lambda
+
+https://docs.aws.amazon.com/serverless/latest/devguide/starter-lambda.html
 
 Using AWS Lambda with Amazon RDS
 
