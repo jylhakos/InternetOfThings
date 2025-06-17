@@ -1,4 +1,19 @@
-# IaC
+# Infrastructure as Code (IaC)
+
+AWS offers the following services to define infrastructure as code.
+
+- AWS CloudFormation
+
+- AWS Serverless Application Model (AWS SAM)
+
+- AWS Cloud Development Kit (AWS CDK)
+
+- AWS Cloud Development Kit for Kubernetes
+
+- AWS Cloud Development Kit for Terraform
+
+- AWS Cloud Control API
+
 
 To utilize IaC for deploying web applications on AWS, you can leverage tools like AWS CloudFormation or Terraform, defining your infrastructure needs in templates or configuration files, which are then used to provision and manage your AWS resources.
 
@@ -46,5 +61,30 @@ Using Terraform, you could define these resources in separate modules (or separa
 
 You would define your desired state, including the EC2 instance type, AMI, and security group rules, the load balancer configuration, and the database parameters. 
 
+References
+
+AWS CloudFormation
+
+https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/aws-cloudformation.html
+
+AWS Serverless Application Model (AWS SAM)
+
+https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/aws-serverless-application-model.html
+
+AWS Cloud Development Kit (AWS CDK)
+
+https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/aws-cdk.html
+
+AWS Cloud Development Kit for Kubernetes
+
+https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/aws-cdk-for-kubernetes.html
+
+AWS Cloud Development Kit for Terraform
+
+https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/aws-cdk-for-terraform.html
+
+AWS Cloud Control API
+
+https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/aws-cloud-control-api.html
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)

@@ -2,6 +2,18 @@
 
 Amazon Elastic Container Service (Amazon ECS) is a container orchestration service that helps you deploy, manage, and scale containerized applications.
 
+There are multiple options for provisioning Amazon ECS:
+
+- AWS Management Console
+
+- AWS Command Line Interface (AWS CLI)
+
+- AWS SDKs
+
+- AWS CDK
+
+Services to use with Amazon ECS:
+
 ## ECS on EC2
 
 Running ECS on EC2 instances would require you to:
@@ -262,5 +274,13 @@ References
 What is Amazon Elastic Container Service?
 
 https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html
+
+Tutorials for Amazon ECS
+
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-tutorials.html
+
+Learn how to create an Amazon ECS Linux task for the Fargate launch type
+
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/getting-started-fargate.html
 
 ![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
