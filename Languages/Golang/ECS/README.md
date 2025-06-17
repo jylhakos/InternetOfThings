@@ -12,15 +12,15 @@ Fargate's serverless, meaning AWS handles the infrastructure, so you only pay fo
 
 Go
 
-![main.go](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/ECS/main.go)
+[main.go](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/ECS/main.go)
 
 Handlers
 
-![handlers.go](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/ECS/handlers.go)
+[handlers.go](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/ECS/handlers.go)
 
 Models
 
-![models.go](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/ECS/models.go)
+[models.go](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Golang/ECS/models.go)
 
 2. Create a Dockerfile and Dockerize
 

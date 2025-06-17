@@ -72,7 +72,7 @@ func (a *App) healthCheck(w http.ResponseWriter, r *http.Request) {
 
 ```
 
-![main.go](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/main.go)
+[main.go](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/main.go)
 
 First, containerize your Go application with Docker.
 
@@ -116,7 +116,7 @@ Push the Docker image to a container registry:
 
 You'll need to push your Docker image to a container registry like Amazon Elastic Container Registry (ECR) or Docker Hub.
 
-![Dockerfile](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/Dockerfile)
+[Dockerfile](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/Dockerfile)
 
 Build and push Docker image:
 
@@ -175,7 +175,7 @@ Create an RDS PostgreSQL instance:
 
 Provision a PostgreSQL database instance within your VPC, ensuring it's not publicly accessible.
 
-![Terraformfor RDS](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/rds.tf)
+[Terraform for RDS](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/rds.tf)
 
 Set up IAM roles:
 
@@ -228,7 +228,7 @@ Create a Fargate profile:
 
 Define a Fargate profile to specify the VPC and subnets where your Fargate tasks will run, ensuring they are within your VPC. 
 
-![Terraform for AWS](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/main.tf)
+[Terraform for AWS](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/main.tf)
 
 ```
 
@@ -331,7 +331,7 @@ Define a service:
 
 Create an ECS service, which manages the desired number of tasks and ensures they are running correctly. You can use Fargate as the launch type for your service.
 
-![ECS Cluster and Task](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/ecs.tf)
+[ECS Cluster and Task](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/ecs.tf)
 
 Configure service discovery (optional):
 
@@ -375,7 +375,7 @@ Application Load Balancer (ALB)
 	}
 
 ```
-![ALB](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/alb.tf)
+[ALB](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/alb.tf)
 
 Route53 for Domain
 
@@ -394,7 +394,7 @@ Route53 for Domain
 
 ```
 
-![Route53](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/route53.tf)
+[Route53](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/route53.tf)
 
 5. Deployment
 
@@ -438,7 +438,7 @@ SSL/TLS:
 
 Enable SSL/TLS with AWS Certificate Manager for HTTPS.
 
-![bash](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/deploy.sh)
+[bash](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Containers/Fargate/deploy.sh)
 
 References
 
