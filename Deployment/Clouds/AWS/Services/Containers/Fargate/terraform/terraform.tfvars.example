@@ -1,0 +1,23 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and modify the values
+
+aws_region     = "us-east-1"
+project_name   = "go-fargate-app"
+environment    = "dev"
+domain_name    = "example.com"        # Change to your domain
+subdomain      = "api"               # Change to your desired subdomain
+
+# Container configuration
+container_port = 8080
+cpu           = 256
+memory        = 512
+desired_count = 2
+
+# Database configuration
+db_instance_class     = "db.t3.micro"
+db_allocated_storage  = 20
+db_name              = "appdb"
+db_username          = "admin"
+
+# ECR repository name
+ecr_repository_name = "my-go-app"
