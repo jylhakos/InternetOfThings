@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7-jammy
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: TaskManagementDB
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - taskapi-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: ["mongod", "--auth"]
+
+  # ASP.NET Core API
+  taskapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aspnet_taskapi
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDbSettings__ConnectionString=mongodb://root:password123@mongo:27017
+      - MongoDbSettings__DatabaseName=TaskManagementDB
+      - MongoDbSettings__UsersCollectionName=users
+      - MongoDbSettings__TasksCollectionName=tasks
+      - Jwt__Key=YourSuperSecretKeyForJWTTokenGeneration123456789ProductionKey2025
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - taskapi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  mongo_data:
+
+networks:
+  taskapi-network:
+    driver: bridge

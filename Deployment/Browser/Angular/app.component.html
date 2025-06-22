@@ -1,0 +1,7 @@
+<h1>Device List</h1>
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<ul>
+  <li *ngFor="let device of devices">
+    {{ device.name }} (ID: {{ device.id }})
+  </li>
+</ul>

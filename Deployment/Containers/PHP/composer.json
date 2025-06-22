@@ -1,0 +1,27 @@
+{
+    "name": " /php-rest-api",
+    "description": "PHP RESTful API with Docker deployment",
+    "type": "project",
+    "authors": [
+        {
+            "name": " ",
+            "email": " @example.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "start": "php -S 0.0.0.0:8000 -t public",
+        "test": "php -l public/index.php"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

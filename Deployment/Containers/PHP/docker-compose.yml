@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password123
+      MYSQL_DATABASE: task_api
+      MYSQL_USER: apiuser
+      MYSQL_PASSWORD: apipass123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - php-api-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword123"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # PHP API with Nginx
+  php-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: php_rest_api
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=task_api
+      - DB_USER=apiuser
+      - DB_PASSWORD=apipass123
+      - JWT_SECRET=YourSuperSecretJWTKeyChangeInProduction2025
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - php-api-network
+    volumes:
+      - ./logs:/var/log/nginx
+      - ./logs:/var/log/php-fpm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Alternative: PHP API with Apache
+  php-api-apache:
+    build:
+      context: .
+      dockerfile: Dockerfile.apache
+    container_name: php_apache_api
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=task_api
+      - DB_USER=apiuser
+      - DB_PASSWORD=apipass123
+      - JWT_SECRET=YourSuperSecretJWTKeyChangeInProduction2025
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - php-api-network
+    profiles:
+      - apache
+
+volumes:
+  mysql_data:
+
+networks:
+  php-api-network:
+    driver: bridge
