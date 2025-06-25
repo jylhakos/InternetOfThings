@@ -3,7 +3,9 @@
 
 ## CloudFront
 
-A content delivery network (CDN) that helps you distribute your static and dynamic web content to users with low latency and high data transfer speeds. It caches content in edge locations around the world, so users can access it faster, regardless of their location.
+A content delivery network (CDN) that helps you distribute your static and dynamic web content to users with low latency and high data transfer speeds. 
+
+CloudFront caches content in edge locations around the world, so users can access it faster, regardless of their location.
 
 ### Static Website Hosting
 
@@ -19,7 +21,7 @@ Configure Origin Access Control (OAC) or Origin Access Identity (OAI):
 
 Restrict direct access to your S3 bucket, allowing only CloudFront to retrieve content.
 
-### The configuration of Content Delivery Network for your web application
+### The configuration of Content Delivery Network (CDN) for your web application
 
 CloudFront acts as a content delivery network (CDN) that caches your web application's static files at edge locations closer to your users, reducing latency and improving page load times.
 
