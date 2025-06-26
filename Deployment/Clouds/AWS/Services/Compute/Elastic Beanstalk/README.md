@@ -74,4 +74,8 @@ You can choose between all-at-once, rolling, and other deployment strategies.
 
 Rolling deployment deploys updates to instances in batches, minimizing downtime. 
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/JWT/JWT.png?raw=true)
+References
+
+Tutorials
+
+https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/tutorials.html
