@@ -6,8 +6,57 @@
 
 In your React application, create components and functionality to allow users to select and upload files.
 
+First, initialize a React project using create React app with the TypeScript template.
+
+```
+
+	$ npx create-react-app my-spa --template typescript
+
+	$ cd my-spa
+
+```
+Implement client-side routing using a library like React Router DOM to manage different views within your SPA.
+
 Use a library like Axios to send the file upload requests from your React frontend to your Node.js Express backend's upload endpoint.
 
+Consider using state management libraries like Redux or React Context API for complex applications.
+
+Direct URLs (for publicly accessible files).
+
+If the files in your S3 bucket (served by CloudFront) are publicly accessible, you can use their CloudFront URLs directly in your application.
+
+Create an <a> tag with the href attribute set to the file's CloudFront URL and the download attribute to suggest a filename.
+
+Example
+
+<a href="https://your-cloudfront-domain.cloudfront.net/path/to/your/file.pdf" download="my-file.pdf">Download File</a>
+
+Using AWS Amplify Storage (for more complex scenarios or private files): 
+
+If you need to handle authentication, authorization, or download private files, consider using AWS Amplify's Storage module.
+
+Use the getUrl API to generate a presigned URL that provides temporary access to the file.
+
+You can then use this presigned URL in an <a> tag or fetch the file programmatically.
+
+Here's the basic project structure with AWS integration.
+
+```
+
+	// AWS Configuration
+	export const AWS_CONFIG = {
+	  cloudFrontDomain: process.env.REACT_APP_CLOUDFRONT_DOMAIN || '',
+	  s3BucketName: process.env.REACT_APP_S3_BUCKET || '',
+	  region: process.env.REACT_APP_AWS_REGION || 'us-east-1',
+	};
+
+	// CDN URL helper
+	export const getCDNUrl = (path: string): string => {
+	  const baseUrl = AWS_CONFIG.cloudFrontDomain;
+	  return `https://${baseUrl}/${path.startsWith('/') ? path.slice(1) : path}`;
+	};
+
+```
 Run npm run build in your React project to create a production build.
 
 2. Set up AWS S3 and CloudFront
@@ -24,7 +73,9 @@ Create a CloudFront distribution:
 
 Create a CloudFront distribution that uses your S3 bucket as the origin.
 
-Configure CloudFront for Security and Caching: Configure settings such as SSL/TLS certificates and caching behavior.
+Configure CloudFront for Security and Caching: 
+
+Configure settings such as SSL/TLS certificates and caching behavior.
 
 Set up OAC (Origin access control):
 
@@ -86,8 +137,3 @@ Upload the contents of your React app's build folder to your S3 bucket.
 In your upload endpoint, use the AWS SDK and Multer to upload the received files to your S3 bucket. 
 
 After deploying, you may need to invalidate the CloudFront distribution's cache to ensure that users are served the latest version of your application.
-
-
-
-
-
