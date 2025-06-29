@@ -20,7 +20,7 @@ Integration with AWS:
 
 Amazon EKS integrates seamlessly with other AWS services like VPC, IAM, and load balancers.
 
-## GCP GKE
+## Google Kubernetes Engine (GKE)
 
 Google Kubernetes Engine (GKE) makes it easier to deploy Docker containers by offering a managed Kubernetes service within Google Cloud.
 
