@@ -14,7 +14,7 @@ func main() {
     }
 
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Hello from Go app running on GKE!")
+        fmt.Fprintf(w, "Go app running on GKE.")
     })
 
     http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
