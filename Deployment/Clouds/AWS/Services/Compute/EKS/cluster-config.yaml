@@ -1,0 +1,36 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: go-app-cluster
+  region: us-west-2
+  version: "1.28"
+
+nodeGroups:
+  - name: go-app-workers
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 4
+    volumeSize: 20
+    ssh:
+      allow: true
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        certManager: true
+        efs: true
+        ebs: true
+        fsx: true
+        cloudWatch: true
+
+addons:
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+  - name: aws-ebs-csi-driver
+
+cloudWatch:
+  clusterLogging:
+    enable: ["audit", "authenticator", "controllerManager"]

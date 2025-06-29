@@ -1,6 +1,6 @@
 # Containers
 
-To deploy an application using containers, you typically build a container image, then run that image as a container on a host machine or in a cloud environment. 
+To deploy an application using containers, you typically build a container image, then run that image as a container on a host machine or in a cloud environment.
 
 ## Deploy an application using containers
 
@@ -85,10 +85,9 @@ Open your web browser and go to http://localhost:8080
 For multi-container applications, create a docker-compose.yml file to define the services, networks, and volumes.
 Use the docker-compose up command to start all the services.
 
-
 ## Kubernetes
 
-Kubernetes is a powerful tool for orchestrating and managing containerized applications.
+Kubernetes is a tool for orchestrating and managing containerized applications.
 
 You can define your application's deployment configuration in YAML files, which can be applied to your Kubernetes cluster using kubectl.
 
