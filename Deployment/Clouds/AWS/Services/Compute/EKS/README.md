@@ -30,7 +30,102 @@ Use the aws configure command to set up your AWS credentials (access key, secret
 
 Download the latest kubectl binary for your Linux distribution.
 
-Make the kubectl binary executable and move it to a directory in your system's PATH.
+To set up and configure kubectl using the apt package manager on Debian:
+
+```
+
+    $ sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates curl
+
+    $ curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/
+    kubernetes-archive-keyring.gpg
+    
+    $ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+    $ sudo apt-get update
+
+    $ sudo apt-get install -y kubectl
+
+```
+Configure AWS credentials using aws configure command.
+
+```
+
+	$ aws configure
+
+```
+You will be prompted to enter the access key, secret key, region, and output format.
+
+Run aws configure and enter your AWS Access Key ID, Secret Access Key, default region, and output format.
+
+If your environment supports IAM roles, configure your instance to assume the appropriate role.
+
+Create environment variables to assume the IAM role.
+
+Set the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION environment variables before running kubectl tool.
+
+```
+
+	$ export AWS_ACCESS_KEY_ID=RoleAccessKeyID
+
+	$ export AWS_SECRET_ACCESS_KEY=RoleSecretKey
+
+	$ export AWS_SESSION_TOKEN=RoleSessionToken
+
+```
+
+Find the ARN of the IAM role you want to assume. 
+
+```
+
+    $ aws iam list-roles --query "Roles[?RoleName == 'your-role-name'].[RoleName, Arn]"
+
+```
+Replace your-role-name with the actual role name. 
+
+Use the aws sts assume-role command to assume the IAM role.
+
+```
+
+	$ aws sts assume-role --role-arn "your-role-arn" --role-session-name "your-session-name"
+
+```
+
+To use an assumed IAM role with kubectl to interact with an EKS cluster, you need to first assume the role using the AWS CLI and then configure your kubectl to use the assumed role's credentials.
+
+Configure kubeconfig for EKS
+
+If you need to grant the assumed role access to the EKS cluster, you might need to add the role to the aws-auth ConfigMap in your cluster. 
+
+This allows the role to authenticate with the EKS cluster.
+
+```
+
+    $ kubectl edit configmap aws-auth -n kube-system
+
+```
+
+Add a new entry under mapRoles with the role ARN and appropriate Kubernetes roles/groups.
+
+```
+
+    mapRoles: |
+      - rolearn: arn:aws:iam::123456789012:role/your-role-name
+        username: system:node:{{EC2PrivateDNSName}}
+        groups:
+          - system:bootstrappers
+          - system:nodes
+
+```
+Using aws eks update-kubeconfig command.
+
+Use the following command to create or update the kubeconfig file, replacing placeholders with your cluster details:
+
+```
+
+    $ aws eks update-kubeconfig --region <your-aws-region> --name <your-cluster-name>
+
+```
+Run kubectl version --client to verify the kubectl version and kubectl get svc to test the connection to your cluster.
 
 3. eksctl installation
 
