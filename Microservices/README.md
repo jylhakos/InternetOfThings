@@ -37,31 +37,17 @@ Consider hybrid approach:
 
 gRPC for internal services, REST for external APIs
 
-## Deploying microservices to the cloud 
+## The microservices on the cloud
 
 Microservices development using Go or Java, HTTP or gRPC communication, and AWS deployment.
 
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   API Gateway   │    │   Load Balancer │    │   Service Mesh  │
-│   (AWS ALB/NLB) │    │                 │    │   (Optional)    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-    ┌────────────────────────────┼────────────────────────────┐
-    │                            │                            │
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Product Service │    │  Order Service  │    │  Auth Service   │
-│   (gRPC)        │    │   (gRPC)        │    │   (gRPC)        │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-              ┌─────────────────────────────┐
-              │   Service Discovery         │
-              │   etcd / ZooKeeper          │
-              └─────────────────────────────┘
+Go deployment on AWS
 
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ │ API Gateway │ │ Load Balancer │ │ Service Mesh │ │ (AWS ALB/NLB) │ │ │ │ (Optional) │ └─────────────────┘ └─────────────────┘ └─────────────────┘ │ │ │ └───────────────────────┼───────────────────────┘ │ ┌────────────────────────────┼────────────────────────────┐ │ │ │ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ │ Product Service │ │ Order Service │ │ Auth Service │ │ (gRPC) │ │ (gRPC) │ │ (gRPC) │ └─────────────────┘ └─────────────────┘ └─────────────────┘ │ │ │ └───────────────────────┼───────────────────────┘ │ ┌─────────────────────────────┐ │ Service Discovery │ │ etcd / ZooKeeper │ └─────────────────────────────┘
+
+Go project structure
+
+microservices-go/ ├── services/ │ ├── product-service/ │ │ ├── main.go │ │ ├── Dockerfile │ │ ├── proto/ │ │ │ └── product.proto │ │ ├── handler/ │ │ │ └── product\_handler.go │ │ └── repository/ │ │ └── product\_repository.go │ ├── auth-service/ │ │ ├── main.go │ │ ├── Dockerfile │ │ └── proto/ │ │ └── auth.proto │ └── api-gateway/ │ ├── main.go │ ├── Dockerfile │ └── middleware/ │ └── auth.go ├── pkg/ │ ├── discovery/ │ │ ├── etcd.go │ │ └── zookeeper.go │ └── interceptors/ │ └── auth.go ├── docker-compose.yml └── k8s/ ├── product-service.yaml ├── auth-service.yaml └── api-gateway.yaml
 
 The dependencies or libraries for microservices
 
