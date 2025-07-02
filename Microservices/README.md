@@ -72,7 +72,38 @@ Go project structure
 
 ```
 
-microservices-go/ ├── services/ │ ├── product-service/ │ │ ├── main.go │ │ ├── Dockerfile │ │ ├── proto/ │ │ │ └── product.proto │ │ ├── handler/ │ │ │ └── product\_handler.go │ │ └── repository/ │ │ └── product\_repository.go │ ├── auth-service/ │ │ ├── main.go │ │ ├── Dockerfile │ │ └── proto/ │ │ └── auth.proto │ └── api-gateway/ │ ├── main.go │ ├── Dockerfile │ └── middleware/ │ └── auth.go ├── pkg/ │ ├── discovery/ │ │ ├── etcd.go │ │ └── zookeeper.go │ └── interceptors/ │ └── auth.go ├── docker-compose.yml └── k8s/ ├── product-service.yaml ├── auth-service.yaml └── api-gateway.yaml
+microservices-go/
+├── services/
+│   ├── product-service/
+│   │   ├── main.go
+│   │   ├── Dockerfile
+│   │   ├── proto/
+│   │   │   └── product.proto
+│   │   ├── handler/
+│   │   │   └── product_handler.go
+│   │   └── repository/
+│   │       └── product_repository.go
+│   ├── auth-service/
+│   │   ├── main.go
+│   │   ├── Dockerfile
+│   │   └── proto/
+│   │       └── auth.proto
+│   └── api-gateway/
+│       ├── main.go
+│       ├── Dockerfile
+│       └── middleware/
+│           └── auth.go
+├── pkg/
+│   ├── discovery/
+│   │   ├── etcd.go
+│   │   └── zookeeper.go
+│   └── interceptors/
+│       └── auth.go
+├── docker-compose.yml
+└── k8s/
+    ├── product-service.yaml
+    ├── auth-service.yaml
+    └── api-gateway.yaml
 
 ```
 
