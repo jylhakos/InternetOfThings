@@ -1,4 +1,4 @@
-# Artificial Intelligence (AI)
+# Large language models
 
 ## Example: LLM application deployed on AWS
 

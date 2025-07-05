@@ -3,6 +3,22 @@
 /.pnp
 .pnp.js
 
+# Ignore the .gradle directory
+.gradle
+
+# Built application files
+*.apk
+*.ap_
+
+# Files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+
 # testing
 /coverage
 
