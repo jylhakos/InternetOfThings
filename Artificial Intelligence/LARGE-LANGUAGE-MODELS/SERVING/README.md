@@ -253,22 +253,27 @@ Response:
 GET /templates
 ```
 Response:
+
 ```json
 {
   "templates": {
     "general": {"name": "general", "description": "General purpose assistant for any topic"},
     "code_helper": {"name": "code_helper", "description": "Specialized assistant for programming"},
-    ...
-  },
+  }
   "count": 8
 }
+
 ```
 
 #### Get Template Details
+
 ```http
-GET /templates/{template_name}
+
+  GET /templates/{template_name}
+
 ```
 Response:
+
 ```json
 {
   "name": "code_helper",
@@ -276,12 +281,15 @@ Response:
   "system_prompt": "You are an expert programmer and coding assistant...",
   "user_template": "Programming question: {question}"
 }
+
 ```
 
 ### Chat Endpoints
 
 #### Simple Chat (with optional system prompt)
+
 ```http
+
 POST /chat
 Content-Type: application/json
 
@@ -293,10 +301,13 @@ Content-Type: application/json
   "max_tokens": 500,
   "temperature": 0.7
 }
+
 ```
 
 #### Templated Chat
+
 ```http
+
 POST /chat/template
 Content-Type: application/json
 
@@ -308,9 +319,11 @@ Content-Type: application/json
   "max_tokens": 500,
   "temperature": 0.7
 }
+
 ```
 
 #### Response Format
+
 ```json
 {
   "answer": "Python is a high-level programming language...",
@@ -323,11 +336,13 @@ Content-Type: application/json
     "total_tokens": 175
   }
 }
+
 ```
 
 ## Usage Examples
 
 ### 1. Simple Chat (No Template)
+
 ```python
 import requests
 
@@ -338,6 +353,7 @@ response = requests.post("http://localhost:8000/chat", json={
 ```
 
 ### 2. Using Custom System Prompt
+
 ```python
 response = requests.post("http://localhost:8000/chat", json={
     "question": "Explain quantum computing",
@@ -347,6 +363,7 @@ response = requests.post("http://localhost:8000/chat", json={
 ```
 
 ### 3. Using Predefined Template
+
 ```python
 response = requests.post("http://localhost:8000/chat/template", json={
     "question": "How do I create a REST API?",
@@ -356,6 +373,7 @@ response = requests.post("http://localhost:8000/chat/template", json={
 ```
 
 ### 4. Using Template via Chat Endpoint
+
 ```python
 response = requests.post("http://localhost:8000/chat", json={
     "question": "Teach me about neural networks",
