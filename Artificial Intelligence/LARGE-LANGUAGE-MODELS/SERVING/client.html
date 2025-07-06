@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama FastAPI Client</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .response.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .response.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .settings {
+                grid-template-columns: 1fr;
+            }
+        }
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status.healthy {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.unhealthy {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦙 Ollama FastAPI Client</h1>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <form id="chatForm">
+            <div class="form-group">
+                <label for="question">Question:</label>
+                <textarea id="question" placeholder="Enter your question here..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="promptType">Prompt Type:</label>
+                <select id="promptType" onchange="handlePromptTypeChange()">
+                    <option value="simple">Simple (No System Prompt)</option>
+                    <option value="template">Use Predefined Template</option>
+                    <option value="custom">Custom System Prompt</option>
+                </select>
+            </div>
+            
+            <div id="templateSection" class="form-group" style="display: none;">
+                <label for="template">Template:</label>
+                <select id="template">
+                    <option value="">Loading templates...</option>
+                </select>
+                <div id="templateDescription" style="margin-top: 5px; font-style: italic; color: #666; font-size: 14px;"></div>
+            </div>
+            
+            <div id="customPromptSection" class="form-group" style="display: none;">
+                <label for="customPrompt">Custom System Prompt:</label>
+                <textarea id="customPrompt" placeholder="Enter custom system instructions for the AI..." rows="3"></textarea>
+            </div>
+            
+            <div class="settings">
+                <div class="form-group">
+                    <label for="model">Model:</label>
+                    <select id="model">
+                        <option value="llama3">llama3</option>
+                        <option value="llama3:8b">llama3:8b</option>
+                        <option value="llama3:70b">llama3:70b</option>
+                        <option value="codellama">codellama</option>
+                        <option value="mistral">mistral</option>
+                        <option value="neural-chat">neural-chat</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxTokens">Max Tokens:</label>
+                    <input type="number" id="maxTokens" value="500" min="1" max="2000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="temperature">Temperature:</label>
+                    <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="serverUrl">Server URL:</label>
+                    <input type="text" id="serverUrl" value="http://localhost:8000">
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Ask Question</button>
+            <button type="button" id="healthBtn">Check Health</button>
+            <button type="button" id="templatesBtn">Load Templates</button>
+        </form>
+        
+        <div id="response" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = () => document.getElementById('serverUrl').value;
+        
+        // Check server health on page load
+        window.addEventListener('load', () => {
+            checkHealth();
+            loadTemplates();
+        });
+        
+        document.getElementById('healthBtn').addEventListener('click', checkHealth);
+        document.getElementById('templatesBtn').addEventListener('click', loadTemplates);
+        document.getElementById('chatForm').addEventListener('submit', handleSubmit);
+        
+        function handlePromptTypeChange() {
+            const promptType = document.getElementById('promptType').value;
+            const templateSection = document.getElementById('templateSection');
+            const customPromptSection = document.getElementById('customPromptSection');
+            
+            templateSection.style.display = promptType === 'template' ? 'block' : 'none';
+            customPromptSection.style.display = promptType === 'custom' ? 'block' : 'none';
+            
+            if (promptType === 'template') {
+                loadTemplates();
+            }
+        }
+        
+        async function checkHealth() {
+            const statusDiv = document.getElementById('status');
+            const healthBtn = document.getElementById('healthBtn');
+            
+            try {
+                healthBtn.disabled = true;
+                healthBtn.textContent = 'Checking...';
+                
+                const response = await fetch(`${API_BASE()}/health`);
+                const data = await response.json();
+                
+                statusDiv.style.display = 'block';
+                
+                if (data.ollama_connected) {
+                    statusDiv.className = 'status healthy';
+                    statusDiv.textContent = `✅ ${data.message}`;
+                } else {
+                    statusDiv.className = 'status unhealthy';
+                    statusDiv.textContent = `❌ ${data.message}`;
+                }
+                
+                // Also load available models
+                await loadModels();
+                
+            } catch (error) {
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'status unhealthy';
+                statusDiv.textContent = `❌ Cannot connect to FastAPI server: ${error.message}`;
+            } finally {
+                healthBtn.disabled = false;
+                healthBtn.textContent = 'Check Health';
+            }
+        }
+        
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_BASE()}/models`);
+                const data = await response.json();
+                
+                const modelSelect = document.getElementById('model');
+                const currentValue = modelSelect.value;
+                
+                // Clear existing options
+                modelSelect.innerHTML = '';
+                
+                // Add available models
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    if (model === currentValue) {
+                        option.selected = true;
+                    }
+                    modelSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+        
+        async function loadTemplates() {
+            const templatesBtn = document.getElementById('templatesBtn');
+            const templateSelect = document.getElementById('template');
+            const templateDescription = document.getElementById('templateDescription');
+            
+            try {
+                templatesBtn.disabled = true;
+                templatesBtn.textContent = 'Loading...';
+                
+                const response = await fetch(`${API_BASE()}/templates`);
+                const data = await response.json();
+                
+                // Clear existing options
+                templateSelect.innerHTML = '<option value="">Select a template...</option>';
+                
+                // Add available templates
+                Object.values(data.templates).forEach(template => {
+                    const option = document.createElement('option');
+                    option.value = template.name;
+                    option.textContent = `${template.name} - ${template.description}`;
+                    templateSelect.appendChild(option);
+                });
+                
+                // Add change handler for template description
+                templateSelect.addEventListener('change', async () => {
+                    const selectedTemplate = templateSelect.value;
+                    if (selectedTemplate) {
+                        try {
+                            const detailResponse = await fetch(`${API_BASE()}/templates/${selectedTemplate}`);
+                            const detail = await detailResponse.json();
+                            templateDescription.textContent = `System Prompt: ${detail.system_prompt.substring(0, 100)}...`;
+                        } catch (error) {
+                            templateDescription.textContent = '';
+                        }
+                    } else {
+                        templateDescription.textContent = '';
+                    }
+                });
+                
+                console.log(`Loaded ${data.count} templates`);
+                
+            } catch (error) {
+                console.error('Failed to load templates:', error);
+                templateSelect.innerHTML = '<option value="">Failed to load templates</option>';
+            } finally {
+                templatesBtn.disabled = false;
+                templatesBtn.textContent = 'Load Templates';
+            }
+        }
+        
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const responseDiv = document.getElementById('response');
+            const question = document.getElementById('question').value.trim();
+            const promptType = document.getElementById('promptType').value;
+            
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+            
+            // Disable form and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Thinking...';
+            
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Waiting for response from LLM...';
+            
+            try {
+                const startTime = Date.now();
+                let response;
+                
+                if (promptType === 'template') {
+                    // Use template endpoint
+                    const template = document.getElementById('template').value;
+                    if (!template) {
+                        throw new Error('Please select a template');
+                    }
+                    
+                    const requestBody = {
+                        question: question,
+                        template_name: template,
+                        model: document.getElementById('model').value,
+                        max_tokens: parseInt(document.getElementById('maxTokens').value),
+                        temperature: parseFloat(document.getElementById('temperature').value)
+                    };
+                    
+                    response = await fetch(`${API_BASE()}/chat/template`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    });
+                    
+                } else {
+                    // Use regular chat endpoint
+                    const requestBody = {
+                        question: question,
+                        model: document.getElementById('model').value,
+                        max_tokens: parseInt(document.getElementById('maxTokens').value),
+                        temperature: parseFloat(document.getElementById('temperature').value)
+                    };
+                    
+                    if (promptType === 'custom') {
+                        const customPrompt = document.getElementById('customPrompt').value.trim();
+                        if (!customPrompt) {
+                            throw new Error('Please enter a custom system prompt');
+                        }
+                        requestBody.system_prompt = customPrompt;
+                    }
+                    
+                    response = await fetch(`${API_BASE()}/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    });
+                }
+                
+                const endTime = Date.now();
+                const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                responseDiv.className = 'response success';
+                
+                let responseText = `🤖 Model: ${data.model}\n`;
+                responseText += `⏱️ Response time: ${responseTime}s\n`;
+                
+                if (data.template_used) {
+                    responseText += `📋 Template: ${data.template_used}\n`;
+                }
+                
+                if (data.system_prompt_used) {
+                    responseText += `🎯 System Prompt: ${data.system_prompt_used.substring(0, 50)}...\n`;
+                }
+                
+                if (data.usage) {
+                    responseText += `📊 Tokens: ${data.usage.total_tokens} (prompt: ${data.usage.prompt_tokens}, completion: ${data.usage.completion_tokens})\n`;
+                }
+                
+                responseText += `\n📝 Answer:\n${data.answer}`;
+                
+                responseDiv.textContent = responseText;
+                
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Ask Question';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -14,6 +14,10 @@ The databases is an asynchronous database library that provides a unified interf
 
 The databases allows you to write queries using the SQLAlchemy Core expression language.
 
+ASGI server is a program that implements the ASGI (Asynchronous Server Gateway Interface) specification, allowing it to run asynchronous Python web frameworks like FastAPI. 
+
+ASGI is designed to handle asynchronous and concurrent processing, enabling web applications to manage multiple requests simultaneously.
+
 ## Example in Python
 
 The project
@@ -68,7 +72,7 @@ Context management
 
 The web application uses Python's context manager protocol for resource handling
 
-Async support 
+Asynchronous operations support 
 
 Lifespan management handles asynchronous operations during startup/shutdown
 
