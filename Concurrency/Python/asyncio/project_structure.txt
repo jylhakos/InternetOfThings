@@ -1,0 +1,14 @@
+my_fastapi_app/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── database.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── crud.py
+│   └── routers/
+│       ├── __init__.py
+│       └── users.py
+├── requirements.txt
+├── .env
+└── docker-compose.yml
