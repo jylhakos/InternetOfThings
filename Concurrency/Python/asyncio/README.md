@@ -37,6 +37,49 @@ The project
 
 ```
 
+The @asynccontextmanager decorator is critical for managing application startup and shutdown events. 
+
+```
+
+	@asynccontextmanager
+	async def lifespan(app: FastAPI):
+	    # Startup
+	    await database.connect()
+	    print("Database connected")
+	    yield  # Application runs here
+	    # Shutdown
+	    await database.disconnect()
+	    print("Database disconnected")
+
+```
+Why lifespan management is critical with the FastAPI?
+
+Lifespan management is the recommended way to handle startup and shutdown events for your web application.
+
+Lifespan management code will be executed once, before the application starts receiving requests.
+
+Resource management
+
+Setting up resources that are needed for the entire application's lifespan, like database connections
+
+Lifespan management ensures proper cleanup even if exceptions occur or performing cleanup operations when the application shuts down.
+
+Context management
+
+The web application uses Python's context manager protocol for resource handling
+
+Async support 
+
+Lifespan management handles asynchronous operations during startup/shutdown
+
+Using the @asynccontextmanager decorator
+
+FastAPI leverages Python's asynchronous context managers for lifespan events.
+
+The @asynccontextmanager decorator from the contextlib module allows you to define a single function that handles both startup and shutdown logic.
+
+This lifespan_demo.py file shows the difference between proper and improper resource management in FastAPI applications.
+
 API (RESTful)
 
 ```
@@ -130,8 +173,15 @@ The web application (FastAPI)
 	    )
 
 ```
+
+The example_fastapi_app.py file that demonstrates best practices in asynchronous programming.
+
 References
 
-Concurrency and async / await¶
+Concurrency and async / await
 
 https://fastapi.tiangolo.com/async/
+
+Lifespan Events
+
+https://fastapi.tiangolo.com/advanced/events/
