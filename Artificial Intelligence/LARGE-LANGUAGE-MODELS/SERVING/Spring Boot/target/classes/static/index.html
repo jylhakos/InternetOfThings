@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Chat Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chat-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+        
+        .message.assistant {
+            align-self: flex-start;
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .message.error {
+            align-self: center;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 24px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            max-height: 120px;
+            min-height: 44px;
+        }
+        
+        .message-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .option {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option:hover {
+            background: #f3f4f6;
+        }
+        
+        .option.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 LLM Chat Service</h1>
+            <p>Powered by Llama-3 via Ollama</p>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="message assistant">
+                Hello! I'm your AI assistant powered by Llama-3. How can I help you today?
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <div class="options">
+                <div class="option active" data-option="system-template">Use System Template</div>
+                <div class="option" data-option="temperature">Temperature: 0.7</div>
+                <div class="option" data-option="max-tokens">Max Tokens: 2048</div>
+            </div>
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    class="message-input" 
+                    placeholder="Type your message here..." 
+                    rows="1"
+                ></textarea>
+                <button id="sendButton" class="send-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const options = document.querySelectorAll('.option');
+        
+        let currentOptions = {
+            useSystemTemplate: true,
+            temperature: 0.7,
+            maxTokens: 2048
+        };
+        
+        // Handle option clicks
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const optionType = option.dataset.option;
+                
+                if (optionType === 'system-template') {
+                    currentOptions.useSystemTemplate = !currentOptions.useSystemTemplate;
+                    option.classList.toggle('active');
+                    option.textContent = currentOptions.useSystemTemplate ? 
+                        'Use System Template' : 'No System Template';
+                } else if (optionType === 'temperature') {
+                    const newTemp = prompt('Enter temperature (0.0 - 2.0):', currentOptions.temperature);
+                    if (newTemp !== null && !isNaN(newTemp) && newTemp >= 0 && newTemp <= 2) {
+                        currentOptions.temperature = parseFloat(newTemp);
+                        option.textContent = `Temperature: ${currentOptions.temperature}`;
+                    }
+                } else if (optionType === 'max-tokens') {
+                    const newTokens = prompt('Enter max tokens (1 - 4096):', currentOptions.maxTokens);
+                    if (newTokens !== null && !isNaN(newTokens) && newTokens >= 1 && newTokens <= 4096) {
+                        currentOptions.maxTokens = parseInt(newTokens);
+                        option.textContent = `Max Tokens: ${currentOptions.maxTokens}`;
+                    }
+                }
+            });
+        });
+        
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+        
+        // Send message on Enter (but allow Shift+Enter for new lines)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        sendButton.addEventListener('click', sendMessage);
+        
+        function addMessage(content, type = 'assistant') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = content;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageDiv;
+        }
+        
+        function addLoadingMessage() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant loading';
+            messageDiv.innerHTML = '<div class="spinner"></div> Thinking...';
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageDiv;
+        }
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Disable send button
+            sendButton.disabled = true;
+            
+            // Add loading message
+            const loadingMessage = addLoadingMessage();
+            
+            try {
+                const response = await fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        use_system_template: currentOptions.useSystemTemplate,
+                        temperature: currentOptions.temperature,
+                        max_tokens: currentOptions.maxTokens
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading message
+                loadingMessage.remove();
+                
+                if (data.success) {
+                    addMessage(data.response, 'assistant');
+                } else {
+                    addMessage(`Error: ${data.error_message}`, 'error');
+                }
+            } catch (error) {
+                // Remove loading message
+                loadingMessage.remove();
+                addMessage(`Network error: ${error.message}`, 'error');
+            } finally {
+                // Re-enable send button
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+        
+        // Focus input on load
+        messageInput.focus();
+    </script>
+</body>
+</html>
