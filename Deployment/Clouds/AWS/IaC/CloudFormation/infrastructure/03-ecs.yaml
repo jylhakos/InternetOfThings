@@ -1,0 +1,370 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS cluster and services for microservices application'
+
+Parameters:
+  EnvironmentName:
+    Description: Environment name prefix
+    Type: String
+    Default: microservices
+
+  ImageTag:
+    Description: Docker image tag
+    Type: String
+    Default: latest
+
+  ECRRepository:
+    Description: ECR repository URI
+    Type: String
+    Default: YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/microservices
+
+Resources:
+  # ECS Cluster
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-cluster
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+        - CapacityProvider: FARGATE_SPOT
+          Weight: 4
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-cluster
+
+  # Application Load Balancer
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${EnvironmentName}-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets: !Split
+        - ','
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PUBLIC-SUBNETS
+      SecurityGroups:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-ALB-SG
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-alb
+
+  # Target Groups
+  APIGatewayTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${EnvironmentName}-api-gateway
+      Port: 3000
+      Protocol: HTTP
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC-ID
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-api-gateway-tg
+
+  # ALB Listener
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref APIGatewayTargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # IAM Role for ECS Tasks
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ecs-task-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - Fn::ImportValue: !Sub ${EnvironmentName}-DB-SECRET-ARN
+
+  # ECS Task Role
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ApplicationPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  # CloudWatch Log Groups
+  AuthServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${EnvironmentName}/auth-service
+      RetentionInDays: 7
+
+  UserServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${EnvironmentName}/user-service
+      RetentionInDays: 7
+
+  APIGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${EnvironmentName}/api-gateway
+      RetentionInDays: 7
+
+  # Task Definitions
+  AuthServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${EnvironmentName}-auth-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      TaskRoleArn: !Ref ECSTaskRole
+      ContainerDefinitions:
+        - Name: auth-service
+          Image: !Sub ${ECRRepository}/auth-service:${ImageTag}
+          PortMappings:
+            - ContainerPort: 3001
+              Protocol: tcp
+          Environment:
+            - Name: NODE_ENV
+              Value: production
+            - Name: PORT
+              Value: '3001'
+            - Name: JWT_SECRET
+              Value: !Sub '{{resolve:secretsmanager:${EnvironmentName}/jwt-secret:SecretString:jwt_secret}}'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref AuthServiceLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          Essential: true
+
+  UserServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${EnvironmentName}-user-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      TaskRoleArn: !Ref ECSTaskRole
+      ContainerDefinitions:
+        - Name: user-service
+          Image: !Sub ${ECRRepository}/user-service:${ImageTag}
+          PortMappings:
+            - ContainerPort: 3002
+              Protocol: tcp
+          Environment:
+            - Name: NODE_ENV
+              Value: production
+            - Name: PORT
+              Value: '3002'
+            - Name: DB_HOST
+              Value:
+                Fn::ImportValue: !Sub ${EnvironmentName}-DB-ENDPOINT
+            - Name: DB_PORT
+              Value:
+                Fn::ImportValue: !Sub ${EnvironmentName}-DB-PORT
+            - Name: DB_NAME
+              Value:
+                Fn::ImportValue: !Sub ${EnvironmentName}-DB-NAME
+          Secrets:
+            - Name: DB_USER
+              ValueFrom: !Sub '${DatabaseSecret}:username::'
+            - Name: DB_PASSWORD
+              ValueFrom: !Sub '${DatabaseSecret}:password::'
+            - Name: JWT_SECRET
+              ValueFrom: !Sub '{{resolve:secretsmanager:${EnvironmentName}/jwt-secret:SecretString:jwt_secret}}'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref UserServiceLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          Essential: true
+
+  APIGatewayTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${EnvironmentName}-api-gateway
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      TaskRoleArn: !Ref ECSTaskRole
+      ContainerDefinitions:
+        - Name: api-gateway
+          Image: !Sub ${ECRRepository}/api-gateway:${ImageTag}
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+          Environment:
+            - Name: NODE_ENV
+              Value: production
+            - Name: PORT
+              Value: '3000'
+            - Name: AUTH_SERVICE_URL
+              Value: http://auth-service.microservices.local:3001
+            - Name: USER_SERVICE_URL
+              Value: http://user-service.microservices.local:3002
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref APIGatewayLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          Essential: true
+
+  # ECS Services
+  AuthService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${EnvironmentName}-auth-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref AuthServiceTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - Fn::ImportValue: !Sub ${EnvironmentName}-ECS-SG
+          Subnets: !Split
+            - ','
+            - Fn::ImportValue: !Sub ${EnvironmentName}-PRIVATE-SUBNETS
+          AssignPublicIp: DISABLED
+      ServiceRegistries:
+        - RegistryArn: !GetAtt AuthServiceRegistry.Arn
+
+  UserService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${EnvironmentName}-user-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref UserServiceTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - Fn::ImportValue: !Sub ${EnvironmentName}-ECS-SG
+          Subnets: !Split
+            - ','
+            - Fn::ImportValue: !Sub ${EnvironmentName}-PRIVATE-SUBNETS
+          AssignPublicIp: DISABLED
+      ServiceRegistries:
+        - RegistryArn: !GetAtt UserServiceRegistry.Arn
+
+  APIGatewayService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${EnvironmentName}-api-gateway
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref APIGatewayTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - Fn::ImportValue: !Sub ${EnvironmentName}-ECS-SG
+          Subnets: !Split
+            - ','
+            - Fn::ImportValue: !Sub ${EnvironmentName}-PRIVATE-SUBNETS
+          AssignPublicIp: DISABLED
+      LoadBalancers:
+        - TargetGroupArn: !Ref APIGatewayTargetGroup
+          ContainerName: api-gateway
+          ContainerPort: 3000
+
+  # Service Discovery
+  PrivateDNSNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: microservices.local
+      Vpc:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC-ID
+
+  AuthServiceRegistry:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: auth-service
+      NamespaceId: !Ref PrivateDNSNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: 300
+        NamespaceId: !Ref PrivateDNSNamespace
+
+  UserServiceRegistry:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: user-service
+      NamespaceId: !Ref PrivateDNSNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: 300
+        NamespaceId: !Ref PrivateDNSNamespace
+
+Outputs:
+  LoadBalancerURL:
+    Description: URL of the load balancer
+    Value: !Sub http://${ApplicationLoadBalancer.DNSName}
+    Export:
+      Name: !Sub ${EnvironmentName}-ALB-URL
+
+  ECSCluster:
+    Description: ECS Cluster name
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub ${EnvironmentName}-ECS-CLUSTER

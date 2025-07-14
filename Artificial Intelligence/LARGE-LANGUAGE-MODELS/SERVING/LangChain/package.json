@@ -1,0 +1,64 @@
+{
+  "name": "llm-inference-server",
+  "version": "1.0.0",
+  "description": "LLM Inference Server with LangChain.js for OpenAI-like API with Meta Llama-3.1 support",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "docker:build": "docker build -t llm-inference-server .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env llm-inference-server",
+    "aws:deploy": "cdk deploy"
+  },
+  "keywords": [
+    "llm",
+    "inference",
+    "langchain",
+    "nodejs",
+    "openai",
+    "llama",
+    "chat",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@langchain/core": "^0.3.62",
+    "@langchain/langgraph": "^0.3.8",
+    "@langchain/community": "^0.3.48",
+    "@langchain/openai": "^0.5.18",
+    "aws-cdk-lib": "^2.163.1",
+    "constructs": "^10.3.0",
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "winston": "^3.17.0",
+    "rate-limiter-flexible": "^5.0.3",
+    "uuid": "^11.0.3",
+    "compression": "^1.7.5",
+    "express-validator": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/uuid": "^10.0.0",
+    "@types/compression": "^1.7.5",
+    "@types/jest": "^29.5.14",
+    "typescript": "^5.7.3",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.1.7",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

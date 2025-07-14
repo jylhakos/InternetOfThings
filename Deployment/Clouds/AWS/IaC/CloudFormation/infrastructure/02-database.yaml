@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'RDS PostgreSQL database for microservices application'
+
+Parameters:
+  EnvironmentName:
+    Description: Environment name prefix
+    Type: String
+    Default: microservices
+
+  DBUsername:
+    Description: Database administrator username
+    Type: String
+    Default: postgres
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+
+  DBPassword:
+    Description: Database administrator password
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: YourSecurePassword123
+
+  DBInstanceClass:
+    Description: Database instance type
+    Type: String
+    Default: db.t3.micro
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.medium
+      - db.r5.large
+
+  AllocatedStorage:
+    Description: Database storage size in GB
+    Type: Number
+    Default: 20
+    MinValue: 20
+    MaxValue: 1000
+
+Resources:
+  # DB Subnet Group
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS database
+      SubnetIds: !Split
+        - ','
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PRIVATE-SUBNETS
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-db-subnet-group
+
+  # Parameter Group
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: Parameter group for PostgreSQL
+      Family: postgres15
+      Parameters:
+        shared_preload_libraries: pg_stat_statements
+        log_statement: all
+        log_min_duration_statement: 1000
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-postgres-params
+
+  # RDS Instance
+  PostgreSQLDatabase:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub ${EnvironmentName}-postgres
+      DBName: microservices_db
+      Engine: postgres
+      EngineVersion: '15.4'
+      DBInstanceClass: !Ref DBInstanceClass
+      AllocatedStorage: !Ref AllocatedStorage
+      StorageType: gp2
+      StorageEncrypted: true
+      
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      
+      VPCSecurityGroups:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-RDS-SG
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBParameterGroupName: !Ref DBParameterGroup
+      
+      BackupRetentionPeriod: 7
+      PreferredBackupWindow: "03:00-04:00"
+      PreferredMaintenanceWindow: "sun:04:00-sun:05:00"
+      
+      MultiAZ: false
+      PubliclyAccessible: false
+      AutoMinorVersionUpgrade: true
+      
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 7
+      
+      DeletionProtection: false
+      
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-postgres
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # Secrets Manager for Database Credentials
+  DatabaseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${EnvironmentName}/database/credentials
+      Description: Database credentials for microservices application
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username": "${DBUsername}"}'
+        GenerateStringKey: 'password'
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-db-secret
+
+  # Attach Secret to RDS Instance
+  SecretRDSInstanceAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref DatabaseSecret
+      TargetId: !Ref PostgreSQLDatabase
+      TargetType: AWS::RDS::DBInstance
+
+Outputs:
+  DatabaseEndpoint:
+    Description: RDS instance endpoint
+    Value: !GetAtt PostgreSQLDatabase.Endpoint.Address
+    Export:
+      Name: !Sub ${EnvironmentName}-DB-ENDPOINT
+
+  DatabasePort:
+    Description: RDS instance port
+    Value: !GetAtt PostgreSQLDatabase.Endpoint.Port
+    Export:
+      Name: !Sub ${EnvironmentName}-DB-PORT
+
+  DatabaseName:
+    Description: Database name
+    Value: microservices_db
+    Export:
+      Name: !Sub ${EnvironmentName}-DB-NAME
+
+  DatabaseSecretArn:
+    Description: Database secret ARN
+    Value: !Ref DatabaseSecret
+    Export:
+      Name: !Sub ${EnvironmentName}-DB-SECRET-ARN

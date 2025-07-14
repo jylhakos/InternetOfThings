@@ -1,0 +1,33 @@
+{
+  "name": "microservices-app",
+  "version": "1.0.0",
+  "description": "Microservices application with React frontend and Node.js backend",
+  "scripts": {
+    "dev": "./scripts/dev-setup.sh start",
+    "dev:stop": "./scripts/dev-setup.sh stop",
+    "dev:logs": "./scripts/dev-setup.sh logs",
+    "dev:setup": "./scripts/dev-setup.sh setup",
+    "deploy": "./scripts/deploy.sh deploy",
+    "deploy:status": "./scripts/deploy.sh status",
+    "deploy:destroy": "./scripts/deploy.sh destroy",
+    "test": "./scripts/dev-setup.sh test",
+    "clean": "./scripts/dev-setup.sh clean"
+  },
+  "keywords": [
+    "microservices",
+    "nodejs",
+    "react",
+    "nextjs",
+    "aws",
+    "cloudformation",
+    "docker",
+    "postgresql",
+    "jwt"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
