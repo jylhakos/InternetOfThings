@@ -1,4 +1,4 @@
-# Microservices Project Structure
+# Microservices
 
 ## Overview
 This project implements a microservices architecture with:
@@ -9,7 +9,7 @@ This project implements a microservices architecture with:
 - Security: JWT authentication, IAM roles
 - CDN: CloudFront for static assets
 
-## Project Structure
+## Project
 ```
 ├── backend/
 │   ├── auth-service/          # Authentication microservice
@@ -22,13 +22,13 @@ This project implements a microservices architecture with:
 └── scripts/                   # Deployment scripts
 ```
 
-## Services Architecture
+## Services
 1. **Auth Service**: JWT token generation/validation
 2. **User Service**: User CRUD operations with PostgreSQL
 3. **API Gateway**: Single entry point for frontend
 4. **Frontend**: React SPA with Next.js SSR
 
-## AWS Resources
+## AWS resources
 - EC2/ECS for backend services
 - RDS PostgreSQL for database
 - S3 + CloudFront for frontend

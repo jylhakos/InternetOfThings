@@ -1,10 +1,10 @@
 
 
-# Microservices Application with React and Node.js
+# Microservices application with Node.js and React
 
-A comprehensive microservices architecture implementation with React/Next.js frontend and Node.js backend services, deployed on AWS using Infrastructure as Code (CloudFormation).
+The microservices deployed on AWS with Infrastructure as Code (CloudFormation).
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture
 
 This project implements a modern microservices architecture with:
 
@@ -17,7 +17,7 @@ This project implements a modern microservices architecture with:
 - **Security**: IAM roles, VPC, security groups, HTTPS/SSL
 - **CDN**: CloudFront for static asset delivery
 
-## 📁 Project Structure
+## 📁 Project
 
 ```
 ├── backend/
@@ -36,7 +36,7 @@ This project implements a modern microservices architecture with:
 └── docker-compose.yml         # Local development environment
 ```
 
-## 🚀 Quick Start
+## 🚀 Steps
 
 ### Prerequisites
 
@@ -45,7 +45,7 @@ This project implements a modern microservices architecture with:
 - AWS CLI configured with appropriate permissions
 - Git
 
-### Local Development
+### Local development
 
 1. **Clone and setup the project:**
    ```bash
@@ -74,7 +74,7 @@ This project implements a modern microservices architecture with:
    ./scripts/dev-setup.sh logs [service-name]
    ```
 
-### AWS Production Deployment
+### AWS deployment
 
 1. **Configure AWS credentials:**
    ```bash
@@ -98,14 +98,14 @@ This project implements a modern microservices architecture with:
 
 ## 🛠️ Services
 
-### Auth Service (Port 3001)
+### Authorization (Port 3001)
 - **Purpose**: JWT token generation and validation
 - **Endpoints**: 
   - `POST /api/auth/signup` - User registration
   - `POST /api/auth/signin` - User login
   - `POST /api/auth/verify` - Token verification
 
-### User Service (Port 3002)
+### User (Port 3002)
 - **Purpose**: User management with PostgreSQL database
 - **Endpoints**:
   - `GET /api/users/profile` - Get user profile
@@ -124,7 +124,7 @@ This project implements a modern microservices architecture with:
   - JWT authentication
   - Responsive design with Tailwind CSS
 
-## 🔐 Security Features
+## 🔐 Security
 
 - **Authentication**: JWT tokens with secure secret management
 - **Network Security**: VPC with public/private subnets
@@ -133,7 +133,7 @@ This project implements a modern microservices architecture with:
 - **IAM**: Least privilege access with specific roles
 - **Secrets**: AWS Secrets Manager for sensitive data
 
-## 🗄️ Database Schema
+## 🗄️ Database schema
 
 ```sql
 -- Users table
@@ -150,27 +150,27 @@ CREATE TABLE users (
 
 ## 🌐 AWS Infrastructure
 
-### Network Layer
+### Network layer
 - VPC with public and private subnets across 2 AZs
 - Internet Gateway and NAT Gateways
 - Security Groups for ALB, ECS, and RDS
 
-### Compute Layer
+### Compute layer
 - ECS Fargate cluster for containerized services
 - Application Load Balancer for traffic distribution
 - Auto-scaling based on CPU and memory usage
 
-### Storage Layer
+### Storage layer
 - RDS PostgreSQL with encryption and backups
 - S3 for static website hosting
 - CloudFront CDN for global content delivery
 
-### Security Layer
+### Security layer
 - IAM roles and policies
 - Secrets Manager for credentials
 - SSL certificates for HTTPS
 
-## 🔧 Development Commands
+## 🔧 Development
 
 ```bash
 # Local development
@@ -188,7 +188,7 @@ CREATE TABLE users (
 
 ## 🧪 Testing
 
-### API Testing
+### API testing
 ```bash
 # Health checks
 curl http://localhost:3000/health
@@ -206,14 +206,14 @@ curl -X POST http://localhost:3000/api/auth/signin \
   -d '{"email":"test@example.com","password":"password123"}'
 ```
 
-## 📊 Monitoring and Logging
+## 📊 Monitoring and logging
 
 - **CloudWatch**: Application and infrastructure metrics
 - **ECS Logging**: Centralized logging for all services
 - **Health Checks**: Automated health monitoring
 - **Alarms**: Automated alerts for critical issues
 
-## 🔄 CI/CD Pipeline
+## 🔄 CI/CD pipeline
 
 The project includes deployment scripts that can be integrated with:
 - GitHub Actions
@@ -221,9 +221,9 @@ The project includes deployment scripts that can be integrated with:
 - Jenkins
 - GitLab CI/CD
 
-## 📝 Environment Variables
+## 📝 Environment variables
 
-### Backend Services
+### Backend
 ```env
 NODE_ENV=production
 JWT_SECRET=<secure-secret>
@@ -237,7 +237,7 @@ DB_PASSWORD=<db-password>
 NEXT_PUBLIC_API_URL=<api-gateway-url>
 ```
 
-## 🎯 Key Features
+## 🎯 Features
 
 ✅ **Microservices Architecture** - Loosely coupled, independently deployable services  
 ✅ **RESTful APIs** - Standard HTTP methods with JSON responses  
@@ -249,14 +249,6 @@ NEXT_PUBLIC_API_URL=<api-gateway-url>
 ✅ **CDN Integration** - Fast global content delivery with CloudFront  
 ✅ **Auto-scaling** - Automatic scaling based on demand  
 ✅ **Monitoring** - Comprehensive logging and metrics  
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
 
 ## 📄 License
 
