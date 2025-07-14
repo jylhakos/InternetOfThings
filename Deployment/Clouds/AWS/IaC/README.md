@@ -1,5 +1,15 @@
 # Infrastructure as Code (IaC)
 
+What is Infrastructure as Code?
+
+Infrastructure as code (IaC) refers to the capability of provisioning and managing your computing infrastructure through code rather than relying on manual processes and configurations.
+
+An application requires various infrastructure components, including operating systems, database connections, and storage. 
+
+In the past, DevOps teams depended on scripts and manual processes to set up infrastructure environments.
+
+You can now automate the configuration of your environment through Infrastructure as Code (IaC), enabling a more efficient and automated process.
+
 AWS offers the following services to define infrastructure as code.
 
 - AWS CloudFormation
@@ -13,7 +23,6 @@ AWS offers the following services to define infrastructure as code.
 - AWS Cloud Development Kit for Terraform
 
 - AWS Cloud Control API
-
 
 To utilize IaC for deploying web applications on AWS, you can leverage tools like AWS CloudFormation or Terraform, defining your infrastructure needs in templates or configuration files, which are then used to provision and manage your AWS resources.
 
@@ -61,7 +70,15 @@ Using Terraform, you could define these resources in separate modules (or separa
 
 You would define your desired state, including the EC2 instance type, AMI, and security group rules, the load balancer configuration, and the database parameters. 
 
-References
+### References
+
+Reviewing IaC tools for the AWS Cloud
+
+https://docs.aws.amazon.com/prescriptive-guidance/latest/choose-iac-tool/iac-tools.html
+
+Choosing an IaC tool
+
+https://docs.aws.amazon.com/prescriptive-guidance/latest/choose-iac-tool/choose-tool.html
 
 AWS CloudFormation
 

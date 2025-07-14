@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: microservices-postgres
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+
+  # Auth Service
+  auth-service:
+    build: 
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      PORT: 3001
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: userdb
+      DB_USER: postgres
+      DB_PASSWORD: password
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    networks:
+      - microservices
+
+  # User Service
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    environment:
+      PORT: 3002
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: userdb
+      DB_USER: postgres
+      DB_PASSWORD: password
+      AUTH_SERVICE_URL: http://auth-service:3001
+    ports:
+      - "3002:3002"
+    depends_on:
+      - postgres
+      - auth-service
+    networks:
+      - microservices
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      CORS_ORIGIN: http://localhost:3003
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - user-service
+    networks:
+      - microservices
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3003:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - microservices
+
+volumes:
+  postgres_data:
+
+networks:
+  microservices:
+    driver: bridge

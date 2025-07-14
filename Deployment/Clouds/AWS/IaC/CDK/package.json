@@ -1,0 +1,23 @@
+{
+  "name": "microservices-aws-cdk",
+  "version": "1.0.0",
+  "description": "Microservices architecture with Node.js backend and React frontend deployed on AWS",
+  "scripts": {
+    "build": "npm run build:backend && npm run build:frontend && npm run build:cdk",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:cdk": "cd infrastructure && npm run build",
+    "deploy": "cd infrastructure && npm run deploy",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ../infrastructure && npm install"
+  },
+  "workspaces": [
+    "backend/*",
+    "frontend",
+    "infrastructure"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
