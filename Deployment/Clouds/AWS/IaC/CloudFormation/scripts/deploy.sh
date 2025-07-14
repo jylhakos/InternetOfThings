@@ -91,6 +91,9 @@ build_and_push_images() {
 deploy_infrastructure() {
     log "Deploying infrastructure..."
     
+    # Note: AWS CLI automatically uploads local template files to S3
+    # when using --template-file. No manual S3 upload required.
+    
     # Deploy network stack
     log "Deploying network infrastructure..."
     aws cloudformation deploy \

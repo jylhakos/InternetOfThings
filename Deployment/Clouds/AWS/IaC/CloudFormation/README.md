@@ -1,8 +1,20 @@
-
-
 # Microservices application with Node.js and React
 
-The microservices deployed on AWS with Infrastructure as Code (CloudFormation).
+The microservices deployed on AWS with Infrastructure as Code (IaC) and AWS CloudFormation.
+
+AWS CloudFormation uses templates that are either a YAML or JSON formatted text file.
+
+The template describes all the AWS resources you need for the project, such as Amazon ECS clusters or services, and AWS CloudFormation takes care of provisioning and configuring those resources.
+
+When you use CloudFormation, you manage related resources as a single unit called a stack.
+
+When you specify a local --template-file, the AWS CLI automatically uploads it to an S3 bucket in your AWS account.
+
+1. Uploads the template to an S3 bucket in your AWS account
+2. Creates a unique S3 bucket (if it doesn't exist) for CloudFormation templates
+3. References the S3 URL when creating/updating the stack
+
+**Template Upload to S3**: When you specify a template file stored locally (using `--template-file`), the AWS CLI automatically uploads it to an S3 bucket in your AWS account. This is handled transparently by our deployment scripts - you don't need to manually upload templates to S3.
 
 ## 🏗️ Architecture
 
@@ -95,6 +107,51 @@ This project implements a modern microservices architecture with:
    ```bash
    ./scripts/deploy.sh destroy
    ```
+
+## 📋 CloudFormation Template Deployment
+
+Our deployment script uses the AWS CLI `cloudformation deploy` command, which automatically handles template uploads:
+
+```bash
+# Example from scripts/deploy.sh
+aws cloudformation deploy \
+    --template-file infrastructure/01-network.yaml \
+    --stack-name microservices-network \
+    --parameter-overrides EnvironmentName=microservices
+```
+
+### Automatic S3 Upload Process
+
+When you run the deployment script:
+
+1. **AWS CLI scans** the local template file (e.g., `infrastructure/01-network.yaml`)
+2. **Creates an S3 bucket** (if not exists) named like `aws-cloudformation-templates-{hash}-{region}`
+3. **Uploads the template** to this S3 bucket with a unique key
+4. **References the S3 URL** when creating/updating the CloudFormation stack
+5. **Manages versioning** automatically for template updates
+
+### Benefits of This Approach
+
+✅ **No manual S3 operations** - Templates are uploaded automatically  
+✅ **Version control** - Each deployment creates a new template version  
+✅ **Rollback support** - Previous template versions remain available  
+✅ **Large template support** - Handles templates larger than 51,200 bytes  
+✅ **Dependency management** - Templates can reference other uploaded templates  
+
+### Template Structure in Our Project
+
+```
+infrastructure/
+├── 01-network.yaml        # VPC, subnets, security groups
+├── 02-database.yaml       # RDS PostgreSQL database
+├── 03-ecs.yaml           # ECS cluster and services
+└── 04-frontend.yaml       # S3, CloudFront, Route53
+```
+
+Each template is deployed as a separate stack, allowing for:
+- **Independent updates** of infrastructure components
+- **Easier troubleshooting** and maintenance
+- **Modular architecture** following AWS best practices
 
 ## 🛠️ Services
 
@@ -262,3 +319,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [AWS ECS Best Practices](https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/introduction.html)
 - [Microservices Pattern](https://microservices.io/)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Create templates visually with Infrastructure Composer](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/infrastructure-composer-for-cloudformation.html)
