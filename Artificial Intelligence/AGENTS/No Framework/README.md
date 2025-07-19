@@ -1,4 +1,4 @@
-# AI Agent - No Framework
+# AI Agent & No Framework
 
 A Python based AI agent implementation without commercial frameworks like LlamaIndex or open-source frameworks like LangChain. This AIagent uses Meta Llama-3.1 (quantized) for LLM capabilities and provides RESTful API services with **Open WebUI integration**.
 
@@ -53,8 +53,8 @@ make full-stack
 ```
 
 **Access points:**
-- 🌐 **Web Interface**: http://localhost:3000 (Open WebUI)
-- 🤖 **API**: http://localhost:8000 (AI Agent)
+- **Web Interface**: http://localhost:3000 (Open WebUI)
+- **API**: http://localhost:8000 (AI Agent)
 
 ### Option 2: API only
 
@@ -266,9 +266,9 @@ ENABLE_SIGNUP=false
 
 ## Documentation
 
-- 📖 **[INSTALLATION.md](INSTALLATION.md)** - Complete setup guide for Debian Linux
-- 🐳 **[DOCKER.md](DOCKER.md)** - Detailed Docker configuration
-- 💡 **[EXAMPLES.md](EXAMPLES.md)** - Usage examples and API references
+- **[INSTALLATION.md](INSTALLATION.md)** - Complete setup guide for Debian Linux
+- **[DOCKER.md](DOCKER.md)** - Detailed Docker configuration
+- **[EXAMPLES.md](EXAMPLES.md)** - Usage examples and API references
 
 ## Troubleshooting
 
@@ -309,21 +309,6 @@ ENABLE_SIGNUP=false
    # Restart container
    ./webui-manage.sh restart
    ```
-
-### Performance optimization
-
-- Use async/await for concurrent requests
-- Implement response caching
-- Use connection pooling for external APIs
-- Monitor memory usage and implement garbage collection
-
-## Contributing
-
-1. Follow Python PEP 8 style guidelines
-2. Add type hints to all functions
-3. Write comprehensive docstrings
-4. Test with multiple concurrent requests
-5. Ensure compatibility with Python 3.12
 
 ## License
 
