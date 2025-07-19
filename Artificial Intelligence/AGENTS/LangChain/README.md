@@ -223,7 +223,7 @@ pip install langchain-openai langchain-experimental
    - Session-based conversation management
    - OpenAI-compatible response format
 
-2. ** Tools (`src/tools.js`)**
+2. **Tools (`src/tools.js`)**
    - **WeatherTool**: Fetches current weather using Open-Meteo API
    - **GreetingTool**: Handles greetings with contextual responses  
    - **LocationTool**: Provides detailed location/coordinate information
