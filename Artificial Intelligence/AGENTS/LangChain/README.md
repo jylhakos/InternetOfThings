@@ -862,7 +862,7 @@ docker-compose --profile python-alternative up -d
 4. **CONTAINERIZATION**: JavaScript has simpler, more efficient containers
 5. **SCALING**: JavaScript scales more naturally in cloud environments
 
-**Decision**: Choose JavaScript unless you have compelling Python-specific requirements.
+**Decision**: Choose JavaScript unless you have clear Python specific requirements.
 
 ---
 
