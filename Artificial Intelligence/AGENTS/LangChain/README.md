@@ -37,7 +37,7 @@ This project provides **two AI agent implementations** with **JavaScript/LangCha
 
 ##  **Primary: JavaScript/LangChain.js implementation (Recommended)**
 - ** Production**: Modern LangChain.js framework with ReAct agents
-- **Performance**: Node.js/Express.js for concurrent request handling  
+- **Performance**: Node.js/Express.js for concurrent request handling
 - **Containerized**: Multi-stage Docker builds optimized for production
 - **Enterprise features**: Built-in monitoring, health checks, structured logging
 - **Standard APIs**: OpenAI-compatible endpoints for seamless integration
@@ -51,7 +51,7 @@ Both JavaScript/Python implementations support:
 - **Meta Llama-3.1** quantized models (8B-instruct-q4_0) via Ollama/vLLM
 - **Weather APIs** with Open-Meteo integration (geocoding + current conditions)
 - **Open WebUI** compatibility for browser-based interaction
-- **🔌 RESTful APIs** with OpenAI-compatible response formats
+- **RESTful APIs** with OpenAI-compatible response formats
 
 ---
 
@@ -376,7 +376,7 @@ curl http://localhost:8000/health
 | **Learning Curve** | Lower (standard libraries) | Moderate (LangChain concepts) | Moderate (framework concepts) |
 | **Extensibility** | Manual implementation | LangChain ecosystem | Framework-based extensions |
 | **Documentation** | Custom docs | [python.langchain.com](https://python.langchain.com/docs/tutorials/) | LangChain.js docs |
-| **Production Ready** | ✅ | ✅ | ✅ (Recommended) |
+| **Production Ready** | (Option) | (Option) | (Recommended) |
 
 ### When to use each implementation
 
@@ -462,13 +462,13 @@ curl -X POST http://localhost:8000/agent/query \
   -d '{"query": "What is the weather in Paris?"}'
 ```
 
-### Test Python Agent  
+### Test Python Agent
 ```bash
 # Start the agent
 source venv/bin/activate
 python src/index.py
 
-# In another terminal, run tests  
+# In another terminal, run tests
 python test_components.py
 
 # Manual test
@@ -742,7 +742,7 @@ make help              # Show all available commands
 make setup             # Full setup
 make run               # Start AI Agent
 make webui-setup       # Setup Open WebUI
-make webui-start       # Start Open WebUI  
+make webui-start       # Start Open WebUI
 make full-stack        # Start everything
 make test              # Test components
 make test-integration  # Test full integration
