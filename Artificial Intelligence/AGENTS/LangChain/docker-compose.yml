@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # AI Agent service (your custom no-framework agent)
+  ai-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-agent-no-framework
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - MODEL_NAME=llama3.1:8b-instruct-q4_0
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8000
+    depends_on:
+      - ollama
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Ollama service for LLM inference
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-service
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    # Uncomment if you have NVIDIA GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Open WebUI for chat interface
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui-aiagent
+    ports:
+      - "3000:8080"
+    environment:
+      # Connect to AI Agent instead of OpenAI
+      - OPENAI_API_BASE_URL=http://ai-agent:8000/v1
+      - OPENAI_API_KEY=sk-aiagent-dummy-key
+      - DEFAULT_MODELS=ai-agent-no-framework
+      - WEBUI_NAME=AI Agent No Framework Interface
+      - ENABLE_SIGNUP=false
+      - DEFAULT_USER_ROLE=admin
+      - WEBUI_SECRET_KEY=change-this-secret-key-in-production
+      # Additional configuration
+      - ENABLE_LOGIN_FORM=true
+      - ENABLE_COMMUNITY_SHARING=false
+      - SHOW_ADMIN_DETAILS=true
+    volumes:
+      - open-webui-data:/app/backend/data
+    depends_on:
+      - ai-agent
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  ai-agent-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  ollama-data:
+    driver: local
+  open-webui-data:
+    driver: local

@@ -1,0 +1,69 @@
+# Multi-stage Dockerfile for LangChain.js AI Agent
+# Production-ready Node.js container for Enterprise deployment
+
+# Build stage
+FROM node:18-alpine AS builder
+
+LABEL maintainer="AI Agent Developer"
+LABEL description="LangChain.js AI Agent - Production-ready JavaScript implementation"
+LABEL version="1.0.0"
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies (including dev dependencies for build)
+RUN npm ci --only=production && npm cache clean --force
+
+# Production stage
+FROM node:18-alpine AS production
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S aiagent -u 1001
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files and install production dependencies
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application source code
+COPY src/ ./src/
+COPY .env* ./
+
+# Create necessary directories
+RUN mkdir -p logs temp
+
+# Set ownership to non-root user
+RUN chown -R aiagent:nodejs /app
+
+# Switch to non-root user
+USER aiagent
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node -e "fetch('http://localhost:8000/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
+
+# Environment variables
+ENV NODE_ENV=production
+ENV PORT=8000
+ENV OLLAMA_BASE_URL=http://ollama:11434
+ENV OLLAMA_MODEL=llama3.1:8b-instruct-q4_0
+ENV LOG_LEVEL=info
+
+# Start the application
+CMD ["node", "src/index.js"]
+
+# Metadata
+LABEL org.opencontainers.image.title="AI Agent LangChain.js"
+LABEL org.opencontainers.image.description="Production-ready AI Agent using LangChain.js framework"
+LABEL org.opencontainers.image.vendor="AI Agent Team"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.licenses="MIT"

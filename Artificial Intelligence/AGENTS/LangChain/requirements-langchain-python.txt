@@ -1,0 +1,39 @@
+# Python LangChain Implementation Dependencies
+# Use this for implementing Python AI Agents with LangChain framework
+# Tutorial: https://python.langchain.com/docs/tutorials/
+
+# Core LangChain libraries
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-core>=0.1.20
+
+# LLM integrations
+langchain-ollama>=0.1.0
+langchain-openai>=0.0.8
+
+# Web server and API
+fastapi>=0.108.0
+uvicorn[standard]>=0.25.0
+
+# HTTP client and utilities
+httpx>=0.26.0
+python-dotenv>=1.0.0
+
+# Data validation and processing
+pydantic>=2.5.0
+
+# Optional: Advanced LangChain features
+langchain-experimental>=0.0.50
+langsmith>=0.0.80
+
+# Optional: Vector databases for advanced RAG
+# langchain-chroma>=0.1.0
+# langchain-pinecone>=0.0.3
+
+# Optional: Memory and caching
+# redis>=5.0.0
+
+# Development dependencies
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0

@@ -1,0 +1,52 @@
+{
+  "name": "ai-agent-langchain-js",
+  "version": "1.0.0",
+  "description": "AI Agent implementation using LangChain.js framework for handling greetings, weather queries, and LLM interactions",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:agents": "node src/agents.js",
+    "dev": "nodemon src/index.js",
+    "test": "node test/test_agent.js",
+    "demo": "node examples/demo_client.js",
+    "install-deps": "./install-langchain.sh",
+    "setup": "npm install && echo '✅ Dependencies installed. Make sure Ollama is running with llama3.1:8b-instruct-q4_0 model.'",
+    "health": "curl -s http://localhost:8000/health | jq .",
+    "docker:build": "docker build -t ai-agent-langchain-js -f Dockerfile.langchain .",
+    "docker:run": "docker run -p 8000:8000 --env-file .env ai-agent-langchain-js",
+    "docker:deploy": "docker-compose -f docker-compose.langchain.yml up -d",
+    "deploy": "./deploy-langchain.sh",
+    "deploy:production": "./deploy-langchain.sh production",
+    "deploy:native": "./deploy-langchain.sh native",
+    "production": "NODE_ENV=production node src/index.js"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.2.0",
+    "@langchain/ollama": "^0.0.4",
+    "@langchain/community": "^0.2.0",
+    "langchain": "^0.2.0",
+    "axios": "^1.6.8",
+    "express": "^4.18.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "zod": "^3.22.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "keywords": [
+    "ai-agent",
+    "langchain",
+    "ollama",
+    "weather-api",
+    "llm",
+    "nodejs"
+  ],
+  "author": "AI Agent Developer",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

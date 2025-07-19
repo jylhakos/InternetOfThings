@@ -1,0 +1,141 @@
+# Docker Compose for LangChain.js AI Agent Production Stack
+# Prioritized JavaScript implementation for DevOps deployment
+
+version: '3.8'
+
+services:
+  # LangChain.js AI Agent (Primary/Prioritized Implementation)
+  ai-agent-js:
+    build:
+      context: .
+      dockerfile: Dockerfile.langchain
+    container_name: langchain-ai-agent
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.1:8b-instruct-q4_0
+      - LOG_LEVEL=info
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - ai-network
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8000/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ai-agent.rule=Host(`ai-agent.local`)"
+      - "traefik.http.services.ai-agent.loadbalancer.server.port=8000"
+
+  # Ollama LLM Service (Required for both implementations)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-llm
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - ai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Open WebUI (Optional - for browser interface)
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ai-agent-js:8000/v1
+      - WEBUI_SECRET_KEY=your-secret-key-change-this
+      - WEBUI_AUTH=False
+    depends_on:
+      ai-agent-js:
+        condition: service_healthy
+    networks:
+      - ai-network
+    volumes:
+      - open-webui-data:/app/backend/data
+
+  # Nginx Reverse Proxy (Production load balancer)
+  nginx:
+    image: nginx:alpine
+    container_name: ai-agent-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/ssl:ro
+    depends_on:
+      - ai-agent-js
+    networks:
+      - ai-network
+    profiles:
+      - production
+
+# Alternative Python Implementation (Optional)
+  ai-agent-python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python-ai-agent
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONPATH=/app/src
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.1:8b-instruct-q4_0
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - ai-network
+    profiles:
+      - python-alternative
+
+networks:
+  ai-network:
+    driver: bridge
+    name: ai-network
+
+volumes:
+  ollama-data:
+    name: ollama-data
+  open-webui-data:
+    name: open-webui-data
+
+# Production deployment profiles:
+# Default: docker-compose up (JavaScript implementation only)
+# Python alternative: docker-compose --profile python-alternative up
+# Full production: docker-compose --profile production up
