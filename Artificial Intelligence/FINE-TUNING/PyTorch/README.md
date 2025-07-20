@@ -4,7 +4,7 @@ This project demonstrates how to fine-tune pre-trained Transformer models like B
 
 ## What is BERT?
 
-**BERT** (Bidirectional Encoder Representations from Transformers) is a revolutionary natural language processing (NLP) model developed by Google in 2018. BERT uses a deep neural network architecture called a **Transformer** to understand the context and meaning of words in text.
+**BERT** (Bidirectional Encoder Representations from Transformers) is a natural language processing (NLP) model developed by Google. BERT uses a deep neural network architecture called a **Transformer** to interpret the context and meaning of words in text.
 
 ### BERT:
 - **Bidirectional**: Unlike traditional models that read text from left to right, BERT reads text in both directions simultaneously
