@@ -2,7 +2,7 @@
 
 ## Overview
 
-I have successfully updated your Python AI Agent to support Meta Llama 4 Scout while maintaining backward compatibility with Llama 3.x models. The implementation provides advanced tool calling capabilities, extended context window support (10M tokens), and enhanced reasoning through the Mixture-of-Experts architecture.
+AI Agent files (Python) was updated to Meta Llama 4 (Scout) model with Llama 3.x models backward compatibility. The implementation provides tool calling capabilities, extended context window support (10M tokens), and reasoning through the Mixture-of-Experts (MOE) architecture.
 
 ## Features
 
