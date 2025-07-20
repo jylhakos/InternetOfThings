@@ -1,0 +1,24 @@
+# AI Agent Dependencies for Llama 4 Scout Support
+# Core web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# HTTP client for API calls
+httpx==0.25.2
+
+# Data validation and settings
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# File operations
+aiofiles==23.2.1
+
+# Additional dependencies for enhanced functionality
+typing-extensions==4.8.0
+
+# Development and testing (optional)
+pytest==7.4.3
+pytest-asyncio==0.21.1

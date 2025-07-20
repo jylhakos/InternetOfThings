@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      - OPENAI_API_BASE_URL=http://host.docker.internal:8000/v1
+      - OPENAI_API_KEY=dummy
+      - DEFAULT_MODELS=ai-agent-llama4-scout
+      - ENABLE_SIGNUP=true
+      - WEBUI_NAME=AI Agent - Llama 4 Scout
+      - DEFAULT_USER_ROLE=admin
+    volumes:
+      - open-webui-data:/app/backend/data
+    restart: unless-stopped
+    networks:
+      - ai-agent-network
+
+networks:
+  ai-agent-network:
+    driver: bridge
+
+volumes:
+  open-webui-data:
+    driver: local

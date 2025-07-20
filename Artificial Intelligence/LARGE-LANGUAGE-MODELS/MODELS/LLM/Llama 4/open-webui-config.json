@@ -1,0 +1,62 @@
+{
+  "ui": {
+    "title": "AI Agent - No Framework",
+    "description": "Custom AI agent with weather capabilities and LLM integration",
+    "default_locale": "en-US",
+    "theme": "dark",
+    "landing_page_mode": "chat",
+    "prompt_suggestions": [
+      {
+        "title": "🌤️ Weather Query",
+        "content": "What's the temperature in London right now?"
+      },
+      {
+        "title": "👋 Greeting",
+        "content": "Hello, how are you today?"
+      },
+      {
+        "title": "🤖 AI Question",
+        "content": "Explain artificial intelligence in simple terms"
+      },
+      {
+        "title": "🌍 Multiple Cities",
+        "content": "Compare the weather in Tokyo, Paris, and New York"
+      },
+      {
+        "title": "📚 Learning",
+        "content": "What is Python programming and why is it popular?"
+      }
+    ]
+  },
+  "models": {
+    "default": "ai-agent-no-framework",
+    "list": [
+      {
+        "id": "ai-agent-no-framework",
+        "name": "AI Agent (No Framework)",
+        "description": "Custom AI agent with weather capabilities powered by Llama-3.1",
+        "capabilities": ["chat", "weather", "general-knowledge"],
+        "max_tokens": 512,
+        "context_length": 2048
+      }
+    ]
+  },
+  "features": {
+    "enable_web_search": false,
+    "enable_image_generation": false,
+    "enable_voice": false,
+    "enable_file_upload": false,
+    "enable_community_sharing": false
+  },
+  "api": {
+    "base_url": "http://host.docker.internal:8000/v1",
+    "timeout": 60,
+    "max_retries": 3
+  },
+  "chat": {
+    "default_system_prompt": "You are a helpful AI assistant with weather information capabilities. You can provide current weather data for cities around the world and answer general questions.",
+    "max_history_length": 50,
+    "auto_scroll": true,
+    "show_timestamps": true
+  }
+}
