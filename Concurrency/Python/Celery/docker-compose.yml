@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+  # Redis - Message broker and result backend
+  redis:
+    image: redis:7-alpine
+    container_name: llm-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ollama - LLM Model Server
+  ollama:
+    image: ollama/ollama:latest
+    container_name: llm-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # LangChain.js Service - LLM Processing
+  langchain-service:
+    build:
+      context: ./langchain-service
+      dockerfile: Dockerfile
+    container_name: llm-langchain
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.1
+    depends_on:
+      - ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # FastAPI - API Gateway
+  fastapi:
+    build:
+      context: ./python-app
+      dockerfile: Dockerfile
+    container_name: llm-fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - LANGCHAIN_SERVICE_URL=http://langchain-service:3000
+      - OLLAMA_URL=http://ollama:11434
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    depends_on:
+      - redis
+      - langchain-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Celery Worker - Background Task Processing
+  celery-worker:
+    build:
+      context: ./python-app
+      dockerfile: Dockerfile
+    container_name: llm-celery-worker
+    restart: unless-stopped
+    command: celery -A celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - LANGCHAIN_SERVICE_URL=http://langchain-service:3000
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      - redis
+      - langchain-service
+    healthcheck:
+      test: ["CMD", "celery", "-A", "celery_app", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Celery Flower - Monitoring (Optional)
+  flower:
+    build:
+      context: ./python-app
+      dockerfile: Dockerfile
+    container_name: llm-flower
+    restart: unless-stopped
+    command: celery -A celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - celery-worker
+
+  # Open WebUI - Chat Interface (Optional)
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: llm-open-webui
+    restart: unless-stopped
+    ports:
+      - "3001:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=secret-key-change-this
+    volumes:
+      - open_webui_data:/app/backend/data
+    depends_on:
+      - ollama
+
+volumes:
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+  open_webui_data:
+    driver: local
+
+networks:
+  default:
+    name: llm-network

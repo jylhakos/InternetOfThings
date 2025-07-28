@@ -1,0 +1,22 @@
+# FastAPI and web server dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Redis and RQ dependencies
+redis==5.0.1
+rq==1.15.1
+
+# HTTP client and utilities
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Development and testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+
+# Optional: For enhanced logging and monitoring
+structlog==23.2.0
+
+# Optional: For API documentation
+python-multipart==0.0.6

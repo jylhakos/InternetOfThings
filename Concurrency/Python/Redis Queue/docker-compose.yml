@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis-queue-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  ollama:
+    image: ollama/ollama
+    container_name: redis-queue-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: redis-queue-open-webui
+    ports:
+      - "3001:8080"
+    environment:
+      - OPENAI_API_BASE_URL=http://host.docker.internal:8000/v1
+      - OPENAI_API_KEY=dummy-key
+      - WEBUI_SECRET_KEY=your-secret-key-here
+      - WEBUI_NAME=Redis Queue LLM Interface
+    volumes:
+      - open_webui_data:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - ollama
+
+volumes:
+  redis_data:
+  ollama_data:
+  open_webui_data:
+
+networks:
+  default:
+    driver: bridge

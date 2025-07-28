@@ -1,0 +1,24 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy application files
+COPY langchain_service.js langchain_script.js ./
+COPY .env .
+
+# Create non-root user
+RUN addgroup -g 1000 appgroup && adduser -u 1000 -G appgroup -s /bin/sh -D appuser
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+# Expose port
+EXPOSE 3000
+
+# Start the service
+CMD ["node", "langchain_service.js"]

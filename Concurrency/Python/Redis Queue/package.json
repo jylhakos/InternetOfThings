@@ -1,0 +1,47 @@
+{
+  "name": "redis-queue-langchain-ollama",
+  "version": "1.0.0",
+  "description": "Redis Queue with FastAPI, LangChain.js, and Ollama integration for asynchronous LLM processing",
+  "main": "langchain_service.js",
+  "scripts": {
+    "start": "node langchain_service.js",
+    "test": "node langchain_script.js 'What is the capital of France?'",
+    "health": "curl -s http://localhost:3000/health | jq",
+    "dev": "nodemon langchain_service.js"
+  },
+  "keywords": [
+    "redis",
+    "queue",
+    "fastapi",
+    "langchain",
+    "ollama",
+    "llm",
+    "async",
+    "rq"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@langchain/community": "^0.0.25",
+    "@langchain/core": "^0.1.25",
+    "@langchain/ollama": "^0.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "langchain": "^0.1.25"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/redis-queue-langchain-ollama.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/redis-queue-langchain-ollama/issues"
+  },
+  "homepage": "https://github.com/your-username/redis-queue-langchain-ollama#readme"
+}
