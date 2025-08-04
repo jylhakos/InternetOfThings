@@ -79,7 +79,7 @@ make pipeline
 - Reproducible across different systems
 - Handles complex ML library dependencies automatically
 
-#### 🥈 **Option 2: Python Virtual Environment**
+#### **Option 2: Python Virtual Environment**
 
 ```bash
 # Setup with venv (traditional Python approach)
