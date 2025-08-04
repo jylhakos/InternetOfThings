@@ -2,7 +2,7 @@
 
 Amazon EKS (Elastic Kubernetes Service) is a Kubernetes-as-a-Service (KaaS) solution that delivers a managed environment for operating Kubernetes clusters, while users manage the worker nodes and utilize options like Fargate for serverless node management.
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/IOT/Deployment/Clouds/AWS/Services/Compute/EKS/Amazon_EKS.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Deployment/Clouds/AWS/Services/Compute/EKS/Amazon_EKS.png?raw=true)
 
 *Figure: Amazon Elastic Kubernetes Service (EKS)*
 
