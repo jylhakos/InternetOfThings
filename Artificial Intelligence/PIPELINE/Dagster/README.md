@@ -1,6 +1,94 @@
-# Dagster BERT Pipeline
+# Dagster
 
-This project demonstrates a complete MLOps pipeline for fine-tuning BERT models using **Dagster** as the orchestration platform. The pipeline integrates data preparation, model training, evaluation, deployment, and inference testing with support for both local development and Amazon AWS production deployment.
+**How to use Dagster for ML pipeline?**
+
+*Dagster as the orchestrator in LLM pipeline*
+
+Dagster defines and orchestrates the entire LLM pipeline as a collection of "assets" (logical units of data or computation). This provides observability, lineage tracking, and robust error handling.
+
+**Amazon AWS**
+
+*Data ingestion and storage*
+
+Amazon Simple Storage Service (Amazon S3)
+
+Used for storing raw data, processed data, and model artifacts.
+
+Amazon Redshift or other data warehouses
+
+For structured data storage and analytics, potentially feeding into LLM training.
+
+Airbyte (or similar tools)
+
+Can be orchestrated by Dagster to ingest data from various sources into S3 or data warehouses.
+
+*LLM training and fine-tuning*
+
+Amazon SageMaker
+
+Provides managed services for building, training, and deploying machine learning models, including LLMs. Dagster can trigger SageMaker training jobs and monitor their progress.
+
+Amazon SageMaker Endpoints
+
+For deploying trained LLMs and serving inference requests.
+
+Amazon EMR (Elastic MapReduce)
+
+For large-scale data processing and transformations using frameworks like Apache Spark, which can prepare data for LLM training.
+
+*LLM inference and deployment*
+
+AWS Lambda
+
+Can be used to invoke LLM inference endpoints as part of a Dagster asset, such as serverless inference.
+
+*Orchestration and infrastructure*
+
+Amazon ECS (Elastic Container Service) Fargate or EC2
+
+For hosting Dagster Dagit (UI) and worker processes.
+
+Amazon Relational Database Service (Amazon RDS) PostgreSQL
+
+For storing Dagster's metadata.
+
+Amazon AWS Systems Manager Parameter Store
+
+Parameter Store integrates with AWS Key Management Service (KMS) for encrypting sensitive data, ensuring secure storage and retrieval of parameters. For securely managing sensitive configurations and secrets used within the pipeline.
+
+AWS Identity and Access Management (IAM)
+
+For managing permissions and access control for Dagster and its interactions with AWS services.
+
+### Dagster Pipeline
+
+**Data Ingestion**
+
+Dagster orchestrates an Airbyte sync to pull data from a source into S3.
+
+**Data transformation**
+
+Dagster defines an asset that uses EMR (via dagster-aws) to process and clean the data in S3, preparing it for LLM training.
+
+**LLM training**
+
+Dagster triggers a SageMaker training job, using the prepared data to train or fine-tune an LLM.
+
+**Model evaluation**
+
+Dagster orchestrates an asset to evaluate the trained LLM's performance and store metrics in S3 or a data warehouse.
+
+**Model deployment**
+
+Dagster orchestrates the deployment of the trained LLM to a SageMaker endpoint for inference.
+
+**Inference or routing**
+
+Dagster can then orchestrate assets for LLM inference, potentially using an LLM router (as described in the Not Diamond blog post) to dynamically select the optimal LLM based on the query.
+
+## Example: MLOps pipeline for fine-tuning BERT models using **Dagster**
+
+This example demonstrates MLOps pipeline for fine-tuning BERT models using **Dagster** as the orchestration platform. The pipeline integrates data preparation, model training, evaluation, deployment, and inference testing with support for both local development and Amazon AWS production deployment.
 
 ## Overview
 
@@ -1072,93 +1160,7 @@ docker exec -it <container_id> /bin/bash
 - `docker-compose.yml` - Multi-service deployment
 - `requirements-dagster.txt` - Python dependencies
 
-**How to integrate components for BERT pipeline? (without Dagster)?**
-
-Dagster as the orchestrator
-
-Dagster defines and orchestrates the entire LLM pipeline as a collection of "assets" (logical units of data or computation). This provides observability, lineage tracking, and robust error handling.
-
-Amazon AWS services
-
-Data ingestion and storage
-
-Amazon S3
-
-Used for storing raw data, processed data, and model artifacts.
-
-AWS Redshift or other data warehouses
-
-For structured data storage and analytics, potentially feeding into LLM training.
-
-Airbyte (or similar tools)
-
-Can be orchestrated by Dagster to ingest data from various sources into S3 or data warehouses.
-
-LLM training and fine-tuning:
-
-Amazon SageMaker
-
-Provides managed services for building, training, and deploying machine learning models, including LLMs. Dagster can trigger SageMaker training jobs and monitor their progress.
-
-Amazon AWS EMR
-
-For large-scale data processing and transformations using frameworks like Apache Spark, which can prepare data for LLM training.
-
-LLM inference and deployment
-
-Amazon SageMaker Endpoints
-
-For deploying trained LLMs and serving inference requests.
-
-AWS Lambda
-
-Can be used to invoke LLM inference endpoints as part of a Dagster asset, such as serverless inference.
-
-Orchestration and infrastructure
-
-AWS ECS (Fargate) or EC2
-
-For hosting Dagster Dagit (UI) and worker processes.
-
-AWS RDS (PostgreSQL)
-
-For storing Dagster's metadata.
-
-AWS Systems Manager Parameter Store: 
-
-For securely managing sensitive configurations and secrets used within the pipeline.
-
-Amazon AWS IAM
-
-For managing permissions and access control for Dagster and its interactions with AWS services.
-
-### Pipeline
-
-**Data Ingestion**
-
-Dagster orchestrates an Airbyte sync to pull data from a source into S3.
-
-**Data transformation**
-
-Dagster defines an asset that uses EMR (via dagster-aws) to process and clean the data in S3, preparing it for LLM training.
-
-**LLM training**
-
-Dagster triggers a SageMaker training job, using the prepared data to train or fine-tune an LLM.
-
-**Model evaluation**
-
-Dagster orchestrates an asset to evaluate the trained LLM's performance and store metrics in S3 or a data warehouse.
-
-**Model deployment**
-
-Dagster orchestrates the deployment of the trained LLM to a SageMaker endpoint for inference.
-
-**Inference or routing**
-
-Dagster can then orchestrate assets for LLM inference, potentially using an LLM router (as described in the Not Diamond blog post) to dynamically select the optimal LLM based on the query.
-
-## A pipeline for fine-tuning
+## A pipeline for fine-tuning (ML pipeline excluded Dagster)
 
 This project demonstrates how to fine-tune pre-trained Transformer models like BERT for text classification using PyTorch and the Hugging Face transformers library.
 
@@ -1646,5 +1648,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 [Running Dagster locally](https://docs.dagster.io/deployment/oss/deployment-options/running-dagster-locally)
 
-
-
+[Using Airbyte with Dagster](https://dagster.io/integrations/dagster-airbyte)
