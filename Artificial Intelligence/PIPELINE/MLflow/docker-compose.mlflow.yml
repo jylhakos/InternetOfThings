@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # Fish Weight Prediction API Service
+  fish-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    container_name: fish-weight-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./mlruns:/app/mlruns
+      - ./Dataset:/app/Dataset
+    environment:
+      - MLFLOW_TRACKING_URI=./mlruns
+      - PYTHONPATH=/app
+    command: ["api"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # MLflow UI Service
+  mlflow-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    container_name: fish-weight-mlflow-ui
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./models:/app/models
+    environment:
+      - MLFLOW_TRACKING_URI=./mlruns
+    command: ["ui"]
+    depends_on:
+      - fish-api
+    restart: unless-stopped
+
+  # Training Service (run once)
+  fish-training:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    container_name: fish-weight-training
+    volumes:
+      - ./models:/app/models
+      - ./mlruns:/app/mlruns
+      - ./Dataset:/app/Dataset
+      - ./plots:/app/plots
+      - ./evaluation_plots:/app/evaluation_plots
+      - ./processed_data:/app/processed_data
+    environment:
+      - MLFLOW_TRACKING_URI=./mlruns
+      - PYTHONPATH=/app
+    command: ["pipeline"]
+    profiles:
+      - training
+
+  # Jupyter Notebook Service (for development)
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    container_name: fish-weight-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+    environment:
+      - MLFLOW_TRACKING_URI=./mlruns
+      - PYTHONPATH=/app
+    command: >
+      bash -c "pip install notebook && 
+               jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''"
+    profiles:
+      - development
+
+  # PostgreSQL for MLflow backend (optional)
+  postgres:
+    image: postgres:13
+    container_name: fish-weight-postgres
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    profiles:
+      - production
+
+  # MLflow with PostgreSQL backend (optional)
+  mlflow-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    container_name: fish-weight-mlflow-server
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./models:/app/models
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://mlflow:mlflow123@postgres:5432/mlflow
+      - MLFLOW_ARTIFACT_ROOT=./mlruns
+    command: >
+      bash -c "pip install psycopg2-binary && 
+               mlflow server --backend-store-uri postgresql://mlflow:mlflow123@postgres:5432/mlflow 
+               --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000"
+    depends_on:
+      - postgres
+    profiles:
+      - production
+
+volumes:
+  postgres_data:

@@ -1,0 +1,41 @@
+name: Fish_Weight_Prediction_Pipeline
+
+# Use conda environment for better dependency management
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      test_size: {type: float, default: 0.2}
+      random_state: {type: int, default: 42}
+      alpha: {type: float, default: 1.0}
+    command: "python train.py --test_size {test_size} --random_state {random_state} --alpha {alpha}"
+  
+  preprocessing:
+    command: "python preprocessing.py"
+  
+  train:
+    parameters:
+      test_size: {type: float, default: 0.2}
+      random_state: {type: int, default: 42}
+      alpha: {type: float, default: 1.0}
+    command: "python train.py --test_size {test_size} --random_state {random_state} --alpha {alpha}"
+  
+  evaluate:
+    command: "python evaluate.py"
+  
+  inference:
+    parameters:
+      model_uri: {type: string, default: "models:/fish_weight_predictor/latest"}
+    command: "python inference.py --model_uri {model_uri}"
+  
+  serve_api:
+    command: "python serve_api.py"
+  
+  # Complete pipeline entry point
+  pipeline:
+    parameters:
+      test_size: {type: float, default: 0.2}
+      random_state: {type: int, default: 42}
+      alpha: {type: float, default: 1.0}
+    command: "python preprocessing.py && python train.py --test_size {test_size} --random_state {random_state} --alpha {alpha} && python evaluate.py"

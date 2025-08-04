@@ -1,577 +1,1195 @@
-# Fine-tuning Transformer models in PyTorch
+# 🐟 Fish Weight Prediction MLflow Pipeline
 
-This project demonstrates how to fine-tune pre-trained Transformer models like BERT for text classification using PyTorch and the Hugging Face transformers library.
+## Overview
 
-## What is BERT?
-
-**BERT** (Bidirectional Encoder Representations from Transformers) is a natural language processing (NLP) model developed by Google. BERT uses a deep neural network architecture called a **Transformer** to interpret the context and meaning of words in text.
-
-### BERT:
-- **Bidirectional**: Unlike traditional models that read text from left to right, BERT reads text in both directions simultaneously
-- **Pre-trained**: Trained on massive text datasets using self-supervised learning
-- **Context-aware**: Understands word meaning based on surrounding context
-- **Transfer Learning**: Can be fine-tuned for specific tasks with minimal additional training
-
-## How does the BERT model work for text classification?
-
-### 1. **Architecture**
-BERT is built on the **Transformer architecture**, which relies on:
-- **Multi-Head Self-Attention**: Allows the model to focus on different parts of the input sequence simultaneously
-- **Feed-Forward Neural Networks**: Process the attention outputs
-- **Layer Normalization**: Stabilizes training
-- **Positional Encodings**: Help the model understand word order
-
-### 2. **Attention mechanism in Transformers**
-The **attention mechanism** is the core innovation of Transformers:
-- **Self-Attention**: Each word in the sequence attends to every other word, creating rich contextual representations
-- **Multi-Head Attention**: Multiple attention mechanisms run in parallel, capturing different types of relationships
-- **Query-Key-Value**: Each word is transformed into query (Q), key (K), and value (V) vectors
-- **Attention Weights**: Computed as: `Attention(Q,K,V) = softmax(QK^T/√d_k)V`
-
-### 3. **Text Classification process**
-1. **Input Tokenization**: Text is converted to token IDs using WordPiece tokenization
-2. **Embedding**: Tokens are converted to dense vector representations
-3. **Transformer Layers**: 12 layers (BERT-base) or 24 layers (BERT-large) process the embeddings
-4. **[CLS] Token**: Special classification token whose final representation is used for classification
-5. **Classification Head**: A simple linear layer maps BERT output to class probabilities
-
-### 4. **Fine-tuning process**
-Fine-tuning adapts the pre-trained BERT model to specific classification tasks:
-- **Transfer Learning**: Start with pre-trained BERT weights
-- **Task specific layer**: Add a classification head for your specific number of classes
-- **End-to-end training**: Update all model parameters using labeled data from your domain
-- **Lower Learning Rate**: Use smaller learning rates (2e-5) to preserve pre-trained knowledge
-
-## How fine-tuning works?
-
-### Supervised learning approach
-Text classification uses **supervised learning**:
-1. **Labeled dataset**: Collection of texts with their corresponding category labels
-2. **Training**: Algorithm learns patterns from labeled examples
-3. **Validation**: Model performance is evaluated on unseen data
-4. **Inference**: Trained model predicts categories for new text
-
-### Pre-trained model
-- **Training time**: Start with language understanding already learned
-- **Performance**: Leverages patterns from massive text corpora
-- **Less data required**: Fine-tuning needs fewer labeled examples than training from scratch
-- **Hugging Face Hub**: Easy access to pre-trained models
+```
+📁 Fish Weight Prediction MLflow Pipeline
+├── Data Layer
+│   ├── Dataset/Fish.csv (Raw fish measurements)
+│   └── processed_data/ (Cleaned and engineered features)
+├── Processing Layer  
+│   ├── preprocessing.py (Data cleaning & feature engineering)
+│   ├── train.py (Model training with multiple algorithms)
+│   └── evaluate.py (Model evaluation & validation)
+├── Model Layer
+│   ├── Linear Regression (Primary)
+│   ├── Ridge Regression
+│   ├── Lasso Regression  
+│   ├── Elastic Net
+│   └── Random Forest (Comparison)
+├── Deployment Layer
+│   ├── serve_api.py (FastAPI REST API)
+│   ├── inference.py (Local predictions)
+│   └── AWS SageMaker (Cloud deployment)
+└── Tracking Layer
+    └── MLflow (Experiment tracking & model registry)
+```
 
 ## Project
 
-```
-PyTorch/
-├── README.md                 # This documentation
-├── DOCUMENTATION.md          # Complete API reference and usage guide
-├── .gitignore               # Git ignore file for Python projects
-├── requirements.txt         # Core dependencies
-├── requirements-api.txt     # API-specific dependencies
-├── bert_env/                # Virtual environment (excluded from git)
-├── src/
-│   ├── bert_fine_tuning.py  # Main BERT fine-tuning script
-│   └── minimal_bert.py      # Simplified version
-├── api.py                   # FastAPI backend server
-├── test_setup.py            # Environment verification script
-├── test_model.py            # Model evaluation suite
-├── test_api.sh              # API testing script with curl commands
-├── examples.py              # Usage examples and guides
-├── project_summary.py       # Project overview
-├── Dockerfile               # Docker container configuration
-├── docker-compose.yml       # Docker Compose setup
-├── nginx.conf               # Nginx reverse proxy config
-└── fine_tuned_bert/         # Saved model directory (created after training)
-```
+This project demonstrates a **complete MLflow pipeline** for predicting fish weight using **Linear Regression** and other machine learning algorithms. The pipeline includes data preprocessing, model training, evaluation, and deployment with both local REST API and AWS SageMaker integration.
 
-## Setup
+### Features
 
-### 1. Create Python virtual environment
+- **End-to-end MLflow pipeline**: Complete ML lifecycle management
+- **Multiple regression models**: Linear, Ridge, Lasso, Elastic Net, Random Forest
+- **Comprehensive evaluation**: Statistical metrics, visualizations, residuals analysis
+- **REST API**: FastAPI server with cURL examples
+- **Cloud deployment**: AWS SageMaker integration
+- **Interactive visualizations**: Plotly dashboards and matplotlib plots
+- **Confidence intervals**: Bootstrap-based prediction uncertainty
+
+### Dataset: Fish.csv
+
+The Fish.csv dataset contains physical measurements of various fish species:
+
+| Feature | Description | Example |
+|---------|-------------|---------|
+| Species | Fish species | Bream, Perch, Pike |
+| Weight | Fish weight (grams) | 242.0 |
+| Length1 | Vertical length (cm) | 23.2 |
+| Length2 | Diagonal length (cm) | 25.4 |
+| Length3 | Cross length (cm) | 30.0 |
+| Height | Height (cm) | 11.52 |
+| Width | Diagonal width (cm) | 4.02 |
+
+**Dataset Source**: [Hugging Face - scikit-learn Fish Dataset](https://huggingface.co/datasets/scikit-learn/Fish)
+
+## Steps
+
+### Choose your environment manager
+
+This project supports both **Conda** (recommended) and **Python Virtual Environment**:
+
+#### **Option 1: Conda (Recommended for MLflow)**
+
 ```bash
-python3 -m venv bert_env
-source bert_env/bin/activate  # On Linux/Mac
+# Setup with conda (better for MLflow projects)
+./setup_conda.sh
+source activate_conda_env.sh
+
+# Run pipeline
+make pipeline
 ```
 
-### 2. Install dependencies
+**Why Conda is better for MLflow?**
+- Native MLflow support with `conda.yaml`
+- Dependency management (system + Python packages)
+- Optimized scientific computing libraries (Intel MKL, etc.)
+- Reproducible across different systems
+- Handles complex ML library dependencies automatically
+
+#### 🥈 **Option 2: Python Virtual Environment**
+
 ```bash
-pip install torch transformers scikit-learn numpy pandas
+# Setup with venv (traditional Python approach)
+./setup_mlflow.sh
+source activate_env.sh
+
+# Run pipeline
+make pipeline
 ```
 
-### 3. Verify setup
+### 1. Environment setup (Once)
+
 ```bash
-python test_setup.py
+# Clone or navigate to the project directory
+cd MLflow
+
+# Choose setup method:
+# For Conda (recommended):
+./setup_conda.sh && source activate_conda_env.sh
+
+# For Virtual Environment:
+./setup_mlflow.sh && source activate_env.sh
 ```
 
-### 4. Run fine-tuning
+### 2. Download dataset
+
 ```bash
-python src/bert_fine_tuning.py
+# Option 1: Download from Hugging Face
+wget https://huggingface.co/datasets/scikit-learn/Fish/raw/main/Fish.csv -O Dataset/Fish.csv
+
+# Option 2: Use existing dataset (if already present)
+# The Dataset/Fish.csv should already be in the project
 ```
 
-### 5. Start FastAPI server
+### 3. Run pipeline
+
 ```bash
-# Install API dependencies
-pip install -r requirements-api.txt
+# Option 1: Using Make (recommended)
+make pipeline
 
-# Start the API server
-python api.py
-# or using uvicorn directly
-uvicorn api:app --host 0.0.0.0 --port 8000 --reload
+# Option 2: Using MLflow
+mlflow run . --experiment-name fish_weight_prediction
+
+# Option 3: Step by step
+python preprocessing.py
+python train.py
+python evaluate.py
 ```
 
-### 6. Test API Endpoints
+### 4. Start MLflow UI
+
 ```bash
-# Run comprehensive API tests
-./test_api.sh
+# Start MLflow tracking UI
+make ui
+# or
+mlflow ui --host 0.0.0.0 --port 5000
 
-# Or test manually with curl
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I love this product!", "return_confidence": true}'
+# Access at: http://localhost:5000
 ```
 
-## FastAPI backend server
+### 5. Start REST API server
 
-This project includes **FastAPI** backend that provides REST API endpoints for text classification using the fine-tuned BERT model.
-
-> 📖 **For detailed API documentation, examples, and troubleshooting, see [DOCUMENTATION.md](./DOCUMENTATION.md)**
-
-### API
-- **RESTful Endpoints**: Standard HTTP methods for text classification
-- **Single & batch processing**: Classify one text or multiple texts at once
-- **Confidence scores**: Optional confidence values for predictions
-- **Health monitoring**: Health check and model status endpoints
-- **Documentation**: Auto-generated API docs with Swagger UI
-- **CORS**: Cross-Origin Resource Sharing enabled
-- **Error handling**: Comprehensive error responses and logging
-- **Performance metrics**: Processing time tracking
-
-### API Endpoints
-
-#### 1. **Root Endpoint**
 ```bash
-GET /
-# Returns basic API information
+# Start FastAPI server
+make serve
+# or
+python serve_api.py
+
+# Access at: http://localhost:8000
+# API docs: http://localhost:8000/docs
 ```
 
-#### 2. **Health Check**
+## � Environment Management: Conda vs Virtual Environment
+
+### Conda vs Python Virtual Environment comparison
+
+| Feature | Conda | Python venv |
+|---------|-------|-------------|
+| **MLflow integration** | ✅ Native support | ⚠️ Requires manual setup |
+| **Dependency management** | ✅ System + Python packages | ❌ Python packages only |
+| **Libraries** | ✅ Optimized builds (Intel MKL) | ⚠️ Default builds |
+| **Reproducibility** | ✅ Cross-platform consistent | ⚠️ Platform dependent |
+| **Dependencies** | ✅ Automatic resolution | ❌ Manual management |
+| **Setup speed** | ⚠️ Slower initial setup | ✅ Faster setup |
+| **Disk space** | ⚠️ Larger footprint | ✅ Smaller footprint |
+| **Learning curve** | ⚠️ Steeper | ✅ Familiar to Python devs |
+
+### **Recommendation: Use Conda for MLflow projects**
+
+For this MLflow pipeline, **conda is strongly recommended** because:
+
+1. **MLflow native support**: MLflow automatically creates conda environments from `conda.yaml`
+2. **Performance**: Optimized scientific computing libraries
+3. **Dependencies**: Conda resolves complex ML library conflicts
+4. **Production**: More reliable for deployment scenarios
+
+### Available setup options
+
 ```bash
-GET /health
-# Returns API and model health status
-curl http://localhost:8000/health
+# Conda Setup (Recommended)
+./setup_conda.sh
+source activate_conda_env.sh
+
+# Python venv Setup (Alternative)
+./setup_mlflow.sh
+source activate_env.sh
+
+# 🐋 Docker Setup (Container)
+docker-compose -f docker-compose.mlflow.yml up
 ```
 
-#### 3. **Model information**
+## � Setup instructions
+
+### Prerequisites
+
+- **Operating System**: Linux/Debian (Ubuntu 20.04+ recommended)
+- **Python**: 3.8 or higher
+- **Make**: GNU Make tool
+- **Git**: Version control
+- **curl**: For API testing
+
+### System dependencies
+
 ```bash
-GET /model/info
-# Returns detailed model information
-curl http://localhost:8000/model/info
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install -y python3 python3-pip python3-venv git curl wget build-essential make
+
+# CentOS/RHEL
+sudo yum update -y
+sudo yum install -y python3 python3-pip git curl wget gcc gcc-c++ make
 ```
 
-#### 4. **Text Classification (Single)**
+### Python environment setup
+
 ```bash
-POST /classify
-# Classify a single text
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I absolutely love this product!", "return_confidence": true}'
+# Create virtual environment
+python3 -m venv venv
 
-# Response:
-{
-  "text": "I absolutely love this product!",
-  "prediction": 1,
-  "label": "positive",
-  "confidence": 0.9876,
-  "processing_time_ms": 45.23
-}
+# Activate environment
+source venv/bin/activate
+
+# Install MLflow with pipelines support
+pip install mlflow[pipelines]>=2.8.0
+
+# Install all dependencies
+pip install -r requirements.txt
 ```
 
-#### 5. **Text Classification (Batch)**
+### Directory structure creation
+
 ```bash
-POST /classify/batch
-# Classify multiple texts at once
-curl -X POST "http://localhost:8000/classify/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "texts": ["Great product!", "Terrible service.", "It was okay."],
-    "return_confidence": true
-  }'
-
-# Response:
-{
-  "results": [
-    {
-      "text": "Great product!",
-      "prediction": 1,
-      "label": "positive",
-      "confidence": 0.9234,
-      "processing_time_ms": 42.1
-    },
-    // ... more results
-  ],
-  "total_texts": 3,
-  "total_processing_time_ms": 123.45
-}
+mkdir -p {models,plots,evaluation_plots,detailed_evaluation,processed_data,logs}
 ```
 
-#### 6. **Classifications - Demo**
+## Data processing pipeline
+
+### 1. Data cloading and exploration
+
+```python
+# Load dataset
+python preprocessing.py
+```
+
+**Outputs:**
+- Dataset shape and statistics
+- Missing value analysis
+- Species distribution
+- Feature correlation matrix
+
+### 2. Data cleaning
+
+- **Missing Values**: Removal of incomplete records
+- **Outlier Detection**: IQR-based outlier removal for weight
+- **Data Type Conversion**: Ensure numeric types
+- **Quality Validation**: Data integrity checks
+
+### 3. Feature Engineering
+
+```python
+# Generated Features:
+Length_avg = (Length1 + Length2 + Length3) / 3
+Volume_proxy = Length_avg × Height × Width
+Length_diff = Length3 - Length1
+Aspect_ratio = Length_avg / Height
+Body_index = Height / Width
+Species_encoded = LabelEncoded(Species)
+```
+
+### 4. Visualization
+
+- Species distribution plots
+- Correlation heatmaps
+- Feature scatter matrices
+- Interactive Plotly dashboards
+
+## Model training
+
+### Algorithms
+
+1. **Linear Regression** (Primary)
+   - Simple linear relationship modeling
+   - Coefficient interpretability
+   - Fast training and prediction
+
+2. **Ridge Regression**
+   - L2 regularization
+   - Handles multicollinearity
+   - Prevents overfitting
+
+3. **Lasso Regression**
+   - L1 regularization
+   - Feature selection capability
+   - Sparse coefficient vectors
+
+4. **Elastic Net**
+   - Combined L1 and L2 regularization
+   - Balanced feature selection and grouping
+   - Robust to correlated features
+
+5. **Random Forest** (Comparison)
+   - Ensemble method
+   - Feature importance ranking
+   - Non-linear relationship modeling
+
+### Training process
+
 ```bash
-GET /classify/demo
-# Returns sample classifications for testing
-curl http://localhost:8000/classify/demo
+# Train all models with comparison
+python train.py --test_size 0.2 --random_state 42 --alpha 1.0
+
+# With custom parameters
+python train.py --test_size 0.3 --alpha 0.5
 ```
 
-### Documentation (API)
+### Model selection criteria
 
-The FastAPI server automatically generates interactive documentation:
+- **Primary Metric**: R² (Coefficient of Determination)
+- **Secondary Metrics**: RMSE, MAE, Cross-validation score
+- **Validation**: 5-fold cross-validation
+- **Best Model**: Automatically selected and saved
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+## Model evaluation
 
-These interfaces allow you to:
-- Browse all available endpoints
-- Test API calls directly in the browser
-- View request/response schemas
-- Download OpenAPI specifications
+### Evaluation metrics
+
+```python
+python evaluate.py
+```
+
+**Metrics:**
+- **R² Score**: Variance explained by the model
+- **RMSE**: Root Mean Square Error
+- **MAE**: Mean Absolute Error
+- **MAPE**: Mean Absolute Percentage Error
+- **Residuals Analysis**: Distribution and patterns
+
+### Evaluation visualizations
+
+1. **Actual vs Predicted Plot**
+   - Perfect prediction line
+   - Confidence bands
+   - R² annotation
+
+2. **Residuals Analysis**
+   - Residuals vs Predicted
+   - Residuals distribution histogram
+   - Q-Q plot for normality
+   - Residuals vs Actual values
+
+3. **Error Analysis by Weight Range**
+   - Absolute error boxplots
+   - Relative error analysis
+   - Performance across different fish sizes
+
+4. **Feature Importance Analysis**
+   - Coefficient magnitudes (Linear models)
+   - Feature importance scores (Tree models)
+
+### Sample results
+
+```
+Evaluation Results:
+  R² Score: 0.9234
+  RMSE: 45.67 grams
+  MAE: 32.14 grams
+  MAPE: 8.45%
+```
+
+## Inference and predictions
+
+### Local predictions
+
+```bash
+# Sample predictions
+python inference.py --samples
+
+# Custom prediction
+python inference.py \
+  --species "Bream" \
+  --length1 23.2 \
+  --length2 25.4 \
+  --length3 30.0 \
+  --height 11.52 \
+  --width 4.02 \
+  --confidence
+
+# Using MLflow model registry
+python inference.py --model_uri "models:/fish_weight_predictor/latest"
+```
+
+### Prediction with confidence intervals
+
+```python
+# Example output:
+Predicted Weight: 242.15 grams
+95% Confidence Interval: [228.34, 255.96] grams
+```
+
+## REST API server
 
 ### Starting the API server
 
-#### Method 1: Python execution
 ```bash
-# Activate virtual environment
-source bert_env/bin/activate
+# Start FastAPI server
+python serve_api.py
 
-# Install API dependencies
-pip install -r requirements-api.txt
-
-# Start server
-python api.py
+# Server starts at: http://localhost:8000
+# Interactive docs: http://localhost:8000/docs
+# Redoc docs: http://localhost:8000/redoc
 ```
 
-#### Method 2: Using Uvicorn
-```bash
-# Development mode with auto-reload
-uvicorn api:app --host 0.0.0.0 --port 8000 --reload
+### API Endpoints
 
-# Production mode
-uvicorn api:app --host 0.0.0.0 --port 8000 --workers 4
+#### Health Check
+```bash
+curl -X GET "http://localhost:8000/"
 ```
 
-### Testing the API
-
-#### Automated testing
+#### Single Fish prediction
 ```bash
-# Run comprehensive test suite
-./test_api.sh
+curl -X POST "http://localhost:8000/predict" \
+-H "Content-Type: application/json" \
+-d '{
+  "species": "Bream",
+  "length1": 23.2,
+  "length2": 25.4,
+  "length3": 30.0,
+  "height": 11.52,
+  "width": 4.02
+}'
 ```
 
-#### Manual testing
+#### Batch predictions
 ```bash
-# Basic classification
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "This movie was fantastic!"}'
-
-# With confidence scores
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I hate this product.", "return_confidence": true}'
-
-# Batch processing
-curl -X POST "http://localhost:8000/classify/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "texts": ["Amazing service!", "Poor quality.", "Average experience."],
-    "return_confidence": true
-  }'
-
-# Health check
-curl http://localhost:8000/health
-
-# Model information
-curl http://localhost:8000/model/info
+curl -X POST "http://localhost:8000/predict/batch" \
+-H "Content-Type: application/json" \
+-d '{
+  "fish_list": [
+    {
+      "species": "Bream",
+      "length1": 23.2,
+      "length2": 25.4,
+      "length3": 30.0,
+      "height": 11.52,
+      "width": 4.02
+    },
+    {
+      "species": "Perch",
+      "length1": 18.7,
+      "length2": 20.0,
+      "length3": 22.2,
+      "height": 8.54,
+      "width": 2.56
+    }
+  ]
+}'
 ```
 
-## Docker deployment
-
-The project includes complete **Docker** support for containerized deployment.
-
-### Docker
-- **Multi-stage Build**: Optimized container size
-- **Security**: Non-root user execution
-- **Health Checks**: Container health monitoring  
-- **Resource Limits**: Memory and CPU constraints
-- **Environment Configuration**: Flexible deployment options
-- **Nginx Integration**: Optional reverse proxy setup
-
-### Start with Docker
-
-#### 1. **Build and run with Docker**
+#### Get available species
 ```bash
-# Build the Docker image
-docker build -t bert-classifier .
-
-# Run the container
-docker run -p 8000:8000 bert-classifier
-
-# Run with custom configuration
-docker run -p 8000:8000 \
-  -e LOG_LEVEL=debug \
-  -v $(pwd)/fine_tuned_bert:/app/fine_tuned_bert:ro \
-  bert-classifier
+curl -X GET "http://localhost:8000/species"
 ```
 
-#### 2. **Using Docker Compose (Recommended)**
+#### Model information
 ```bash
-# Start the service
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop the service
-docker-compose down
-
-# Start with nginx (production)
-docker-compose --profile production up -d
+curl -X GET "http://localhost:8000/model/info"
 ```
 
-#### 3. **Production deployment**
+#### cURL examples
 ```bash
-# Build and run with nginx reverse proxy
-docker-compose --profile production up -d
-
-# Scale the API service
-docker-compose up -d --scale bert-api=3
+curl -X GET "http://localhost:8000/examples/curl"
 ```
 
-### Docker configuration
+### API response format
 
-#### **Dockerfile**
-The Dockerfile includes:
-- Python 3.11 slim base image
-- System dependencies installation
-- Python package installation with caching
-- Non-root user for security
-- Health check configuration
-- Optimized layer caching
-
-#### **Docker Compose**
-The docker-compose.yml provides:
-- API service configuration
-- Port mapping (8000:8000)
-- Volume mounting for models
-- Health checks
-- Resource limits
-- Optional nginx reverse proxy
-
-#### **Environment variables**
-```bash
-# Available environment variables
-LOG_LEVEL=info          # Logging level
-PYTHONPATH=/app         # Python path
-MODEL_PATH=/app/fine_tuned_bert  # Custom model path
+```json
+{
+  "species": "Bream",
+  "predicted_weight": 242.15,
+  "confidence_interval_lower": 228.34,
+  "confidence_interval_upper": 255.96,
+  "features_used": {
+    "Length1": 23.2,
+    "Length2": 25.4,
+    "Length3": 30.0,
+    "Height": 11.52,
+    "Width": 4.02,
+    "Length_avg": 26.2,
+    "Volume_proxy": 1217.47,
+    "Length_diff": 6.8,
+    "Aspect_ratio": 2.27,
+    "Body_index": 2.87,
+    "Species_encoded": 0
+  },
+  "prediction_timestamp": "2025-08-04T10:30:45.123456"
+}
 ```
 
-### Docker deployment options
+## ☁️ Amazon AWS deployment
 
-#### **Development**
+### Prerequisites for Amazon AWS deployment
+
 ```bash
-# Basic development setup
-docker-compose up -d
-# Access API at http://localhost:8000
+# Install AWS CLI
+sudo apt-get install awscli
+# or
+pip install awscli
+
+# Configure AWS credentials
+aws configure
 ```
 
-#### **Production with Load Balancer**
+### Deploy to Amazon SageMaker
+
 ```bash
-# Production setup with nginx
-docker-compose --profile production up -d
-# Access API through nginx at http://localhost:80
+# Deploy model to SageMaker
+chmod +x deploy_aws.sh
+./deploy_aws.sh
 ```
 
-#### **Kubernetes deployment**
-```yaml
-# kubernetes-deployment.yaml (example)
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bert-classifier
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: bert-classifier
-  template:
-    metadata:
-      labels:
-        app: bert-classifier
-    spec:
-      containers:
-      - name: bert-classifier
-        image: bert-classifier:latest
-        ports:
-        - containerPort: 8000
-        resources:
-          requests:
-            memory: "2Gi"
-            cpu: "500m"
-          limits:
-            memory: "4Gi"
-            cpu: "1000m"
+### Amazon AWS deployment process
+
+1. **S3 Bucket Creation**: For model artifacts storage
+2. **IAM Role Setup**: SageMaker execution permissions
+3. **Model Packaging**: Tar file with inference code
+4. **SageMaker Model**: Model registration in SageMaker
+5. **Endpoint Configuration**: Instance type and scaling
+6. **Endpoint Creation**: Live inference endpoint
+
+### Testing SageMaker Endpoint
+
+```bash
+# Test the deployed endpoint
+python test_sagemaker_endpoint.py
+```
+
+### Amazon AWS resources
+
+```bash
+# Monitor endpoint status
+aws sagemaker describe-endpoint --endpoint-name fish-weight-endpoint
+
+# List all endpoints
+aws sagemaker list-endpoints
+
+# Cleanup resources (to avoid charges)
+./cleanup_aws_resources.sh
+```
+
+### Cost
+
+- **ml.t2.medium**: ~$0.0464 per hour
+- **Data transfer**: Minimal for small predictions
+- **Storage**: S3 charges for model artifacts
+
+** Important**: Delete endpoints when not in use to avoid unnecessary charges.
+
+## 📈 MLflow Integration
+
+### MLflow components
+
+1. **MLflow Tracking**: Experiment and run tracking
+2. **MLflow Projects**: Reproducible ML code packaging
+3. **MLflow Models**: Model packaging and deployment
+4. **MLflow Model Registry**: Model versioning and staging
+
+### MLflow experiments
+
+```bash
+# View experiments in UI
+mlflow ui
+
+# List experiments via CLI
+mlflow experiments list
+
+# Search runs
+mlflow runs list --experiment-id 1
+```
+
+### Model Registry operations
+
+```bash
+# Register model
+mlflow models register --model-uri runs:/<run-id>/fish_weight_predictor --name fish_weight_predictor
+
+# Transition model stage
+mlflow models transition --name fish_weight_predictor --version 1 --stage Production
+
+# Serve model locally
+mlflow models serve -m models:/fish_weight_predictor/Production -p 8001
+```
+
+### Experiment tracking
+
+Each run automatically logs:
+- **Parameters**: test_size, random_state, alpha, model_type
+- **Metrics**: R², RMSE, MAE, MAPE, cross-validation scores
+- **Artifacts**: Model files, plots, evaluation reports
+- **Tags**: Git commit, user, environment info
+
+## 🛠️ Development commands
+
+### Make commands
+
+```bash
+# See all available commands
+make help
+
+# Setup environment
+make setup
+
+# Run individual steps
+make preprocess    # Data preprocessing
+make train        # Model training
+make evaluate     # Model evaluation
+make serve        # Start API server
+
+# Complete pipeline
+make pipeline
+
+# Start MLflow UI
+make ui
+
+# Clean generated files
+make clean
+
+# MLflow specific commands
+make mlflow-run    # Run MLflow project
+make mlflow-serve  # Serve model via MLflow
+```
+
+### MLflow commands
+
+```bash
+# Run complete pipeline
+mlflow run . --experiment-name fish_weight_prediction
+
+# Run with parameters
+mlflow run . -P test_size=0.3 -P alpha=0.5
+
+# Run specific entry point
+mlflow run . -e train -P test_size=0.2
+
+# Serve model
+mlflow models serve -m models:/fish_weight_predictor/latest -p 8001
+```
+
+### Python scripts
+
+```bash
+# Data preprocessing
+python preprocessing.py
+
+# Model training with parameters
+python train.py --test_size 0.2 --random_state 42 --alpha 1.0
+
+# Model evaluation
+python evaluate.py
+
+# Inference examples
+python inference.py --samples
+python inference.py --species "Pike" --length1 35.0 --length2 38.5 --length3 41.0 --height 9.85 --width 3.33 --confidence
+
+# API server
+python serve_api.py
+
+# Test setup
+python test_setup.py
+```
+
+## 📁 Project Structure
+
+```
+📦 MLflow/
+├── 📄 MLproject                 # MLflow project definition
+├── 📄 conda.yaml              # Conda environment specification
+├── 📄 requirements.txt        # Python dependencies
+├── 📄 README.md               # This documentation
+├── 📄 Makefile                # Build automation
+├── 🔧 setup_mlflow.sh         # Environment setup script
+├── 🔧 activate_env.sh          # Environment activation script
+├── 🔧 deploy_aws.sh           # AWS deployment script
+├── 🔧 test_setup.py           # Setup verification script
+├── 🐍 preprocessing.py        # Data preprocessing pipeline
+├── 🐍 train.py                # Model training pipeline
+├── 🐍 evaluate.py             # Model evaluation pipeline
+├── 🐍 inference.py            # Inference and prediction script
+├── 🐍 serve_api.py            # FastAPI REST API server
+├── 📁 Dataset/
+│   └── 📊 Fish.csv            # Raw fish dataset
+├── 📁 scikit-learn/           # Legacy scikit-learn scripts
+│   ├── 🐍 fish_analysis.py
+│   ├── 🐍 fish_predictive_model.py
+│   ├── 🐍 fish_regression.py
+│   └── 📄 requirements.txt
+├── 📁 models/                 # Trained model artifacts
+├── 📁 plots/                  # EDA visualizations
+├── 📁 evaluation_plots/       # Model evaluation plots
+├── 📁 detailed_evaluation/    # Comprehensive evaluation
+├── 📁 processed_data/         # Processed datasets
+├── 📁 sagemaker_deployment/   # SageMaker deployment files
+├── 📁 mlruns/                 # MLflow tracking data
+└── 📁 logs/                   # Application logs
+```
+
+## Advanced features
+
+### Bootstrap confidence intervals
+
+The pipeline includes bootstrap-based confidence interval estimation:
+
+```python
+# Confidence interval calculation
+predictions = []
+for _ in range(100):
+    noise = np.random.normal(0, 0.05, X.shape)
+    X_noisy = X + noise
+    pred = model.predict(X_noisy)
+    predictions.append(pred)
+
+lower_ci = np.percentile(predictions, 2.5)
+upper_ci = np.percentile(predictions, 97.5)
+```
+
+### Cross-Validation
+
+All models use 5-fold cross-validation for robust performance estimation:
+
+```python
+cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='neg_mean_squared_error')
+cv_rmse = np.sqrt(-cv_scores.mean())
+```
+
+### Interactive visualizations
+
+Plotly-based interactive dashboards are generated:
+
+- Scatter matrix plots
+- 3D surface plots
+- Interactive correlation heatmaps
+- Dynamic filtering and zooming
+
+### Model comparison
+
+Automatic comparison across multiple algorithms:
+
+- Linear Regression
+- Ridge Regression (L2 regularization)
+- Lasso Regression (L1 regularization)
+- Elastic Net (L1 + L2 regularization)
+- Random Forest (ensemble method)
+
+
+### Development setup
+```bash
+# Fork the repository
+git clone <your-fork>
+cd MLflow
+
+# Setup development environment
+./setup_mlflow.sh
+source activate_env.sh
+
+# Install development dependencies
+pip install pytest pytest-cov black flake8
+
+# Run tests
+pytest
+
+# Format code
+black .
+
+# Lint code
+flake8 .
+```
+
+**🐟 Fish Weight Predicting 🐟**
+Bream,290.0,24.0,26.3,31.2,12.48,4.3056
+Pike,270.0,16.2,18.0,22.2,8.544,4.1472
+...
+```
+
+**Features (Variables):**
+- `Length1`: Body length (cm)
+- `Length2`: Diagonal length (cm) 
+- `Length3`: Cross length (cm)
+- `Height`: Body height (cm)
+- `Width`: Diagonal width (cm)
+- `Species`: Fish species (categorical)
+
+**Target (Dependent variable)**
+- `Weight`: Fish weight in grams (continuous)
+
+### Supervised Learning
+
+#### 1. **Problem Type**: Regression
+- **Goal**: Predict continuous weight values
+- **Algorithm**: Random Forest Regressor, Linear Regression
+- **Evaluation Metrics**: R², RMSE, MAE
+
+#### 2. **Feature Engineering**
+```python
+# Categorical encoding for species
+species_encoded = pd.get_dummies(df['Species'], prefix='Species')
+
+# Feature scaling for numerical variables
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_numeric)
+
+# Feature interactions
+df['length_height_ratio'] = df['Length1'] / df['Height']
+df['volume_estimate'] = df['Length1'] * df['Height'] * df['Width']
+```
+
+#### 3. **Model training pipeline**
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model training
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+
+# Predictions and evaluation
+y_pred = rf_model.predict(X_test)
+r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+```
+
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: bert-classifier-service
-spec:
-  selector:
-    app: bert-classifier
-  ports:
-  - port: 80
-    targetPort: 8000
-  type: LoadBalancer
-```
 
-### Container health monitoring
+## 🛠️ Environment setup & requirements
 
-#### **Health Check Endpoint**
+### Virtual Environment
+
+Create isolated Python environment for the project:
+
 ```bash
-# Check container health
-curl http://localhost:8000/health
+# Create virtual environment
+python3 -m venv fish_prediction_env
 
-# Docker health status
-docker ps
-# Look for "healthy" status
+# Activate environment
+source fish_prediction_env/bin/activate  # Linux/macOS
+# fish_prediction_env\Scripts\activate  # Windows
+
+# Upgrade pip
+pip install --upgrade pip
 ```
 
-#### **Monitoring commands**
+#### **scikit-learn/requirements.txt**
+```txt
+# Machine Learning Core
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.17.0
+
+# Model Evaluation
+scikit-plot>=0.3.7
+yellowbrick>=1.5.0
+
+# Model Persistence
+joblib>=1.3.0
+
+# Hyperparameter Tuning
+optuna>=3.4.0
+scikit-optimize>=0.9.0
+
+# Development
+jupyter>=1.0.0
+ipykernel>=6.25.0
+```
+
+### Installation commands
+
 ```bash
-# View container logs
-docker logs <container_id>
+# Install main requirements
+pip install -r requirements.txt
 
-# Monitor resource usage
-docker stats <container_id>
 
-# Execute commands inside container
-docker exec -it <container_id> /bin/bash
+# Install scikit-learn specific requirements
+pip install -r scikit-learn/requirements.txt
+
+# Verify installation
+python -c "import sklearn, pandas; print('All packages installed successfully!')"
 ```
 
-### Troubleshooting Docker
+## FastAPI model deployment
 
-#### **Problems**
-```bash
-# Container not starting
-docker logs <container_id>
+Deploy the trained model as a RESTful API for real-time predictions.
 
-# Port already in use
-docker ps | grep 8000
-sudo netstat -tulpn | grep 8000
+### RESTful API
 
-# Model not loading
-# Ensure fine_tuned_bert directory exists
-ls -la fine_tuned_bert/
-
-# Memory issues
-# Increase Docker memory limits
-# Or use smaller models like DistilBERT
-```
-
-#### **Performance optimization**
-```bash
-# Use multi-stage builds
-# Enable Docker BuildKit
-DOCKER_BUILDKIT=1 docker build -t bert-classifier .
-
-# Use .dockerignore to exclude unnecessary files
-# Optimize layer caching by copying requirements first
-```
-
-## Testing fine-tuning success
-
-### 1. **Training metrics**
-- **Loss Reduction**: Training loss should decrease over epochs
-- **Convergence**: Loss should stabilize (not oscillate wildly)
-- **No Overfitting**: Validation loss shouldn't increase while training loss decreases
-
-### 2. **Evaluation metrics**
-- **Accuracy**: Percentage of correctly classified samples
-- **Precision**: True positives / (True positives + False positives)
-- **Recall**: True positives / (True positives + False negatives)  
-- **F1-Score**: Harmonic mean of precision and recall
-
-### 3. **Test cases**
 ```python
-# Example test cases
-test_cases = [
-    ("I love this product!", 1),      # Positive
-    ("This is terrible quality", 0),   # Negative
-    ("Average experience", ???),       # Neutral - check model confidence
-]
+# fish_api.py
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import joblib
+import numpy as np
+import pandas as pd
+from typing import List, Optional
+
+app = FastAPI(title="Fish Weight Prediction API", version="1.0.0")
+
+# Load trained model at startup
+model = joblib.load('models/fish_weight_predictor.pkl')
+scaler = joblib.load('models/feature_scaler.pkl')
+
+class FishMeasurement(BaseModel):
+    species: str
+    length1: float
+    length2: float
+    length3: float
+    height: float
+    width: float
+
+class PredictionResponse(BaseModel):
+    predicted_weight: float
+    confidence_score: Optional[float] = None
+    model_version: str = "1.0.0"
+
+@app.post("/predict", response_model=PredictionResponse)
+async def predict_fish_weight(measurement: FishMeasurement):
+    try:
+        # Prepare features
+        features = np.array([[
+            measurement.length1, measurement.length2, measurement.length3,
+            measurement.height, measurement.width
+        ]])
+        
+        # Scale features
+        features_scaled = scaler.transform(features)
+        
+        # Make prediction
+        prediction = model.predict(features_scaled)[0]
+        
+        return PredictionResponse(
+            predicted_weight=round(prediction, 2),
+            confidence_score=0.95  # Calculate based on model uncertainty
+        )
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "model_loaded": model is not None}
 ```
 
-## Model performance evaluation
+### Docker deployment
 
-### 1. **Validation split**
-- Split data into training (80%), validation (10%), test (10%)
-- Use validation set to tune hyperparameters
-- Use test set for final performance evaluation
+```dockerfile
+# Dockerfile
+FROM python:3.9-slim
 
-### 2. **Cross validation**
-- K-fold cross-validation for robust performance estimates
-- Helps detect overfitting and ensures generalization
+WORKDIR /app
 
-### 3. **Confusion matrix**
-- Visualize classification performance across all classes
-- Identify which classes are being confused
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-### 4. **Classification report**
-```python
-from sklearn.metrics import classification_report
-print(classification_report(y_true, y_pred))
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "fish_api:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-## Model Prediction Testing
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  fish-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    environment:
+      - MODEL_PATH=/app/models/fish_weight_predictor.pkl
+    restart: unless-stopped
 
-### 1. **Inference function**
-```python
-def predict_sentiment(text, model, tokenizer):
-    inputs = tokenizer(text, return_tensors="pt", 
-                      padding=True, truncation=True, max_length=128)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        prediction = torch.argmax(outputs.logits, dim=-1)
-    return prediction.item()
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: fish_predictions
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
 ```
 
-### 2. **Batch prediction**
-- Process multiple texts efficiently
-- Monitor prediction confidence scores
-- Handle edge cases and out-of-domain text
+## Troubleshooting
 
-### 3. **Model interpretability**
-- Use attention visualization to understand model decisions
-- Analyze which words contribute most to predictions
-- Test with adversarial examples
+### Issues
 
-## References
+#### 1. MLflow installation issues
+```bash
+# Reinstall MLflow with all dependencies
+pip uninstall mlflow
+pip install mlflow[pipelines] --upgrade
+```
 
-- **DOCUMENTATION.md**: [Complete API Reference and Usage Guide](./DOCUMENTATION.md)
-- **BERT Paper**: [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
-- **BERT**: [BERT: Pre-training of Deep Bidirectional Transformers](https://arxiv.org/abs/1810.04805)
-- **Hugging Face**: [https://huggingface.co/](https://huggingface.co/)
-- **PyTorch**: [https://pytorch.org/](https://pytorch.org/)
-- **Text Classification with BERT**: [https://www.sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert](https://www.sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert)
+#### 2. Dataset Not Found
+```bash
+# Verify dataset location
+ls -la Dataset/Fish.csv
 
-## Advanced topics
+# Download dataset
+wget https://huggingface.co/datasets/scikit-learn/Fish/raw/main/Fish.csv -O Dataset/Fish.csv
+```
 
-### **Model variants**
-- RoBERTa: Robustly Optimized BERT
-- DistilBERT: Smaller, faster BERT
-- ALBERT: A Lite BERT
-- DeBERTa: Decoding-enhanced BERT
+#### 3. Port Already in Use
+```bash
+# Check running processes
+lsof -i :8000  # for API server
+lsof -i :5000  # for MLflow UI
 
-### **Production deployment**
-- **Model quantization for faster inference**: Reduce model size and inference time
-- **ONNX export for cross-platform deployment**: Convert to ONNX format for broader compatibility
-- **API endpoints with FastAPI/Flask**: RESTful services for integration
-- **Docker containerization**: Scalable deployment with container orchestration
-- **Monitoring and logging in production**: Track performance and detect issues
-- **Load balancing and auto-scaling**: Handle high traffic loads
-- **Security considerations**: Authentication, rate limiting, and input validation
+# Kill processes if needed
+kill -9 <PID>
+```
+
+#### 4. AWS deployment issues
+```bash
+# Verify AWS credentials
+aws sts get-caller-identity
+
+# Check IAM permissions
+aws iam list-attached-role-policies --role-name FishWeightSageMakerRole
+```
+
+#### 5. Model loading issues
+```bash
+# Verify model file exists
+ls -la models/best_fish_weight_model.pkl
+
+# Retrain if needed
+python train.py
+```
+
+#### 6. Network configuration for ML pipeline
+
+**🔧 When you need iptables/nginx:**
+
+| Scenario | iptables | nginx | Why |
+|----------|----------|-------|-----|
+| **Local Development** | ❌ No | ❌ No | localhost only |
+| **Team Sharing** | ⚠️ Maybe | ⚠️ Maybe | Network access |
+| **Production** | ✅ Yes | ✅ Yes | Security & SSL |
+| **Load Balancing** | ⚠️ Maybe | ✅ Yes | Multiple instances |
+
+**For LOCAL DEVELOPMENT (current setup):**
+-  No iptables configuration needed
+-  No nginx configuration needed  
+-  Services bind to localhost (127.0.0.1) by default
+-  Only accessible from your local machine
+-  Access via: `http://localhost:8000` (API), `http://localhost:5000` (MLflow UI)
+
+**For team sharing (if needed):**
+```bash
+# Modify serve_api.py to bind to all interfaces:
+uvicorn.run("serve_api:app", host="0.0.0.0", port=8000)
+
+# Start MLflow UI for external access:
+mlflow ui --host 0.0.0.0 --port 5000
+
+# Add firewall rules (Ubuntu/Debian):
+sudo ufw allow 8000/tcp
+sudo ufw allow 5000/tcp
+
+# Access via: http://YOUR_IP:8000 (API), http://YOUR_IP:5000 (MLflow UI)
+```
+
+**For production deployment:**
+```bash
+# nginx reverse proxy configuration
+# /etc/nginx/sites-available/mlflow-api
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+    
+    location /mlflow/ {
+        proxy_pass http://127.0.0.1:5000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# Enable site:
+sudo ln -s /etc/nginx/sites-available/mlflow-api /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# iptables rules for production:
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT   # SSH
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT   # HTTP
+sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT  # HTTPS
+sudo iptables -A INPUT -j DROP                       # Drop all other
+
+# Save rules:
+sudo iptables-save > /etc/iptables/rules.v4
+```
+
+**Network configuration check:**
+```bash
+# Run network analysis script
+./check_network_config.sh
+
+# Check what's listening on ports
+netstat -tuln | grep -E ":5000|:8000"
+
+# Test local access
+curl http://localhost:8000/
+```
+
+### Environment Issues
+
+#### Virtual Environment Problems
+```bash
+# Recreate virtual environment
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### Permission issues
+```bash
+# Make scripts executable
+chmod +x setup_mlflow.sh
+chmod +x activate_env.sh
+chmod +x deploy_aws.sh
+```
+### Performance
+
+#### Memory issues
+```bash
+# Monitor memory usage
+htop
+
+# Reduce batch size for predictions
+# Limit plot generation for large datasets
+```
+
+#### Speed
+```bash
+# Use specific model instead of comparing all
+python train.py --model_type linear_regression
+
+# Reduce cross-validation folds
+# Limit bootstrap iterations for confidence intervals
+```
+
+## Resources
+
+### MLflow Documentation
+- [MLflow Official Documentation](https://mlflow.org/docs/latest/index.html)
+- [MLflow Tutorials](https://mlflow.org/docs/latest/tutorials-and-examples/index.html)
+- [MLflow Pipelines Guide](https://mlflow.org/docs/latest/pipelines.html)
+
+### AWS SageMaker Resources
+- [SageMaker MLflow Integration](https://docs.aws.amazon.com/sagemaker/latest/dg/mlflow.html)
+- [Deploy MLflow to SageMaker](https://mlflow.org/docs/latest/ml/deployment/deploy-model-to-sagemaker/)
+- [SageMaker Pipelines with MLflow](https://sagemaker-examples.readthedocs.io/en/latest/sagemaker-mlflow/sagemaker_pipelines_mlflow.html)
+
+### Machine Learning Resources
+- [Scikit-learn Documentation](https://scikit-learn.org/stable/)
+- [Linear Regression Theory](https://scikit-learn.org/stable/modules/linear_model.html#ordinary-least-squares)
+- [Model Evaluation Metrics](https://scikit-learn.org/stable/modules/model_evaluation.html)
+
+---

@@ -1,0 +1,89 @@
+# Fish Weight Prediction MLflow Pipeline Docker Image
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+ENV MLFLOW_TRACKING_URI=./mlruns
+ENV PYTHONPATH=/app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    make \
+    curl \
+    git \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p models plots evaluation_plots detailed_evaluation processed_data logs mlruns
+
+# Initialize MLflow experiment
+RUN mlflow experiments create --experiment-name fish_weight_prediction || true
+
+# Expose ports
+EXPOSE 5000 8000
+
+# Create entrypoint script for flexible container usage
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+case "$1" in\n\
+    "api")\n\
+        echo "🚀 Starting Fish Weight Prediction API Server..."\n\
+        python serve_api.py\n\
+        ;;\n\
+    "ui")\n\
+        echo "📊 Starting MLflow UI..."\n\
+        mlflow ui --host 0.0.0.0 --port 5000\n\
+        ;;\n\
+    "pipeline")\n\
+        echo "🔄 Running complete MLflow pipeline..."\n\
+        python preprocessing.py && python train.py && python evaluate.py\n\
+        ;;\n\
+    "train")\n\
+        echo "🤖 Training models..."\n\
+        python train.py\n\
+        ;;\n\
+    "demo")\n\
+        echo "🎭 Running pipeline demo..."\n\
+        python demo_pipeline.py\n\
+        ;;\n\
+    "bash")\n\
+        /bin/bash\n\
+        ;;\n\
+    *)\n\
+        echo "🐟 Fish Weight Prediction MLflow Pipeline"\n\
+        echo "Available commands:"\n\
+        echo "  api      - Start REST API server (port 8000)"\n\
+        echo "  ui       - Start MLflow UI (port 5000)"\n\
+        echo "  pipeline - Run complete pipeline"\n\
+        echo "  train    - Train models only"\n\
+        echo "  demo     - Run demonstration"\n\
+        echo "  bash     - Interactive shell"\n\
+        echo ""\n\
+        echo "Usage: docker run -p 8000:8000 fish-weight-mlflow api"\n\
+        exec "$@"\n\
+        ;;\n\
+esac' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Default command
+CMD ["api"]

@@ -1,47 +1,45 @@
-# Use Python 3.11 slim image as base
-FROM python:3.11-slim
+# Use Python 3.9 slim image as base
+FROM python:3.9-slim
 
 # Set working directory
 WORKDIR /app
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
-    wget \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better Docker layer caching
-COPY requirements-api.txt requirements.txt ./
+# Copy requirements file
+COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements-api.txt
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY api.py .
-COPY src/ ./src/
+# Copy project files
+COPY . .
 
-# Copy model files if they exist (fine-tuned model)
-# Note: Use .dockerignore or conditional copy in build script if model doesn't exist
+# Create necessary directories
+RUN mkdir -p /app/data /app/models /app/output /app/logs /app/powerbi_output
 
-# Create non-root user for security
-RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app
-USER app
+# Copy Fish.csv to data directory if it exists
+RUN if [ -f "Dataset/Fish.csv" ]; then cp Dataset/Fish.csv data/; fi
 
-# Expose port
-EXPOSE 8000
+# Set permissions
+RUN chmod +x setup.sh activate_env.sh
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Expose ports for Jupyter and potential web services
+EXPOSE 8888 8000 5000
 
-# Run the application
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Set default command
+CMD ["python", "scikit-learn/fish_predictive_model.py"]
+
+# Optional: Use this for Jupyter notebook
+# CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
