@@ -1,0 +1,92 @@
+# Dagster Instance Configuration
+# This file configures how Dagster manages runs, events, and schedules
+
+# PostgreSQL storage for production (RDS)
+storage:
+  postgres:
+    postgres_db:
+      username: 
+        env: DAGSTER_PG_USERNAME
+      password: 
+        env: DAGSTER_PG_PASSWORD  
+      hostname:
+        env: DAGSTER_PG_HOST
+      db_name:
+        env: DAGSTER_PG_DB
+      port: 5432
+
+# ECS Run Launcher for AWS deployment
+run_launcher:
+  module: dagster_aws.ecs
+  class: EcsRunLauncher
+  config:
+    cluster: 
+      env: DAGSTER_ECS_CLUSTER
+    subnets:
+      - env: DAGSTER_ECS_SUBNET_1
+      - env: DAGSTER_ECS_SUBNET_2
+    security_group_ids:
+      - env: DAGSTER_ECS_SECURITY_GROUP
+    task_definition:
+      env: DAGSTER_ECS_TASK_DEFINITION
+    container_name: "dagster-pipeline"
+    secrets_tag: "dagster"
+    run_resources:
+      cpu: "1024"      # 1 vCPU
+      memory: "2048"   # 2 GB RAM
+      ephemeral_storage: 40  # 40 GiB
+
+# Run Coordinator - manages concurrency
+run_coordinator:
+  module: dagster.core.run_coordinator
+  class: QueuedRunCoordinator
+  config:
+    max_concurrent_runs: 5
+
+# Compute Log Manager - stores compute logs in S3
+compute_logs:
+  module: dagster_aws.s3.compute_log_manager
+  class: S3ComputeLogManager
+  config:
+    bucket:
+      env: DAGSTER_S3_BUCKET
+    prefix: "dagster/compute-logs"
+
+# Schedule Storage - PostgreSQL for schedule state
+schedule_storage:
+  module: dagster_postgres.schedule_storage
+  class: DagsterPostgresScheduleStorage
+  config:
+    postgres_db:
+      username: 
+        env: DAGSTER_PG_USERNAME
+      password: 
+        env: DAGSTER_PG_PASSWORD  
+      hostname:
+        env: DAGSTER_PG_HOST
+      db_name:
+        env: DAGSTER_PG_DB
+      port: 5432
+
+# Event Log Storage - PostgreSQL for event logs  
+event_log_storage:
+  module: dagster_postgres.event_log
+  class: DagsterPostgresEventLogStorage
+  config:
+    postgres_db:
+      username: 
+        env: DAGSTER_PG_USERNAME
+      password: 
+        env: DAGSTER_PG_PASSWORD  
+      hostname:
+        env: DAGSTER_PG_HOST
+      db_name:
+        env: DAGSTER_PG_DB
+      port: 5432
+
+# Local storage settings (for development)
+local_artifact_storage:
+  module: dagster.core.storage.root
+  class: LocalArtifactStorage
+  config:
+    base_dir: "/tmp/dagster"

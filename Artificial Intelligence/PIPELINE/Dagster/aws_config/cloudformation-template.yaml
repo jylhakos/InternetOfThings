@@ -1,0 +1,279 @@
+# AWS CloudFormation Template for Dagster infrastructure
+# Deploy with: aws cloudformation create-stack --stack-name dagster-bert-pipeline --template-body file://cloudformation-template.yaml --capabilities CAPABILITY_IAM
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Dagster BERT Pipeline Infrastructure'
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID for the Dagster deployment
+    
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of subnet IDs for ECS tasks
+    
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: EC2 Key Pair for SSH access
+    
+  ECRRepository:
+    Type: String
+    Description: ECR repository URI for Dagster images
+    Default: "your-account.dkr.ecr.us-east-1.amazonaws.com/dagster-bert"
+
+Resources:
+  # RDS PostgreSQL Database for Dagster metadata
+  DagsterDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: dagster
+      DBInstanceIdentifier: dagster-bert-pipeline-db
+      DBInstanceClass: db.t3.micro
+      Engine: postgres
+      EngineVersion: '13.7'
+      MasterUsername: dagster
+      MasterUserPassword: !Ref DagsterDBPassword
+      AllocatedStorage: 20
+      StorageType: gp2
+      VPCSecurityGroups:
+        - !Ref DagsterDBSecurityGroup
+      DBSubnetGroupName: !Ref DagsterDBSubnetGroup
+      BackupRetentionPeriod: 7
+      MultiAZ: false
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      DeletionProtection: false
+
+  # DB Subnet Group
+  DagsterDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Dagster RDS
+      SubnetIds: !Ref SubnetIds
+      Tags:
+        - Key: Name
+          Value: dagster-db-subnet-group
+
+  # Security Group for RDS
+  DagsterDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Dagster RDS
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref DagsterECSSecurityGroup
+      Tags:
+        - Key: Name
+          Value: dagster-db-sg
+
+  # ECS Cluster
+  DagsterECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: dagster-bert-pipeline
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+
+  # Security Group for ECS
+  DagsterECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Dagster ECS tasks
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: dagster-ecs-sg
+
+  # S3 Bucket for Dagster storage
+  DagsterS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "dagster-bert-pipeline-${AWS::AccountId}-${AWS::Region}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # IAM Role for ECS Task Execution
+  DagsterECSExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: dagster-ecs-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DagsterDBSecret
+
+  # IAM Role for ECS Task
+  DagsterECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: dagster-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DagsterS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "${DagsterS3Bucket}/*"
+                  - !GetAtt DagsterS3Bucket.Arn
+        - PolicyName: ECSTaskManagement
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:RunTask
+                  - ecs:DescribeTasks
+                  - ecs:StopTask
+                Resource: "*"
+        - PolicyName: LambdaInvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: "*"
+
+  # Secrets Manager for Database Credentials
+  DagsterDBSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: dagster-db-credentials
+      Description: Database credentials for Dagster
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "dagster"}'
+        GenerateStringKey: 'password'
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+
+  # Secrets Manager Secret for Database Password reference
+  DagsterDBPassword:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: dagster-db-password
+      Description: Database password for Dagster RDS
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+
+  # CloudWatch Log Group
+  DagsterLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/dagster-bert-pipeline
+      RetentionInDays: 30
+
+  # Application Load Balancer (optional)
+  DagsterALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: dagster-bert-alb
+      Type: application
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref DagsterALBSecurityGroup
+      Subnets: !Ref SubnetIds
+
+  # ALB Security Group
+  DagsterALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Dagster ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  DatabaseEndpoint:
+    Description: RDS PostgreSQL Endpoint
+    Value: !GetAtt DagsterDatabase.Endpoint.Address
+    Export:
+      Name: !Sub "${AWS::StackName}-database-endpoint"
+
+  ECSClusterArn:
+    Description: ECS Cluster ARN
+    Value: !GetAtt DagsterECSCluster.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-ecs-cluster"
+
+  S3BucketName:
+    Description: S3 Bucket for Dagster storage
+    Value: !Ref DagsterS3Bucket
+    Export:
+      Name: !Sub "${AWS::StackName}-s3-bucket"
+
+  TaskExecutionRoleArn:
+    Description: ECS Task Execution Role ARN
+    Value: !GetAtt DagsterECSExecutionRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-execution-role"
+
+  TaskRoleArn:
+    Description: ECS Task Role ARN
+    Value: !GetAtt DagsterECSTaskRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-task-role"

@@ -1,0 +1,14 @@
+# Dagster Workspace Configuration
+# This file tells Dagster where to find your pipeline code
+
+load_from:
+  # Load the main Dagster project module
+  - python_module:
+      module_name: dagster_project
+      working_directory: .
+      
+  # You can add additional modules or files here
+  # - python_file: path/to/additional_pipeline.py
+  # - grpc_server:
+  #     host: localhost
+  #     port: 4000

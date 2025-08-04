@@ -1,0 +1,176 @@
+# Docker Compose for Dagster BERT Pipeline
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Dagster metadata
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster_password
+      POSTGRES_DB: dagster
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - dagster-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dagster"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Dagster Webserver
+  dagster-webserver:
+    build:
+      context: .
+      target: application
+    ports:
+      - "3000:3000"
+    environment:
+      DAGSTER_HOME: /app/dagster_home
+      PYTHONPATH: /app
+      DAGSTER_PG_USERNAME: dagster
+      DAGSTER_PG_PASSWORD: dagster_password
+      DAGSTER_PG_HOST: postgres
+      DAGSTER_PG_DB: dagster
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./results:/app/results
+    networks:
+      - dagster-network
+    command: ["dagster", "dev", "-h", "0.0.0.0", "-p", "3000", "-w", "/app/workspace.yaml"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/server_info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Dagster Daemon (for schedules and sensors)
+  dagster-daemon:
+    build:
+      context: .
+      target: application
+    environment:
+      DAGSTER_HOME: /app/dagster_home
+      PYTHONPATH: /app
+      DAGSTER_PG_USERNAME: dagster
+      DAGSTER_PG_PASSWORD: dagster_password
+      DAGSTER_PG_HOST: postgres
+      DAGSTER_PG_DB: dagster
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./results:/app/results
+    networks:
+      - dagster-network
+    command: ["dagster-daemon", "run"]
+
+  # BERT API Server
+  bert-api:
+    build:
+      context: .
+      target: api
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONPATH: /app
+      MODEL_PATH: /app/models/bert_fine_tuned
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./results:/app/results
+    networks:
+      - dagster-network
+    command: ["python", "api.py"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Nginx reverse proxy (production profile)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - dagster-webserver
+      - bert-api
+    networks:
+      - dagster-network
+    profiles:
+      - production
+
+  # MinIO for local S3-compatible storage (development)
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    networks:
+      - dagster-network
+    command: server /data --console-address ":9001"
+    profiles:
+      - development
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - dagster-network
+    profiles:
+      - development
+      - production
+
+  # Jupyter Notebook for development
+  jupyter:
+    build:
+      context: .
+      target: application
+    ports:
+      - "8888:8888"
+    environment:
+      PYTHONPATH: /app
+      JUPYTER_ENABLE_LAB: "yes"
+    volumes:
+      - ./notebooks:/app/notebooks
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./results:/app/results
+    networks:
+      - dagster-network
+    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+    profiles:
+      - development
+
+volumes:
+  postgres_data:
+  minio_data:
+  redis_data:
+
+networks:
+  dagster-network:
+    driver: bridge

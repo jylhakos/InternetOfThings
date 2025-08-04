@@ -1,0 +1,119 @@
+{
+  "family": "dagster-bert-pipeline",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/dagster-ecs-task-role",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/dagster-ecs-execution-role",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "containerDefinitions": [
+    {
+      "name": "dagster-webserver",
+      "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/dagster-bert:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "command": [
+        "dagster-webserver",
+        "-h", "0.0.0.0",
+        "-p", "3000",
+        "-w", "/app/workspace.yaml"
+      ],
+      "environment": [
+        {
+          "name": "DAGSTER_HOME",
+          "value": "/app/dagster_home"
+        },
+        {
+          "name": "PYTHONPATH",
+          "value": "/app"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DAGSTER_PG_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:username::"
+        },
+        {
+          "name": "DAGSTER_PG_PASSWORD", 
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:password::"
+        },
+        {
+          "name": "DAGSTER_PG_HOST",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:host::"
+        },
+        {
+          "name": "DAGSTER_PG_DB",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:database::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/dagster-bert-pipeline",
+          "awslogs-region": "REGION",
+          "awslogs-stream-prefix": "webserver"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:3000/server_info || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    },
+    {
+      "name": "dagster-daemon",
+      "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/dagster-bert:latest", 
+      "essential": true,
+      "command": [
+        "dagster-daemon",
+        "run"
+      ],
+      "environment": [
+        {
+          "name": "DAGSTER_HOME",
+          "value": "/app/dagster_home"
+        },
+        {
+          "name": "PYTHONPATH",
+          "value": "/app"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DAGSTER_PG_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:username::"
+        },
+        {
+          "name": "DAGSTER_PG_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:password::"
+        },
+        {
+          "name": "DAGSTER_PG_HOST", 
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:host::"
+        },
+        {
+          "name": "DAGSTER_PG_DB",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:dagster-db:database::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/dagster-bert-pipeline",
+          "awslogs-region": "REGION", 
+          "awslogs-stream-prefix": "daemon"
+        }
+      }
+    }
+  ]
+}
