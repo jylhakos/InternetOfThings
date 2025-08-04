@@ -2,6 +2,10 @@
 
 Amazon EKS (Elastic Kubernetes Service) is a Kubernetes-as-a-Service (KaaS) solution that delivers a managed environment for operating Kubernetes clusters, while users manage the worker nodes and utilize options like Fargate for serverless node management.
 
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/IOT/Deployment/Clouds/AWS/Services/Compute/EKS/Amazon_EKS.png?raw=true)
+
+*Figure: Amazon Elastic Kubernetes Service (EKS)*
+
 Setting up tools to configure AWS EKS on a local Linux machine.
 
 1. AWS CLI installation and configuration
@@ -579,7 +583,11 @@ Create the install-alb-controller.sh file to install the AWS Load Balancer contr
 	kubectl get ingress go-app-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 
 ```
-References
+### References
+
+What is Amazon EKS?
+
+https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 
 Learn Kubernetes Basics
 
@@ -612,6 +620,7 @@ https://docs.aws.amazon.com/eks/latest/userguide/sample-deployment.html
 Deploy a web app and store data
 
 https://docs.aws.amazon.com/eks/latest/userguide/quickstart.html
+
 
 Helm
 
