@@ -558,7 +558,7 @@ aws sagemaker list-endpoints
 
 ** Important**: Delete endpoints when not in use to avoid unnecessary charges.
 
-## 📈 MLflow Integration
+## MLflow Integration
 
 ### MLflow components
 
