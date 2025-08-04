@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-FastAPI backend for BERT Text Classification
-Provides REST API endpoints for text classification using fine-tuned BERT model
+FastAPI backend for BERT Text Classification: REST API endpoints for text classification using fine-tuned BERT model
 """
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks

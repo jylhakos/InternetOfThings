@@ -1,577 +1,619 @@
-# Fine-tuning Transformer models in PyTorch
+# BERT ML pipeline with Kubeflow
 
-This project demonstrates how to fine-tune pre-trained Transformer models like BERT for text classification using PyTorch and the Hugging Face transformers library.
+A document for building, deploying, and running BERT fine-tuning pipelines using Kubeflow on local Linux environments and Amazon AWS or Google GCP.
 
-## What is BERT?
+## Table of Contents
 
-**BERT** (Bidirectional Encoder Representations from Transformers) is a natural language processing (NLP) model developed by Google. BERT uses a deep neural network architecture called a **Transformer** to interpret the context and meaning of words in text.
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [Local Development Setup](#local-development-setup)
+4. [Kubeflow Pipeline Components](#kubeflow-pipeline-components)
+5. [Local Kubeflow Setup](#local-kubeflow-setup)
+6. [AWS Deployment](#aws-deployment)
+7. [Pipeline Execution](#pipeline-execution)
+8. [API Gateway and Load Balancing](#api-gateway-and-load-balancing)
+9. [Monitoring and Logging](#monitoring-and-logging)
+10. [Troubleshooting](#troubleshooting)
+11. [Kubeflow on Google GCP](#kubeflow-on-google-gcp)
 
-### BERT:
-- **Bidirectional**: Unlike traditional models that read text from left to right, BERT reads text in both directions simultaneously
-- **Pre-trained**: Trained on massive text datasets using self-supervised learning
-- **Context-aware**: Understands word meaning based on surrounding context
-- **Transfer Learning**: Can be fine-tuned for specific tasks with minimal additional training
+## Overview
 
-## How does the BERT model work for text classification?
+This project implements a complete ML pipeline for BERT model fine-tuning with the following stages:
 
-### 1. **Architecture**
-BERT is built on the **Transformer architecture**, which relies on:
-- **Multi-Head Self-Attention**: Allows the model to focus on different parts of the input sequence simultaneously
-- **Feed-Forward Neural Networks**: Process the attention outputs
-- **Layer Normalization**: Stabilizes training
-- **Positional Encodings**: Help the model understand word order
+1. **Data Preprocessing** - Text data preparation and tokenization
+2. **Model Fine-tuning** - BERT model training on custom dataset
+3. **Model Evaluation** - Performance metrics and validation
+4. **Model Deployment** - Containerized model serving
+5. **Inference API** - FastAPI endpoint for real-time predictions
 
-### 2. **Attention mechanism in Transformers**
-The **attention mechanism** is the core innovation of Transformers:
-- **Self-Attention**: Each word in the sequence attends to every other word, creating rich contextual representations
-- **Multi-Head Attention**: Multiple attention mechanisms run in parallel, capturing different types of relationships
-- **Query-Key-Value**: Each word is transformed into query (Q), key (K), and value (V) vectors
-- **Attention Weights**: Computed as: `Attention(Q,K,V) = softmax(QK^T/√d_k)V`
+## Prerequisites
 
-### 3. **Text Classification process**
-1. **Input Tokenization**: Text is converted to token IDs using WordPiece tokenization
-2. **Embedding**: Tokens are converted to dense vector representations
-3. **Transformer Layers**: 12 layers (BERT-base) or 24 layers (BERT-large) process the embeddings
-4. **[CLS] Token**: Special classification token whose final representation is used for classification
-5. **Classification Head**: A simple linear layer maps BERT output to class probabilities
+### System requirements
+- **OS**: Linux/Debian (Ubuntu 20.04+ recommended)
+- **RAM**: Minimum 8GB (16GB+ recommended for GPU training)
+- **Storage**: 20GB+ free space
+- **Python**: 3.8+
+- **Docker**: 20.10+
+- **kubectl**: 1.20+
 
-### 4. **Fine-tuning process**
-Fine-tuning adapts the pre-trained BERT model to specific classification tasks:
-- **Transfer Learning**: Start with pre-trained BERT weights
-- **Task specific layer**: Add a classification head for your specific number of classes
-- **End-to-end training**: Update all model parameters using labeled data from your domain
-- **Lower Learning Rate**: Use smaller learning rates (2e-5) to preserve pre-trained knowledge
+### Required tools
 
-## How fine-tuning works?
-
-### Supervised learning approach
-Text classification uses **supervised learning**:
-1. **Labeled dataset**: Collection of texts with their corresponding category labels
-2. **Training**: Algorithm learns patterns from labeled examples
-3. **Validation**: Model performance is evaluated on unseen data
-4. **Inference**: Trained model predicts categories for new text
-
-### Pre-trained model
-- **Training time**: Start with language understanding already learned
-- **Performance**: Leverages patterns from massive text corpora
-- **Less data required**: Fine-tuning needs fewer labeled examples than training from scratch
-- **Hugging Face Hub**: Easy access to pre-trained models
-
-## Project
-
-```
-PyTorch/
-├── README.md                 # This documentation
-├── DOCUMENTATION.md          # Complete API reference and usage guide
-├── .gitignore               # Git ignore file for Python projects
-├── requirements.txt         # Core dependencies
-├── requirements-api.txt     # API-specific dependencies
-├── bert_env/                # Virtual environment (excluded from git)
-├── src/
-│   ├── bert_fine_tuning.py  # Main BERT fine-tuning script
-│   └── minimal_bert.py      # Simplified version
-├── api.py                   # FastAPI backend server
-├── test_setup.py            # Environment verification script
-├── test_model.py            # Model evaluation suite
-├── test_api.sh              # API testing script with curl commands
-├── examples.py              # Usage examples and guides
-├── project_summary.py       # Project overview
-├── Dockerfile               # Docker container configuration
-├── docker-compose.yml       # Docker Compose setup
-├── nginx.conf               # Nginx reverse proxy config
-└── fine_tuned_bert/         # Saved model directory (created after training)
-```
-
-## Setup
-
-### 1. Create Python virtual environment
+#### 1. Install Docker
 ```bash
-python3 -m venv bert_env
-source bert_env/bin/activate  # On Linux/Mac
+# Remove old versions
+sudo apt-get remove docker docker-engine docker.io containerd runc
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
 ```
 
-### 2. Install dependencies
+#### 2. Install kubectl
 ```bash
-pip install torch transformers scikit-learn numpy pandas
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 ```
 
-### 3. Verify setup
+#### 3. Install AWS CLI
 ```bash
-python test_setup.py
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 ```
 
-### 4. Run fine-tuning
+#### 4. Install Terraform (for Infrastructure as Code)
 ```bash
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install terraform
+```
+
+## Local development
+
+### 1. Create Python Virtual Environment
+
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd "Artificial Intelligence/PIPELINE/Kubeflow"
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Install requirements
+pip install -r requirements.txt
+pip install -r requirements-api.txt
+
+# Install additional Kubeflow SDK
+pip install kfp==1.8.22 kubernetes==24.2.0
+```
+
+### 2. Environment configuration
+
+Create `.env` file for local development:
+```bash
+cat > .env << EOF
+# Model Configuration
+MODEL_NAME=bert-base-uncased
+MAX_LENGTH=128
+BATCH_SIZE=16
+LEARNING_RATE=2e-5
+NUM_EPOCHS=3
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# AWS Configuration (for deployment)
+AWS_REGION=us-west-2
+AWS_ACCOUNT_ID=your-account-id
+ECR_REPOSITORY=bert-pipeline
+EKS_CLUSTER_NAME=kubeflow-cluster
+
+# Kubeflow Configuration
+KUBEFLOW_NAMESPACE=kubeflow
+PIPELINE_NAME=bert-training-pipeline
+EOF
+```
+
+### 3. Test local environment
+
+```bash
+# Test BERT fine-tuning locally
 python src/bert_fine_tuning.py
-```
 
-### 5. Start FastAPI server
-```bash
-# Install API dependencies
-pip install -r requirements-api.txt
-
-# Start the API server
+# Test API locally
 python api.py
-# or using uvicorn directly
-uvicorn api:app --host 0.0.0.0 --port 8000 --reload
+
+# Test in another terminal
+curl -X POST "http://localhost:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "This is a great product!", "return_confidence": true}'
 ```
 
-### 6. Test API Endpoints
-```bash
-# Run comprehensive API tests
-./test_api.sh
+## 🔧 Kubeflow pipeline components
 
-# Or test manually with curl
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I love this product!", "return_confidence": true}'
+### Pipeline architecture
+
+The pipeline consists of four main components:
+
+1. **Data Component** - Data preprocessing and validation
+2. **Training Component** - BERT model fine-tuning
+3. **Evaluation Component** - Model performance assessment
+4. **Deployment Component** - Model serving setup
+
+##  Local Kubeflow setup
+
+### 1. Install Minikube (for local Kubernetes)
+
+```bash
+# Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# Start Minikube with sufficient resources
+minikube start --cpus=4 --memory=8192 --disk-size=20g --driver=docker
+
+# Enable necessary addons
+minikube addons enable ingress
+minikube addons enable dashboard
 ```
 
-## FastAPI backend server
+### 2. Install Kubeflow pipelines standalone
 
-This project includes **FastAPI** backend that provides REST API endpoints for text classification using the fine-tuned BERT model.
-
-> 📖 **For detailed API documentation, examples, and troubleshooting, see [DOCUMENTATION.md](./DOCUMENTATION.md)**
-
-### API
-- **RESTful Endpoints**: Standard HTTP methods for text classification
-- **Single & batch processing**: Classify one text or multiple texts at once
-- **Confidence scores**: Optional confidence values for predictions
-- **Health monitoring**: Health check and model status endpoints
-- **Documentation**: Auto-generated API docs with Swagger UI
-- **CORS**: Cross-Origin Resource Sharing enabled
-- **Error handling**: Comprehensive error responses and logging
-- **Performance metrics**: Processing time tracking
-
-### API Endpoints
-
-#### 1. **Root Endpoint**
 ```bash
-GET /
-# Returns basic API information
+# Download Kubeflow Pipelines manifests
+export PIPELINE_VERSION=1.8.5
+kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$PIPELINE_VERSION"
+kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io
+kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/env/dev?ref=$PIPELINE_VERSION"
+
+# Wait for deployment
+kubectl wait --for=condition=available --timeout=600s deployment/ml-pipeline-ui -n kubeflow
+
+# Port forward to access UI
+kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80 &
 ```
 
-#### 2. **Health Check**
+### 3. Access Kubeflow dashboard
+
+Open your browser and navigate to: `http://localhost:8080`
+
+## ☁️ Amazon AWS deployment
+
+### 1. Configure Amazon AWS credentials
+
 ```bash
-GET /health
-# Returns API and model health status
-curl http://localhost:8000/health
+# Configure AWS CLI
+aws configure
+# Enter your AWS Access Key ID, Secret Access Key, Region, and Output format
+
+# Verify configuration
+aws sts get-caller-identity
 ```
 
-#### 3. **Model information**
-```bash
-GET /model/info
-# Returns detailed model information
-curl http://localhost:8000/model/info
-```
+### 2. Create Amazon EKS cluster using Terraform
 
-#### 4. **Text Classification (Single)**
-```bash
-POST /classify
-# Classify a single text
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I absolutely love this product!", "return_confidence": true}'
+Create `terraform/main.tf`:
 
-# Response:
-{
-  "text": "I absolutely love this product!",
-  "prediction": 1,
-  "label": "positive",
-  "confidence": 0.9876,
-  "processing_time_ms": 45.23
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# Variables
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-west-2"
+}
+
+variable "cluster_name" {
+  description = "EKS cluster name"
+  type        = string
+  default     = "kubeflow-cluster"
+}
+
+# VPC for EKS
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+  
+  name = "${var.cluster_name}-vpc"
+  cidr = "10.0.0.0/16"
+  
+  azs             = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  
+  enable_nat_gateway = true
+  enable_vpn_gateway = true
+  
+  tags = {
+    Terraform = "true"
+    Environment = "dev"
+  }
+}
+
+# EKS Cluster
+module "eks" {
+  source = "terraform-aws-modules/eks/aws"
+  
+  cluster_name    = var.cluster_name
+  cluster_version = "1.27"
+  
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+  
+  eks_managed_node_groups = {
+    main = {
+      desired_capacity = 2
+      max_capacity     = 4
+      min_capacity     = 1
+      
+      instance_types = ["m5.large"]
+      
+      k8s_labels = {
+        Environment = "dev"
+        Application = "kubeflow"
+      }
+    }
+  }
+}
+
+# ECR Repository for Docker images
+resource "aws_ecr_repository" "bert_pipeline" {
+  name                 = "bert-pipeline"
+  image_tag_mutability = "MUTABLE"
+  
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+# Output values
+output "cluster_endpoint" {
+  description = "Endpoint for EKS control plane"
+  value       = module.eks.cluster_endpoint
+}
+
+output "cluster_security_group_id" {
+  description = "Security group ids attached to the cluster control plane"
+  value       = module.eks.cluster_security_group_id
+}
+
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = aws_ecr_repository.bert_pipeline.repository_url
 }
 ```
 
-#### 5. **Text Classification (Batch)**
-```bash
-POST /classify/batch
-# Classify multiple texts at once
-curl -X POST "http://localhost:8000/classify/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "texts": ["Great product!", "Terrible service.", "It was okay."],
-    "return_confidence": true
-  }'
+Deploy infrastructure:
 
-# Response:
-{
-  "results": [
-    {
-      "text": "Great product!",
-      "prediction": 1,
-      "label": "positive",
-      "confidence": 0.9234,
-      "processing_time_ms": 42.1
-    },
-    // ... more results
-  ],
-  "total_texts": 3,
-  "total_processing_time_ms": 123.45
-}
+```bash
+# Initialize and apply Terraform
+cd terraform
+terraform init
+terraform plan
+terraform apply
+
+# Update kubeconfig
+aws eks update-kubeconfig --region us-west-2 --name kubeflow-cluster
 ```
 
-#### 6. **Classifications - Demo**
+### 3. Install Kubeflow on Amazon EKS
+
 ```bash
-GET /classify/demo
-# Returns sample classifications for testing
-curl http://localhost:8000/classify/demo
+# Clone Kubeflow manifests
+git clone https://github.com/awslabs/kubeflow-manifests.git
+cd kubeflow-manifests
+
+# Install Kubeflow (choose one option)
+
+# Option 1: Full Kubeflow deployment
+make deploy-kubeflow INSTALLATION_OPTION=kustomize DEPLOYMENT_OPTION=vanilla
+
+# Option 2: Standalone Pipelines only
+make deploy-kubeflow-pipelines INSTALLATION_OPTION=kustomize
 ```
 
-### Documentation (API)
+### 4. Configure AWS Load Balancer
 
-The FastAPI server automatically generates interactive documentation:
+Create `aws-load-balancer.yaml`:
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
-These interfaces allow you to:
-- Browse all available endpoints
-- Test API calls directly in the browser
-- View request/response schemas
-- Download OpenAPI specifications
-
-### Starting the API server
-
-#### Method 1: Python execution
-```bash
-# Activate virtual environment
-source bert_env/bin/activate
-
-# Install API dependencies
-pip install -r requirements-api.txt
-
-# Start server
-python api.py
-```
-
-#### Method 2: Using Uvicorn
-```bash
-# Development mode with auto-reload
-uvicorn api:app --host 0.0.0.0 --port 8000 --reload
-
-# Production mode
-uvicorn api:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-### Testing the API
-
-#### Automated testing
-```bash
-# Run comprehensive test suite
-./test_api.sh
-```
-
-#### Manual testing
-```bash
-# Basic classification
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "This movie was fantastic!"}'
-
-# With confidence scores
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "I hate this product.", "return_confidence": true}'
-
-# Batch processing
-curl -X POST "http://localhost:8000/classify/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "texts": ["Amazing service!", "Poor quality.", "Average experience."],
-    "return_confidence": true
-  }'
-
-# Health check
-curl http://localhost:8000/health
-
-# Model information
-curl http://localhost:8000/model/info
-```
-
-## Docker deployment
-
-The project includes complete **Docker** support for containerized deployment.
-
-### Docker
-- **Multi-stage Build**: Optimized container size
-- **Security**: Non-root user execution
-- **Health Checks**: Container health monitoring  
-- **Resource Limits**: Memory and CPU constraints
-- **Environment Configuration**: Flexible deployment options
-- **Nginx Integration**: Optional reverse proxy setup
-
-### Start with Docker
-
-#### 1. **Build and run with Docker**
-```bash
-# Build the Docker image
-docker build -t bert-classifier .
-
-# Run the container
-docker run -p 8000:8000 bert-classifier
-
-# Run with custom configuration
-docker run -p 8000:8000 \
-  -e LOG_LEVEL=debug \
-  -v $(pwd)/fine_tuned_bert:/app/fine_tuned_bert:ro \
-  bert-classifier
-```
-
-#### 2. **Using Docker Compose (Recommended)**
-```bash
-# Start the service
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop the service
-docker-compose down
-
-# Start with nginx (production)
-docker-compose --profile production up -d
-```
-
-#### 3. **Production deployment**
-```bash
-# Build and run with nginx reverse proxy
-docker-compose --profile production up -d
-
-# Scale the API service
-docker-compose up -d --scale bert-api=3
-```
-
-### Docker configuration
-
-#### **Dockerfile**
-The Dockerfile includes:
-- Python 3.11 slim base image
-- System dependencies installation
-- Python package installation with caching
-- Non-root user for security
-- Health check configuration
-- Optimized layer caching
-
-#### **Docker Compose**
-The docker-compose.yml provides:
-- API service configuration
-- Port mapping (8000:8000)
-- Volume mounting for models
-- Health checks
-- Resource limits
-- Optional nginx reverse proxy
-
-#### **Environment variables**
-```bash
-# Available environment variables
-LOG_LEVEL=info          # Logging level
-PYTHONPATH=/app         # Python path
-MODEL_PATH=/app/fine_tuned_bert  # Custom model path
-```
-
-### Docker deployment options
-
-#### **Development**
-```bash
-# Basic development setup
-docker-compose up -d
-# Access API at http://localhost:8000
-```
-
-#### **Production with Load Balancer**
-```bash
-# Production setup with nginx
-docker-compose --profile production up -d
-# Access API through nginx at http://localhost:80
-```
-
-#### **Kubernetes deployment**
 ```yaml
-# kubernetes-deployment.yaml (example)
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bert-classifier
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: bert-classifier
-  template:
-    metadata:
-      labels:
-        app: bert-classifier
-    spec:
-      containers:
-      - name: bert-classifier
-        image: bert-classifier:latest
-        ports:
-        - containerPort: 8000
-        resources:
-          requests:
-            memory: "2Gi"
-            cpu: "500m"
-          limits:
-            memory: "4Gi"
-            cpu: "1000m"
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: bert-classifier-service
+  name: kubeflow-gateway-nlb
+  namespace: istio-system
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
 spec:
-  selector:
-    app: bert-classifier
+  type: LoadBalancer
   ports:
   - port: 80
-    targetPort: 8000
-  type: LoadBalancer
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    istio: ingressgateway
 ```
 
-### Container health monitoring
-
-#### **Health Check Endpoint**
+Apply the configuration:
 ```bash
-# Check container health
+kubectl apply -f aws-load-balancer.yaml
+```
+
+## Pipeline execution
+
+### 1. Build and Push Docker Images
+
+```bash
+# Login to ECR
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-west-2.amazonaws.com
+
+# Build and push training image
+docker build -t bert-training -f Dockerfile.training .
+docker tag bert-training:latest <account-id>.dkr.ecr.us-west-2.amazonaws.com/bert-pipeline:training
+docker push <account-id>.dkr.ecr.us-west-2.amazonaws.com/bert-pipeline:training
+
+# Build and push serving image
+docker build -t bert-serving -f Dockerfile .
+docker tag bert-serving:latest <account-id>.dkr.ecr.us-west-2.amazonaws.com/bert-pipeline:serving
+docker push <account-id>.dkr.ecr.us-west-2.amazonaws.com/bert-pipeline:serving
+```
+
+### 2. Create and run pipeline
+
+```bash
+# Compile and run the pipeline
+python pipeline/bert_pipeline.py
+
+# Monitor pipeline execution
+kubectl get pods -n kubeflow
+kubectl logs -f <pipeline-pod-name> -n kubeflow
+```
+
+## 🌐 API Gateway and AWS Load Balancing
+
+### 1. AWS API Gateway Setup
+
+Create `api-gateway.tf`:
+
+```hcl
+# API Gateway
+resource "aws_api_gateway_rest_api" "bert_api" {
+  name        = "bert-inference-api"
+  description = "API Gateway for BERT model inference"
+}
+
+# API Gateway VPC Link
+resource "aws_api_gateway_vpc_link" "bert_vpc_link" {
+  name        = "bert-vpc-link"
+  target_arns = [aws_lb.bert_nlb.arn]
+}
+
+# Network Load Balancer
+resource "aws_lb" "bert_nlb" {
+  name               = "bert-nlb"
+  internal           = false
+  load_balancer_type = "network"
+  subnets            = module.vpc.public_subnets
+
+  enable_deletion_protection = false
+
+  tags = {
+    Environment = "production"
+  }
+}
+```
+
+### 2. Local iptables configuration
+
+Create `scripts/setup-iptables.sh`:
+
+```bash
+#!/bin/bash
+# Local iptables configuration for development
+
+# Allow incoming traffic on port 8000 (FastAPI)
+sudo iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+
+# Allow incoming traffic on port 8080 (Kubeflow UI)
+sudo iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+
+# Allow Docker bridge network
+sudo iptables -A INPUT -i docker0 -j ACCEPT
+sudo iptables -A FORWARD -i docker0 -o docker0 -j ACCEPT
+
+# Save iptables rules
+sudo iptables-save > /etc/iptables/rules.v4
+
+echo "iptables rules configured successfully"
+```
+
+## Monitoring and logging
+
+### 1. Set up Prometheus and Grafana
+
+```bash
+# Add Helm repositories
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+# Install Prometheus
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+
+# Install Grafana
+helm install grafana grafana/grafana -n monitoring
+```
+
+### 2. Configure CloudWatch (Amazon AWS)
+
+```bash
+# Install CloudWatch agent
+kubectl apply -f https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/cloudwatch-namespace.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/cwagent/cwagent-configmap.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/cwagent/cwagent-daemonset.yaml
+```
+
+## Troubleshooting
+
+### Issues
+
+#### 1. Kubeflow installation
+```bash
+# Check pod status
+kubectl get pods -n kubeflow
+
+# Check logs
+kubectl logs -n kubeflow deployment/ml-pipeline-ui
+
+# Restart failed pods
+kubectl delete pod <pod-name> -n kubeflow
+```
+
+#### 2. Amazon EKS connection
+```bash
+# Update kubeconfig
+aws eks update-kubeconfig --region us-west-2 --name kubeflow-cluster
+
+# Verify connection
+kubectl get nodes
+```
+
+#### 3. Docker build
+```bash
+# Clear Docker cache
+docker system prune -a
+
+# Check available space
+df -h
+```
+
+#### 4. GPU support (if available)
+```bash
+# Install NVIDIA device plugin
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.12.0/nvidia-device-plugin.yml
+
+# Verify GPU nodes
+kubectl get nodes "-o=custom-columns=NAME:.metadata.name,GPU:.status.allocatable.nvidia\.com/gpu"
+```
+
+## Usage
+
+### 1. Run training pipeline locally
+```bash
+python src/bert_fine_tuning.py --data-path data/ --output-dir models/ --epochs 3
+```
+
+### 2. Test API Endpoints
+```bash
+# Health check
 curl http://localhost:8000/health
 
-# Docker health status
-docker ps
-# Look for "healthy" status
+# Single prediction
+curl -X POST "http://localhost:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "This product is amazing!", "return_confidence": true}'
+
+# Batch prediction
+curl -X POST "http://localhost:8000/predict/batch" \
+     -H "Content-Type: application/json" \
+     -d '{"texts": ["Great service!", "Poor quality"], "return_confidence": true}'
 ```
 
-#### **Monitoring commands**
-```bash
-# View container logs
-docker logs <container_id>
+### 3. Monitor pipeline in Kubeflow UI
+1. Open Kubeflow UI: `http://localhost:8080` (local) or Load Balancer URL (AWS)
+2. Navigate to "Pipelines" section
+3. Upload and run `bert_pipeline.py`
+4. Monitor execution in "Runs" section
 
-# Monitor resource usage
-docker stats <container_id>
+## Kubeflow on Google GCP
 
-# Execute commands inside container
-docker exec -it <container_id> /bin/bash
-```
+Building a BERT machine learning (ML) pipeline with Kubeflow on Google Cloud Platform (GCP) involves leveraging Kubeflow pipelines within Vertex AI pipelines to orchestrate the various stages of your machine learning (ML) workflow.
 
-### Troubleshooting Docker
+**Steps**
 
-#### **Problems**
-```bash
-# Container not starting
-docker logs <container_id>
+*Project Setup on Google GCP*
 
-# Port already in use
-docker ps | grep 8000
-sudo netstat -tulpn | grep 8000
+Validate that you have an active Google GCP project with permissions (e.g., Owner).
 
-# Model not loading
-# Ensure fine_tuned_bert directory exists
-ls -la fine_tuned_bert/
+Create a Google Cloud Storage bucket for storing pipeline artifacts and data.
 
-# Memory issues
-# Increase Docker memory limits
-# Or use smaller models like DistilBERT
-```
+*Kubeflow pipelines environment*
 
-#### **Performance optimization**
-```bash
-# Use multi-stage builds
-# Enable Docker BuildKit
-DOCKER_BUILDKIT=1 docker build -t bert-classifier .
+Utilize Vertex AI Pipelines, which is the managed service for running Kubeflow Pipelines on Google GCP. This abstracts away the underlying Kubernetes infrastructure management.
 
-# Use .dockerignore to exclude unnecessary files
-# Optimize layer caching by copying requirements first
-```
+Alternatively, you can manually deploy Kubeflow on a Google Kubernetes Engine (GKE) cluster, but Vertex AI Pipelines is generally recommended for ease of use and scalability.
 
-## Testing fine-tuning success
+*Pipeline definition with Kubeflow Pipelines SDK*
 
-### 1. **Training metrics**
-- **Loss Reduction**: Training loss should decrease over epochs
-- **Convergence**: Loss should stabilize (not oscillate wildly)
-- **No Overfitting**: Validation loss shouldn't increase while training loss decreases
+Define your ML pipeline using the Kubeflow Pipelines SDK (KFP SDK), preferably v2 or later for compatibility with Vertex AI Pipelines.
 
-### 2. **Evaluation metrics**
-- **Accuracy**: Percentage of correctly classified samples
-- **Precision**: True positives / (True positives + False positives)
-- **Recall**: True positives / (True positives + False negatives)  
-- **F1-Score**: Harmonic mean of precision and recall
+Break down your BERT workflow into distinct components (e.g., data preprocessing, model training, model evaluation, model deployment).
 
-### 3. **Test cases**
-```python
-# Example test cases
-test_cases = [
-    ("I love this product!", 1),      # Positive
-    ("This is terrible quality", 0),   # Negative
-    ("Average experience", ???),       # Neutral - check model confidence
-]
-```
+*Custom Components*
 
-## Model performance evaluation
+For specific BERT-related tasks (e.g., fine-tuning, specific data formats), you will likely need to create custom components using Python functions or containerized applications.
 
-### 1. **Validation split**
-- Split data into training (80%), validation (10%), test (10%)
-- Use validation set to tune hyperparameters
-- Use test set for final performance evaluation
+*Google Cloud pipeline components*
 
-### 2. **Cross validation**
-- K-fold cross-validation for robust performance estimates
-- Helps detect overfitting and ensures generalization
+Leverage pre-built Google Cloud pipeline components for interacting with other Vertex AI services, such as Vertex AI Datasets, Model Registry, and Endpoints, for tasks like data loading, model management, and online predictions.
 
-### 3. **Confusion matrix**
-- Visualize classification performance across all classes
-- Identify which classes are being confused
+*BERT model integration*
 
-### 4. **Classification report**
-```python
-from sklearn.metrics import classification_report
-print(classification_report(y_true, y_pred))
-```
+Training
 
-## Model Prediction Testing
+Within your training component, implement the BERT model training logic using frameworks like TensorFlow or PyTorch. This might involve loading pre-trained BERT models, fine-tuning them on your specific dataset, and saving the trained model artifacts.
 
-### 1. **Inference function**
-```python
-def predict_sentiment(text, model, tokenizer):
-    inputs = tokenizer(text, return_tensors="pt", 
-                      padding=True, truncation=True, max_length=128)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        prediction = torch.argmax(outputs.logits, dim=-1)
-    return prediction.item()
-```
+Data Handling
 
-### 2. **Batch prediction**
-- Process multiple texts efficiently
-- Monitor prediction confidence scores
-- Handle edge cases and out-of-domain text
+Use appropriate libraries and techniques to handle the text data required for BERT, including tokenization and formatting.
 
-### 3. **Model interpretability**
-- Use attention visualization to understand model decisions
-- Analyze which words contribute most to predictions
-- Test with adversarial examples
+*Orchestration*
+
+Automate the entire BERT machine learning (ML) lifecycle from data ingestion to model deployment.
+
+*Artifact and Metadata management*
+
+Vertex AI Pipelines integrates with Vertex ML Metadata, automatically tracking artifacts (e.g., datasets, models, metrics) and lineage across pipeline runs.
+
+This provides visibility into your experiments and helps manage different versions of your BERT models.
+
+*Deployment and Serving (Optional)*
+
+If you need to serve your trained BERT model for online predictions, integrate components for deploying the model to a Vertex AI Endpoint using services like TorchServe or KFServing.
+
 
 ## References
 
-- **DOCUMENTATION.md**: [Complete API Reference and Usage Guide](./DOCUMENTATION.md)
-- **BERT Paper**: [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
-- **BERT**: [BERT: Pre-training of Deep Bidirectional Transformers](https://arxiv.org/abs/1810.04805)
-- **Hugging Face**: [https://huggingface.co/](https://huggingface.co/)
-- **PyTorch**: [https://pytorch.org/](https://pytorch.org/)
-- **Text Classification with BERT**: [https://www.sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert](https://www.sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert)
+- [Kubeflow on AWS](https://awslabs.github.io/kubeflow-manifests/)
+- [Install Kubeflow Pipelines](https://docs.aws.amazon.com/sagemaker/latest/dg/kubernetes-sagemaker-components-install.html)
+- [Amazon Elastic Kubernetes Service](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
+- [AWS EKS Documentation](https://docs.aws.amazon.com/eks/)
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [Kubeflow Pipelines SDK](https://kubeflow-pipelines.readthedocs.io/en/latest/)
+- [Build a pipeline](https://cloud.google.com/vertex-ai/docs/pipelines/build-pipeline)
 
-## Advanced topics
+## 📝 License
 
-### **Model variants**
-- RoBERTa: Robustly Optimized BERT
-- DistilBERT: Smaller, faster BERT
-- ALBERT: A Lite BERT
-- DeBERTa: Decoding-enhanced BERT
-
-### **Production deployment**
-- **Model quantization for faster inference**: Reduce model size and inference time
-- **ONNX export for cross-platform deployment**: Convert to ONNX format for broader compatibility
-- **API endpoints with FastAPI/Flask**: RESTful services for integration
-- **Docker containerization**: Scalable deployment with container orchestration
-- **Monitoring and logging in production**: Track performance and detect issues
-- **Load balancing and auto-scaling**: Handle high traffic loads
-- **Security considerations**: Authentication, rate limiting, and input validation
+This project is licensed under the MIT License - see the LICENSE file for details.

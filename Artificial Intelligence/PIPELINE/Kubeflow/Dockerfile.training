@@ -1,0 +1,52 @@
+# Training Dockerfile for BERT fine-tuning
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    wget \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Install additional packages for training
+RUN pip install --no-cache-dir \
+    torch>=2.0.0 \
+    transformers>=4.30.0 \
+    scikit-learn>=1.3.0 \
+    pandas>=1.5.0 \
+    numpy>=1.21.0 \
+    datasets>=2.10.0 \
+    accelerate>=0.20.0 \
+    tensorboard>=2.13.0
+
+# Copy source code
+COPY src/ ./src/
+COPY pipeline/ ./pipeline/
+
+# Create directories for data and models
+RUN mkdir -p /app/data /app/models /app/logs /app/cache
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV TRANSFORMERS_CACHE=/app/cache
+ENV HF_HOME=/app/cache
+ENV TORCH_HOME=/app/cache
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash trainer && \
+    chown -R trainer:trainer /app
+USER trainer
+
+# Default command
+CMD ["python", "src/bert_fine_tuning.py"]

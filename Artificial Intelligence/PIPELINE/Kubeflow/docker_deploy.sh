@@ -1,7 +1,6 @@
 #!/bin/bash
 """
-Docker Build and Deployment Script
-Builds Docker image and provides deployment options
+Docker Build and deployment script: Builds Docker image and provides deployment options
 """
 
 set -e

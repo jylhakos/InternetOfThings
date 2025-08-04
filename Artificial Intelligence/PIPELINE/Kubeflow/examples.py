@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Usage and demo
-This script demonstrates various ways to use the BERT fine-tuning project
+Usage: This script demonstrates various ways to use the BERT fine-tuning project
 """
 
 def show_usage_examples():
