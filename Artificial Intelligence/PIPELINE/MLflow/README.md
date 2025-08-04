@@ -237,7 +237,7 @@ mkdir -p {models,plots,evaluation_plots,detailed_evaluation,processed_data,logs}
 
 ## Data processing pipeline
 
-### 1. Data cloading and exploration
+### 1. Data loading and exploration
 
 ```python
 # Load dataset
