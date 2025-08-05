@@ -1,0 +1,45 @@
+# Environment-specific requirements for different setups
+
+# requirements-minimal.txt - Minimal requirements for basic functionality
+torch>=2.0.0
+transformers>=4.20.0
+pandas>=1.3.0
+numpy>=1.21.0
+scikit-learn>=1.0.0
+
+# requirements-full.txt - Full requirements for complete functionality
+torch>=2.0.0
+transformers>=4.20.0
+scikit-learn>=1.0.0
+numpy>=1.21.0
+pandas>=1.3.0
+datasets>=2.0.0
+accelerate>=0.20.0
+evaluate>=0.4.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+wordcloud>=1.8.0
+textstat>=0.7.0
+fastapi>=0.68.0
+uvicorn>=0.15.0
+requests>=2.25.0
+psutil>=5.8.0
+pytest>=6.0.0
+jupyter>=1.0.0
+
+# requirements-airflow.txt - Additional requirements for Airflow
+apache-airflow==2.7.2
+apache-airflow-providers-docker==3.7.2
+apache-airflow-providers-postgres==5.6.0
+apache-airflow-providers-celery==3.3.0
+
+# requirements-gpu.txt - GPU-specific requirements
+# Install with: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# requirements-dev.txt - Development requirements
+black>=22.0.0
+flake8>=4.0.0
+mypy>=0.950
+pre-commit>=2.17.0
+pytest-cov>=3.0.0

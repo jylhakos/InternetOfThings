@@ -1,0 +1,153 @@
+{
+  "datasets": {
+    "imdb": {
+      "name": "IMDB Movie Reviews",
+      "url": "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz",
+      "type": "sentiment",
+      "classes": ["negative", "positive"],
+      "text_column": "review",
+      "label_column": "sentiment",
+      "max_samples": 25000,
+      "preprocessing": {
+        "remove_html": true,
+        "lowercase": true,
+        "remove_special_chars": false,
+        "min_length": 50,
+        "max_length": 5000
+      }
+    },
+    "amazon_reviews": {
+      "name": "Amazon Product Reviews", 
+      "url": "https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Electronics_v1_00.tsv.gz",
+      "type": "sentiment",
+      "classes": [1, 2, 3, 4, 5],
+      "text_column": "review_body",
+      "label_column": "star_rating",
+      "max_samples": 50000,
+      "preprocessing": {
+        "remove_html": false,
+        "lowercase": true,
+        "min_length": 20,
+        "max_length": 3000
+      }
+    },
+    "yelp_reviews": {
+      "name": "Yelp Business Reviews",
+      "url": "https://www.yelp.com/dataset/download",
+      "type": "sentiment",
+      "classes": [1, 2, 3, 4, 5],
+      "text_column": "text",
+      "label_column": "stars",
+      "max_samples": 100000,
+      "preprocessing": {
+        "remove_html": false,
+        "lowercase": true,
+        "min_length": 25
+      }
+    },
+    "ag_news": {
+      "name": "AG News Classification",
+      "url": "https://raw.githubusercontent.com/mhjabreel/CharCnn_Keras/master/data/ag_news_csv.tar.gz",
+      "type": "news_classification",
+      "classes": ["World", "Sports", "Business", "Sci/Tech"],
+      "text_column": "description",
+      "label_column": "class",
+      "max_samples": 120000,
+      "preprocessing": {
+        "remove_html": true,
+        "lowercase": true,
+        "min_length": 10
+      }
+    },
+    "financial_news": {
+      "name": "Financial News Sentiment",
+      "url": "https://www.kaggle.com/datasets/ankurzing/sentiment-analysis-for-financial-news",
+      "type": "sentiment",
+      "classes": ["negative", "neutral", "positive"],
+      "text_column": "text",
+      "label_column": "sentiment",
+      "max_samples": 50000,
+      "preprocessing": {
+        "remove_html": false,
+        "lowercase": true,
+        "min_length": 15
+      }
+    },
+    "custom": {
+      "name": "Custom Dataset",
+      "path": "data/custom_dataset.csv",
+      "type": "classification",
+      "text_column": "text",
+      "label_column": "label",
+      "max_samples": -1,
+      "preprocessing": {
+        "remove_html": false,
+        "lowercase": true,
+        "min_length": 5
+      }
+    },
+    "sample_sentiment": {
+      "name": "Sample Sentiment Dataset",
+      "type": "built_in",
+      "classes": ["negative", "positive"],
+      "text_column": "text",
+      "label_column": "label",
+      "max_samples": 1000,
+      "preprocessing": {
+        "lowercase": true,
+        "min_length": 5
+      }
+    }
+  },
+  "training": {
+    "test_size": 0.2,
+    "validation_size": 0.1,
+    "random_state": 42,
+    "stratify": true
+  },
+  "tokenization": {
+    "max_length": 512,
+    "padding": "max_length",
+    "truncation": true,
+    "return_tensors": "pt"
+  },
+  "data_paths": {
+    "raw_data": "data/raw/",
+    "processed_data": "data/processed/",
+    "cache": "data/cache/",
+    "models": "models/",
+    "logs": "logs/"
+  },
+  "model_configs": {
+    "bert-base-uncased": {
+      "max_length": 512,
+      "batch_size_gpu": 16,
+      "batch_size_cpu": 4,
+      "learning_rate": 2e-5,
+      "num_epochs": 3,
+      "warmup_steps": 500
+    },
+    "bert-base-cased": {
+      "max_length": 512,
+      "batch_size_gpu": 16,
+      "batch_size_cpu": 4,
+      "learning_rate": 2e-5,
+      "num_epochs": 3,
+      "warmup_steps": 500
+    },
+    "distilbert-base-uncased": {
+      "max_length": 512,
+      "batch_size_gpu": 24,
+      "batch_size_cpu": 6,
+      "learning_rate": 5e-5,
+      "num_epochs": 3,
+      "warmup_steps": 300
+    }
+  },
+  "hardware_optimization": {
+    "auto_batch_size": true,
+    "mixed_precision": true,
+    "gradient_checkpointing": false,
+    "dataloader_num_workers": 2
+  }
+}

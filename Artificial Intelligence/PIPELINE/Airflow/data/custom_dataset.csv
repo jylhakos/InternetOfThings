@@ -1,0 +1,53 @@
+# Sample Custom Dataset
+text,label
+"This product is absolutely amazing! Best purchase I've ever made.",1
+"Terrible quality, broke after one day. Waste of money.",0
+"Good value for the price, works as expected.",1
+"Outstanding customer service and fast shipping.",1
+"Poor build quality, very disappointed with this purchase.",0
+"Love this item! Exactly what I needed.",1
+"Overpriced for what you get, not worth it.",0
+"Great features and easy to use interface.",1
+"Difficult to set up and confusing instructions.",0
+"Excellent product, highly recommend to others!",1
+"Cheap materials and poor craftsmanship.",0
+"Perfect size and works perfectly for my needs.",1
+"Arrived damaged and customer service was unhelpful.",0
+"Best product in this category, very satisfied.",1
+"Doesn't work as advertised, returning immediately.",0
+"Great design and very user-friendly.",1
+"Too expensive for the quality you receive.",0
+"Fantastic features and excellent performance.",1
+"Worst purchase ever, complete waste of time.",0
+"Good product overall, minor issues but nothing major.",1
+"Broke within a week, very poor quality.",0
+"Amazing value and works exactly as described.",1
+"Confusing interface and poor documentation.",0
+"Outstanding quality and fast delivery.",1
+"Not compatible with my device despite claims.",0
+"Perfect solution for my problem, very happy!",1
+"Cheap plastic construction, feels flimsy.",0
+"Excellent customer support and great product.",1
+"Misleading product description, not as shown.",0
+"High quality materials and great craftsmanship.",1
+"Stopped working after a month, very unreliable.",0
+"Easy to install and works perfectly.",1
+"Overpriced and underwhelming performance.",0
+"Best investment I've made this year!",1
+"Poor packaging, arrived broken.",0
+"Great functionality and intuitive design.",1
+"Doesn't fit properly despite checking dimensions.",0
+"Excellent build quality and attention to detail.",1
+"Terrible user experience, very frustrating.",0
+"Perfect for what I needed, highly satisfied.",1
+"Cheap knock-off quality, avoid this product.",0
+"Amazing results and very easy to use.",1
+"Defective product, poor quality control.",0
+"Great value proposition and solid performance.",1
+"Complicated setup process and poor instructions.",0
+"Outstanding product that exceeded expectations.",1
+"Not durable at all, broke easily.",0
+"Fantastic design and excellent functionality.",1
+"Overpriced for such poor quality.",0
+"Perfect fit and works exactly as promised.",1
+"Worst customer service experience ever.",0

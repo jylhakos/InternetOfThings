@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./models:/models
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - ml-network
+
+  bert-api:
+    build: .
+    container_name: bert-api
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - MODEL_NAME=bert-classifier
+    depends_on:
+      - ollama
+    volumes:
+      - ./fine_tuned_bert:/app/fine_tuned_bert:ro
+    networks:
+      - ml-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - bert-api
+      - ollama
+    networks:
+      - ml-network
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+
+networks:
+  ml-network:
+    driver: bridge
