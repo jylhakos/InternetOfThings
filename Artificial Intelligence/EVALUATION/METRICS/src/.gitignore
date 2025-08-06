@@ -1,0 +1,169 @@
+# Python Virtual Environment
+electricity_forecast_env/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch and Deep Learning
+*.pth
+*.pt
+*.model
+*.weights
+*.ckpt
+checkpoints/
+models/
+runs/
+logs/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+.jupyter/
+.local/share/jupyter/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Environment variables
+.env
+.venv
+
+# API Keys and Secrets
+config_secrets.py
+secrets.json
+*.key
+*.pem
+
+# Output files (but keep sample outputs for documentation)
+output/
+results/
+plots/
+figures/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+!sample_*.png
+!demo_*.png
+!example_*.png
+
+# Keep Dataset folder and CSV files in repository
+!Dataset/
+!Dataset/*.csv
+!Dataset/*.txt
+!Dataset/README.md
+
+# Keep important documentation and examples
+!README.md
+!requirements.txt
+!setup.py
+!demo.py
+!test_*.py
+!*_example.py
+!*.ipynb
+
+# Flask session files
+flask_session/
+
+# PyCharm
+.idea/
+
+# Performance and profiling
+.prof
+*.prof
+.cprofile
+
+# Database files (if any)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Node modules (if any JavaScript tools)
+node_modules/
+
+# Compiled CSS and JS (if any web interface)
+*.css.map
+*.js.map
+
+# Documentation build
+docs/_build/
+site/
+
+# Local configuration
+local_config.py
+config_local.py
+
+# System files
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
