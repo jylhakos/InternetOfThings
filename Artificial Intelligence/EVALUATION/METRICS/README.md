@@ -186,8 +186,8 @@ START
                                         │
                                         ▼
                               ┌─────────────────────┐
-                              │ Overfitting Check  │
-                              │ Train vs Val Loss  │
+                              │ Overfitting Check   │
+                              │ Train vs Val Loss   │
                               └─────────┬───────────┘
                                         │
                      ┌──────────────────┼──────────────────┐
@@ -206,9 +206,9 @@ START
                                         ▼
                               ┌─────────────────────┐
                               │ Final Evaluation    │
-                              │ • Test Set         │
-                              │ • Production Ready │
-                              │ • Deploy Model     │
+                              │ • Test Set          │
+                              │ • Production Ready  │
+                              │ • Deploy Model      │
                               └─────────────────────┘
 ```
 
@@ -366,7 +366,7 @@ The F1 Score is the harmonic mean of precision and recall. It is a balance betwe
 
 **AUC-ROC (Area Under the Receiver Operating Characteristic Curve)**
 
-The Area Under the Curve (AUC) represents the measure of the ability of the classifier to distinguish between the classes. A graphical representation of the model's ability to distinguish between classes, used for binary classification problems. Receiver Operating Characteristic (ROC) curve is a graphical plot that illustrates the diagnostic ability of a binary classifier as its discrimination threshold is varied. 
+The Area Under the Curve (AUC) represents the measure of the ability of the classifier to distinguish between the classes. A graphical representation of the model's ability to distinguish between classes, used for binary classification problems. Receiver Operating Characteristic (ROC) curve is a graphical plot that illustrates the diagnostic ability of a binary classifier as its discrimination threshold is varied.
 
 2. Multi-Class Classification Metrics
 
@@ -410,6 +410,30 @@ Represents the proportion of variance in the dependent variable that is explaine
 
 Formula: `R² = 1 - (SSres/SStot)`
 
+Where:
+- **SSres (Sum of Squares of Residuals)**: The sum of squared differences between actual and predicted values
+  - `SSres = Σ(yi - ŷi)²`
+  - Represents the **unexplained variance** by the model
+  - Lower SSres indicates better model fit
+  
+- **SStot (Total Sum of Squares)**: The sum of squared differences between actual values and their mean
+  - `SStot = Σ(yi - ȳ)²`
+  - Represents the **total variance** in the data
+  - Fixed value independent of model performance
+
+**Interpretation for Electricity Forecasting:**
+- **R² = 1.0**: Perfect prediction - model explains 100% of consumption variance
+- **R² = 0.8**: Good model - explains 80% of daily electricity consumption patterns
+- **R² = 0.0**: No predictive power - model performs as poorly as using the mean
+- **R² < 0**: Model performs worse than simply predicting the average consumption
+
+**Example Calculation:**
+For electricity consumption data where actual values are [15000, 16000, 14500] MW and predictions are [14800, 15900, 14600] MW:
+- Mean consumption (ȳ) = 15166.7 MW
+- SSres = (15000-14800)² + (16000-15900)² + (14500-14600)² = 50,000
+- SStot = (15000-15166.7)² + (16000-15166.7)² + (14500-15166.7)² = 1,388,889
+- R² = 1 - (50,000/1,388,889) = 0.964 (96.4% variance explained)
+
 ### **Advanced Time-Series Metrics**
 
 **Directional Accuracy (DA)**
@@ -418,11 +442,88 @@ Measures the percentage of predictions that correctly predict the direction of c
 
 Formula: `DA = (1/n) * Σ[sign(yt - yt-1) = sign(ŷt - yt-1)]`
 
+Where:
+- **sign()** is the mathematical sign function that returns:
+  - `+1` if the value is positive (increasing trend)
+  - `-1` if the value is negative (decreasing trend)
+  - `0` if the value is zero (no change)
+
+**Components Explained:**
+- **sign(yt - yt-1)**: Direction of actual change from previous day
+  - Positive = electricity consumption increased
+  - Negative = electricity consumption decreased
+- **sign(ŷt - yt-1)**: Direction of predicted change from previous day
+  - What the model predicted would happen
+- **Comparison**: `sign(actual) = sign(predicted)` returns 1 if directions match, 0 if they don't
+
+**Interpretation for Electricity Forecasting:**
+- **DA = 1.0 (100%)**: Perfect directional prediction - model always correctly predicts if consumption will rise or fall
+- **DA = 0.75 (75%)**: Good directional accuracy - correctly predicts trend direction 3 out of 4 times
+- **DA = 0.5 (50%)**: Random performance - no better than coin flipping for trend direction
+- **DA < 0.5**: Poor performance - systematically wrong about trend directions
+
+**Example Calculation:**
+For 3-day electricity consumption sequence:
+- Day 1: Actual = 15000 MW, Day 2: Actual = 16000 MW, Day 3: Actual = 15500 MW
+- Predictions: Day 2 = 15800 MW, Day 3 = 15400 MW
+
+Day 2: sign(16000-15000) = sign(+1000) = +1, sign(15800-15000) = sign(+800) = +1 → Match ✓
+Day 3: sign(15500-16000) = sign(-500) = -1, sign(15400-16000) = sign(-600) = -1 → Match ✓
+
+DA = (1+1)/2 = 1.0 = 100% directional accuracy
+
 **Mean Absolute Scaled Error (MASE)**
 
 MASE is scale-independent and compares forecast accuracy against a naive seasonal forecast, making it ideal for comparing different RNN/LSTM models.
 
 Formula: `MASE = MAE / MAE_naive`
+
+Where:
+- **MAE**: Mean Absolute Error of your RNN/LSTM model
+- **MAE_naive**: Mean Absolute Error of a simple "naive" baseline forecast
+
+**What is "Naive" Forecast?**
+A naive forecast is the possible prediction method that serves as a baseline for comparison.
+
+**Types of Naive Forecasts for Electricity Consumption:**
+1. **Naive Forecast (Random Walk)**: `ŷt = yt-1`
+   - Tomorrow's consumption = Today's consumption
+   - Example: If today's consumption is 15,000 MW, predict 15,000 MW for tomorrow
+
+2. **Seasonal Naive Forecast**: `ŷt = yt-s`
+   - Tomorrow's consumption = Same day last week/year
+   - Example: Tuesday's consumption = Last Tuesday's consumption
+   - For electricity: `s = 7` (weekly seasonality) or `s = 365` (yearly seasonality)
+
+3. **Drift Naive Forecast**: `ŷt = yt-1 + (yt-1 - y1)/(t-1)`
+   - Accounts for linear trend in the data
+
+**MASE Interpretation for Electricity Forecasting:**
+- **MASE = 1.0**: Your model performs exactly as well as the naive forecast
+- **MASE < 1.0**: Your model is **better** than naive (good performance)
+  - MASE = 0.5 means your model is **twice as accurate** as naive
+  - MASE = 0.8 means your model is **25% better** than naive
+- **MASE > 1.0**: Your model is **worse** than naive (poor performance)
+  - MASE = 1.5 means naive forecast is **50% better** than your model
+
+**Example Calculation:**
+For 3-day electricity forecasting:
+- Actual consumption: [15000, 16000, 15500] MW
+- Your LSTM predictions: [14800, 15900, 15400] MW
+- Naive predictions (yesterday's value): [-, 15000, 16000] MW
+
+MAE_model = |16000-15900| + |15500-15400| / 2 = (100 + 100) / 2 = 100 MW
+MAE_naive = |16000-15000| + |15500-16000| / 2 = (1000 + 500) / 2 = 750 MW
+
+MASE = 100 / 750 = 0.133
+
+**Result**: LSTM model is **7.5 times more accurate** than using yesterday's consumption.
+
+**Why MASE is Valuable:**
+- **Scale-independent**: Can compare models across different consumption levels
+- **Intuitive interpretation**: Directly shows how much better/worse than baseline
+- **Robust baseline**: Naive forecasts are surprisingly effective for many time series
+- **Cross-model comparison**: Fair comparison between different forecasting approaches
 
 **Symmetric Mean Absolute Percentage Error (sMAPE)**
 
