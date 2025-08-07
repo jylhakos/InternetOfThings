@@ -295,7 +295,7 @@ curl -X POST "http://localhost:8000/classify" \
 
 This project includes **FastAPI** backend that provides REST API endpoints for text classification using the fine-tuned BERT model.
 
-> 📖 **For detailed API documentation, examples, and troubleshooting, see [DOCUMENTATION.md](./DOCUMENTATION.md)**
+> 📖 **For detailed API documentation, examples, and troubleshooting, see the auto-generated docs at [http://localhost:8000/docs](http://localhost:8000/docs) when the server is running**
 
 ### API
 - **RESTful Endpoints**: Standard HTTP methods for text classification
@@ -1230,7 +1230,7 @@ def predict_sentiment(text, model, tokenizer):
 ## References
 
 ### **Core Documentation**
-- **DOCUMENTATION.md**: [Complete API Reference and Usage Guide](./DOCUMENTATION.md)
+- **API Documentation**: [Auto-generated Swagger UI](http://localhost:8000/docs) (when server is running)
 - **Installation Guide**: [evaluation_examples/installation_guide.md](./evaluation_examples/installation_guide.md)
 - **Comprehensive Demo**: [evaluation_examples/comprehensive_demo.py](./evaluation_examples/comprehensive_demo.py)
 - **Integration Tests**: [evaluation_examples/integration_test.py](./evaluation_examples/integration_test.py)
@@ -1297,5 +1297,3 @@ def predict_sentiment(text, model, tokenizer):
 - **Text Classification with BERT**: [sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert](https://www.sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert)
 - **Modern Optimizers Guide**: [modern_optimizers_guide.py](./modern_optimizers_guide.py)
 - **LLM Evaluation Best Practices**: [arxiv.org/abs/2307.03109](https://arxiv.org/abs/2307.03109)
-
-

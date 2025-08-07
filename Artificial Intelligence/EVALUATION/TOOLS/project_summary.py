@@ -12,14 +12,13 @@ This project demonstrates how to fine-tune BERT for text classification using Py
 
 PROJECT STRUCTURE:
    ├── README.md                 # Comprehensive documentation
-   ├── DOCUMENTATION.md          # Complete API reference and usage guide
    ├── .gitignore               # Git ignore file for Python projects
    ├── requirements.txt         # Python dependencies
    ├── bert_env/                # Virtual environment
    ├── src/
    │   ├── bert_fine_tuning.py  # Main fine-tuning script
    │   └── minimal_bert.py      # Simplified version
-   ├── api.py                   # FastAPI backend server
+   ├── api.py                   # FastAPI backend server (auto-generated docs at /docs)
    ├── test_setup.py            # Environment verification
    ├── test_model.py            # Model evaluation suite
    ├── test_api.sh              # API testing script
