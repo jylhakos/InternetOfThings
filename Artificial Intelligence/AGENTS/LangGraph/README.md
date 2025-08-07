@@ -324,7 +324,7 @@ const modelWithTools = llm.bindTools(tools);
 ## Documentation
 
 ### **Official LangGraph Resources**
-- **📖 Why LangGraph?** - [Understanding Agent Infrastructure](https://langchain-ai.github.io/langgraph/concepts/why-langgraph/)
+- **🤖 Why to build agents by LangGraph?** - [Understanding Agent Infrastructure](https://langchain-ai.github.io/langgraph/concepts/why-langgraph/)
 - **JavaScript Quickstart** - [LangGraphJS Tutorial](https://langchain-ai.github.io/langgraphjs/tutorials/quickstart/)
 - **Agent Infrastructure** - [Building Production Agents](https://blog.langchain.com/why-agent-infrastructure/)
 - **LangGraph Documentation** - [Complete Guide](https://langchain-ai.github.io/langgraph/)
@@ -340,7 +340,7 @@ const modelWithTools = llm.bindTools(tools);
 - **State Management** - [Advanced Patterns](https://langchain-ai.github.io/langgraph/concepts/low_level/)
 - **🛠️ Tool Integration** - [Custom Tools Guide](https://python.langchain.com/docs/modules/agents/tools/)
 
-## 🎯 Use Cases & Applications
+## Use Cases
 
 ### **Enterprise Applications**
 - **Customer Service**: Multi-turn support conversations
@@ -348,7 +348,7 @@ const modelWithTools = llm.bindTools(tools);
 - **Workflow Automation**: Complex business process automation
 - **🛠️ DevOps**: Infrastructure management and monitoring
 
-### **Consumer Applications**  
+### **Customer Applications**
 - **🚗 Transportation**: Ride booking and route planning
 - **Smart Home**: Device control and automation
 - **Personal Assistant**: Task management and scheduling
