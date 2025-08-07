@@ -1,0 +1,38 @@
+{
+  "name": "langgraph-taxi-agents",
+  "version": "1.0.0",
+  "description": "LangGraph agents with taxi booking tools for cities like London and Berlin",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "demo": "node demo.js",
+    "ollama-demo": "node ollama-demo.js",
+    "dev": "npx @langchain/langgraph-cli dev",
+    "test": "node test/test-taxi-tool.js",
+    "setup": "node setup/install-deps.js",
+    "sdk-example": "node examples/langgraph-sdk-integration.js",
+    "validate": "node validate.js"
+  },
+  "keywords": [
+    "langgraph",
+    "agents",
+    "tools",
+    "taxi",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "@langchain/langgraph": "^0.2.0",
+    "@langchain/langgraph-sdk": "^0.0.14",
+    "@langchain/ollama": "^0.1.6",
+    "@langchain/openai": "^0.3.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.5",
+    "langchain": "^0.3.0",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
+  }
+}

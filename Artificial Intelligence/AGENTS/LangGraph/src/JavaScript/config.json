@@ -1,0 +1,181 @@
+{
+  "title": "Taxi Booking Agent",
+  "description": "LangGraph agent for booking taxis in major European cities",
+  "version": "1.0.0",
+  "config": {
+    "agent": {
+      "model": "gpt-3.5-turbo",
+      "temperature": 0.1,
+      "max_tokens": 1000,
+      "timeout": 30000
+    },
+    "supported_cities": [
+      {
+        "name": "London",
+        "country": "UK",
+        "currency": "GBP",
+        "symbol": "£",
+        "coordinates": {
+          "lat": 51.5074,
+          "lng": -0.1278
+        }
+      },
+      {
+        "name": "Berlin", 
+        "country": "Germany",
+        "currency": "EUR",
+        "symbol": "€",
+        "coordinates": {
+          "lat": 52.5200,
+          "lng": 13.4050
+        }
+      },
+      {
+        "name": "Paris",
+        "country": "France", 
+        "currency": "EUR",
+        "symbol": "€",
+        "coordinates": {
+          "lat": 48.8566,
+          "lng": 2.3522
+        }
+      },
+      {
+        "name": "Madrid",
+        "country": "Spain",
+        "currency": "EUR", 
+        "symbol": "€",
+        "coordinates": {
+          "lat": 40.4168,
+          "lng": -3.7038
+        }
+      },
+      {
+        "name": "Rome",
+        "country": "Italy",
+        "currency": "EUR",
+        "symbol": "€", 
+        "coordinates": {
+          "lat": 41.9028,
+          "lng": 12.4964
+        }
+      }
+    ],
+    "taxi_types": [
+      {
+        "type": "economy",
+        "description": "Standard taxi service, budget-friendly option",
+        "capacity": 4,
+        "features": ["Standard vehicle", "Basic amenities"]
+      },
+      {
+        "type": "premium", 
+        "description": "Higher-end vehicles with additional comfort",
+        "capacity": 4,
+        "features": ["Luxury vehicle", "WiFi", "Phone chargers", "Water bottles"]
+      },
+      {
+        "type": "luxury",
+        "description": "Top-tier service with premium vehicles", 
+        "capacity": 4,
+        "features": ["Luxury sedan/SUV", "Professional driver", "Premium amenities", "Complimentary refreshments"]
+      },
+      {
+        "type": "van",
+        "description": "Large vehicle for groups or extra luggage",
+        "capacity": 8,
+        "features": ["Spacious van", "Extra luggage space", "Group-friendly"]
+      }
+    ],
+    "booking_statuses": [
+      {
+        "status": "confirmed",
+        "description": "Booking confirmed, searching for driver"
+      },
+      {
+        "status": "driver_assigned", 
+        "description": "Driver found and assigned to your booking"
+      },
+      {
+        "status": "en_route",
+        "description": "Driver is on the way to pickup location"
+      },
+      {
+        "status": "arrived",
+        "description": "Driver has arrived at pickup location" 
+      },
+      {
+        "status": "in_progress",
+        "description": "Trip is in progress"
+      },
+      {
+        "status": "completed",
+        "description": "Trip completed successfully"
+      },
+      {
+        "status": "cancelled",
+        "description": "Booking was cancelled"
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "geocodingTool",
+      "description": "Convert city names to geographical coordinates",
+      "required_params": ["city"],
+      "optional_params": []
+    },
+    {
+      "name": "bookTaxi",
+      "description": "Book a taxi reservation in supported cities",
+      "required_params": ["city", "pickup_address", "destination_address", "passenger_count", "taxi_type"],
+      "optional_params": ["booking_time"]
+    },
+    {
+      "name": "checkTaxiStatus", 
+      "description": "Check the status of an existing taxi booking",
+      "required_params": ["booking_id"],
+      "optional_params": []
+    }
+  ],
+  "examples": [
+    {
+      "user_input": "I need a taxi in London from Heathrow Airport to Westminster for 2 passengers",
+      "expected_tools": ["bookTaxi"],
+      "description": "Simple taxi booking request"
+    },
+    {
+      "user_input": "What are the coordinates of Berlin?",
+      "expected_tools": ["geocodingTool"], 
+      "description": "Geocoding query"
+    },
+    {
+      "user_input": "Check status of booking taxi_123456789",
+      "expected_tools": ["checkTaxiStatus"],
+      "description": "Status check request"
+    },
+    {
+      "user_input": "Book a luxury taxi in Paris from Eiffel Tower to Louvre for 4 people",
+      "expected_tools": ["bookTaxi"],
+      "description": "Premium booking with specific locations"
+    }
+  ],
+  "error_handling": {
+    "unsupported_city": "City not supported. Available cities: London, Berlin, Paris, Madrid, Rome",
+    "invalid_passenger_count": "Passenger count must be between 1 and 8",
+    "invalid_taxi_type": "Taxi type must be one of: economy, premium, luxury, van",
+    "missing_api_key": "OpenAI API key not configured. Please set OPENAI_API_KEY in environment variables",
+    "booking_not_found": "Booking ID not found or invalid format",
+    "network_error": "Unable to connect to taxi service. Please try again later"
+  },
+  "development": {
+    "server_port": 2024,
+    "debug_mode": false,
+    "mock_apis": true,
+    "test_booking_ids": [
+      "taxi_test_123456",
+      "taxi_example_789012", 
+      "taxi_demo_345678"
+    ]
+  }
+}
