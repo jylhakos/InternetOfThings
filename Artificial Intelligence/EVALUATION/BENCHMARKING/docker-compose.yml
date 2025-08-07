@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  llm-benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: llm_benchmarking
+    ports:
+      - "8888:8888"  # Jupyter notebook
+      - "6006:6006"  # TensorBoard (optional)
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+      - ./models:/app/models
+      - ./notebooks:/app/notebooks
+    environment:
+      - TOKENIZERS_PARALLELISM=false
+      - HF_HOME=/app/.cache/huggingface
+    command: notebook
+    
+  # Optional: TensorBoard service
+  tensorboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tensorboard
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./results:/app/results
+    command: tensorboard --logdir=/app/results --host=0.0.0.0 --port=6006
+    profiles: ["tensorboard"]

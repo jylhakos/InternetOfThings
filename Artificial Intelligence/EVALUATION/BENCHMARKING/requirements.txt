@@ -1,0 +1,52 @@
+# Core ML/AI Libraries
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+transformers>=4.30.0
+datasets>=2.12.0
+evaluate>=0.4.0
+accelerate>=0.20.0
+tokenizers>=0.13.0
+
+# Benchmarking Frameworks
+deepeval>=0.20.0
+deepchecks[nlp]>=0.17.0
+
+# Evaluation Metrics
+nltk>=3.8.1
+rouge-score>=0.1.2
+sacrebleu>=2.3.0
+bert-score>=0.3.13
+sentence-transformers>=2.2.0
+
+# Data Science and ML
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+
+# NLP Libraries
+spacy>=3.6.0
+
+# Development and Visualization Tools
+jupyter>=1.0.0
+notebook>=6.5.0
+ipykernel>=6.23.0
+ipywidgets>=8.0.0
+wandb>=0.15.0
+tensorboard>=2.13.0
+
+# Utilities
+tqdm>=4.65.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# Optional: Additional model libraries (uncomment if needed)
+# openai>=0.27.0
+# anthropic>=0.3.0
+# langchain>=0.0.200
+# chromadb>=0.3.0
