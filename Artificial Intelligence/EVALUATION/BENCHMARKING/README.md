@@ -2,15 +2,15 @@
 
 ## Table of Contents
 - [Introduction](#introduction)
-- [How Benchmarking Works](#how-benchmarking-works)
-- [LLM Evaluation Criteria](#llm-evaluation-criteria)
+- [How Benchmarking of Large Language Models Works?](#how-benchmarking-of-large-language-models-works)
+- [Large Language Models Evaluation Criteria](#large-language-models-evaluation-criteria)
 - [Evaluation Metrics](#evaluation-metrics)
-- [Popular LLM Benchmarks](#popular-llm-benchmarks)
+- [Large Language Models Benchmarks](#large-language-models-benchmarks)
 - [Open-Source Benchmarking Tools](#open-source-benchmarking-tools)
-- [Installation Guide](#installation-guide)
-- [Practical Benchmarking Examples](#practical-benchmarking-examples)
+- [Installation](#installation)
+- [Practical Benchmarking](#practical-benchmarking)
 - [Benchmark Results Comparison](#benchmark-results-comparison)
-- [Setup and Usage Guide](SETUP_AND_USAGE.md)
+- [Setup and Usage](SETUP_AND_USAGE.md)
 - [References](#references)
 
 ## Introduction
@@ -21,7 +21,7 @@ Large language models (LLMs) benchmarks are sets of tests that help assess the c
 
 > **Quick Start**: New to this project? Check out our [Setup and Usage Guide](SETUP_AND_USAGE.md) for step-by-step installation and usage instructions.
 
-## How Benchmarking of Large language models (LLMs) Works?
+## How Benchmarking of Large Language Models Works?
 
 ### Testing Approaches
 
@@ -31,7 +31,7 @@ Large language models (LLMs) benchmarks are sets of tests that help assess the c
 
 **Fine-tuned Testing**: Models are specifically trained on similar datasets, evaluating their potential for specialized tasks. This approach assesses how well models can adapt to domain-specific requirements through additional training.
 
-## Large language models (LLMs) Evaluation Criteria
+## Large Language Models Evaluation Criteria
 
 Evaluating LLMs requires an approach that considers various dimensions of the model's output, from the accuracy and relevance of its responses to its ability to retrieve and integrate external information. Below are the key criteria essential for assessing the performance and reliability of LLMs across different use cases:
 
@@ -83,7 +83,7 @@ Various metrics are used to evaluate LLM performance, each providing unique insi
 
 **F1 Score**: The F1 score is a popular metric that balances precision and recall by calculating their harmonic mean—a specific type of average that penalizes extremes more heavily than the arithmetic mean. A high F1 score indicates that the model maintains a good balance between precision and recall, making it particularly useful when both false positives and false negatives are important considerations. The F1 score ranges between 0 and 1, where 1 indicates perfect precision and recall.
 
-## Large language models (LLMs) Benchmarks
+## Large Language Models Benchmarks
 
 ### Reasoning and Knowledge Benchmarks
 
@@ -144,7 +144,7 @@ Benchmarking tools can be categorized into several types:
 - GitHub: https://github.com/latitude-dev/latitude-llm
 - Features: Prompt optimization, A/B testing, performance tracking
 
-## Installation Guide
+## Installation
 
 ### Local Virtual Environment Setup (Python)
 
@@ -241,7 +241,7 @@ source llm_benchmark_env/bin/activate
 pip install deepeval deepchecks transformers datasets torch
 ```
 
-## Practical Benchmarking Examples
+## Practical Benchmarking
 
 **Note**: The current benchmark_runner.py implementation primarily performs **zero-shot testing**, where models are evaluated without any task-specific examples or fine-tuning. This section shows how to implement all three testing approaches.
 

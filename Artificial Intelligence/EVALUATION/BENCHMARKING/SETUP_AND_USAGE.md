@@ -1,4 +1,4 @@
-# Large language models (LLMs) Benchmarking Tools - Setup and Usage
+# Large Language Models Benchmarking Tools - Setup and Usage
 
 ## Overview
 This scripts provides a toolkit for benchmarking Large Language Models (LLMs) with a focus on comparing BERT, DistilBERT, and ALBERT models across various tasks.
