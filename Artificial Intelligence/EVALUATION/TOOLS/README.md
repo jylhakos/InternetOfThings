@@ -1,10 +1,10 @@
-# Open Source Tools For Evaluating Large Language Models (LLMs)
+# Open Source Tools For Evaluating Large Language Models
 
-This document presents how to evaluate LLM models like BERT model.
+This document presents how to evaluate Large Language Models (LLM) models like BERT model.
 
-## 🛠️ Open Source LLM Evaluation Tools (2025)
+## 🛠️ Open Source Evaluation Tools for Large Language Models (August - 2025)
 
-The LLM evaluation has evolved with open-source tools designed specifically for model assessment. This project integrates several evaluation frameworks to provide multi-dimensional analysis of language model performance.
+Large Language Models (LLMs) evaluation has evolved with open-source tools designed specifically for model assessment. This project integrates several evaluation frameworks to provide multi-dimensional analysis of language model performance.
 
 ### **Evaluation Tools**
 
@@ -295,7 +295,7 @@ curl -X POST "http://localhost:8000/classify" \
 
 This project includes **FastAPI** backend that provides REST API endpoints for text classification using the fine-tuned BERT model.
 
-> 📖 **For detailed API documentation, examples, and troubleshooting, see the auto-generated docs at [http://localhost:8000/docs](http://localhost:8000/docs) when the server is running**
+> **For detailed API documentation, examples, and troubleshooting, see the auto-generated docs at [http://localhost:8000/docs](http://localhost:8000/docs) when the server is running**
 
 ### API
 - **RESTful Endpoints**: Standard HTTP methods for text classification
@@ -714,7 +714,7 @@ Several open-source frameworks can assist in evaluating BERT and other LLMs:
 5. **BLEURT**
    Model-based metric using transformer representations for scoring LLM outputs.
 
-### Traditional Training and Evaluation Metrics
+## Training and Evaluation Metrics
 
 #### 1. **Training metrics**
 - **Loss Reduction**: Training loss should decrease over epochs
@@ -737,22 +737,22 @@ test_cases = [
 ]
 ```
 
-### Model Performance Evaluation
+## Model Performance Evaluation
 
-#### 1. **Validation split**
+### 1. **Validation split**
 - Split data into training (80%), validation (10%), test (10%)
 - Use validation set to tune hyperparameters
 - Use test set for final performance evaluation
 
-#### 2. **Cross validation**
+### 2. **Cross validation**
 - K-fold cross-validation for robust performance estimates
 - Helps detect overfitting and ensures generalization
 
-#### 3. **Confusion matrix**
+### 3. **Confusion matrix**
 - Visualize classification performance across all classes
 - Identify which classes are being confused
 
-#### 4. **Classification report**
+### 4. **Classification report**
 ```python
 from sklearn.metrics import classification_report
 print(classification_report(y_true, y_pred))
@@ -768,7 +768,7 @@ print(classification_report(y_true, y_pred))
 ./setup_evaluation.sh
 ```
 
-#### Manual Setup
+### Manual Setup
 ```bash
 # Activate virtual environment
 source bert_env/bin/activate
@@ -780,9 +780,9 @@ pip install -r requirements-evaluation.txt
 python src/test_environment.py
 ```
 
-### Available Evaluation Tools
+## Evaluation Tools
 
-#### 1. **DeepEval Framework**
+### 1. **DeepEval Framework**
 [GitHub: confident-ai/deepeval](https://github.com/confident-ai/deepeval)
 
 DeepEval provides comprehensive LLM evaluation metrics including:
@@ -800,7 +800,7 @@ pip install deepeval
 python src/bert_evaluation.py
 ```
 
-#### 2. **BERTScore Integration**
+### 2. **BERTScore Integration**
 [Documentation: BERTScore](https://spotintelligence.com/2024/08/20/bertscore/)
 
 Semantic similarity evaluation using BERT embeddings:
@@ -810,7 +810,7 @@ scorer = BERTScorer(lang="en", rescale_with_baseline=True)
 P, R, F1 = scorer.score(predictions, references)
 ```
 
-#### 3. **G-Eval Implementation**
+### 3. **G-Eval Implementation**
 [Paper: G-Eval NLG Evaluation](https://github.com/nlpyang/geval)
 
 LLM-as-a-judge evaluation with chain-of-thoughts:
@@ -822,7 +822,7 @@ export OPENAI_API_KEY="your-api-key"
 python src/geval_integration.py
 ```
 
-#### 4. **ROUGE and BLEU Metrics**
+### 4. **ROUGE and BLEU Metrics**
 Traditional text similarity metrics:
 ```python
 # ROUGE scores
@@ -848,7 +848,7 @@ python src/bert_fine_tuning.py
 python src/bert_evaluation.py
 ```
 
-#### Evaluation Features
+### Evaluation Features
 - **Traditional Metrics**: Accuracy, Precision, Recall, F1-Score
 - **Semantic Metrics**: BERTScore, ROUGE, BLEU
 - **LLM-based Metrics**: DeepEval suite, G-Eval
@@ -962,19 +962,19 @@ python test_imports.py  # Verify all imports work
 python quick_bert_test.py  # Quick BERT functionality test
 ```
 
-#### Optimizers (2025)
+## Optimizers (2025)
 
 The choice of optimizer significantly impacts BERT fine-tuning performance. Here are the **optimizer options** available in your environment.
 
-##### **Available Optimizers**
+### **Available Optimizers**
 ```python
 # 1. RECOMMENDED: torch.optim.AdamW (Default Choice)
 from torch.optim import AdamW
 optimizer = AdamW(model.parameters(), lr=2e-5, weight_decay=0.01)
 
-# 2. MEMORY EFFICIENT: transformers.Adafactor  
+# 2. MEMORY EFFICIENT: transformers.Adafactor
 from transformers.optimization import Adafactor
-optimizer = Adafactor(model.parameters(), scale_parameter=False, 
+optimizer = Adafactor(model.parameters(), scale_parameter=False,
                       relative_step=False, lr=1e-3)
 
 # 3. SELF-CORRECTING: torch.optim.RAdam
@@ -982,11 +982,11 @@ from torch.optim import RAdam
 optimizer = RAdam(model.parameters(), lr=2e-5, weight_decay=0.01)
 
 # 4. SPARSE DATA: torch.optim.Adamax
-from torch.optim import Adamax  
+from torch.optim import Adamax
 optimizer = Adamax(model.parameters(), lr=2e-3, weight_decay=0.01)
 ```
 
-##### **Optimizer Comparison Table**
+### **Optimizer Comparison Table**
 | Optimizer | Memory Usage | Stability | Performance | Best For |
 |-----------|-------------|-----------|-------------|----------|
 | **AdamW** | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | General BERT fine-tuning |
@@ -994,7 +994,7 @@ optimizer = Adamax(model.parameters(), lr=2e-3, weight_decay=0.01)
 | **RAdam** | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Self-correcting, no warmup needed |
 | **Adamax** | Medium | ⭐⭐⭐ | ⭐⭐⭐ | Sparse gradients, unstable data |
 
-##### **Usage Recommendations**
+### **Usage Recommendations**
 
 **Default Choice**: Use `torch.optim.AdamW`
 ```python
@@ -1018,7 +1018,7 @@ optimizer = Adafactor(model.parameters(),
                       lr=1e-3)
 ```
 
-**🔬 Research/Stability**: Use `RAdam` for self-correcting behavior
+**Research/Stability**: Use `RAdam` for self-correcting behavior
 ```python
 from torch.optim import RAdam
 
@@ -1026,7 +1026,7 @@ optimizer = RAdam(model.parameters(), lr=2e-5, weight_decay=0.01)
 # No manual warmup needed - RAdam handles it internally
 ```
 
-##### **Modern Fine-tuning Template**
+### **Fine-tuning Template**
 ```python
 def create_modern_optimizer(model, optimizer_type="adamw", lr=2e-5):
     """Create modern optimizer for BERT fine-tuning"""
