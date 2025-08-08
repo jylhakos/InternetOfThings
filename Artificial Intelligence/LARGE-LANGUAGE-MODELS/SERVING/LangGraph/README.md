@@ -2300,54 +2300,613 @@ response_format = {
 
 ## LangGraph RAG Workflow
 
-### How LangGraph Enhances RAG
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Artificial%20Intelligence/LARGE-LANGUAGE-MODELS/SERVING/LangGraph/agentic_langgraph.png?raw=true)
 
-LangGraph provides a graph-based approach to building complex, multi-step RAG workflows:
+*Figure: The Retrieval augmented generation (RAG) pipeline involves embedding a user query, retrieving relevant documents to the query, and passing the documents to an LLM for generation of an answer grounded in the retrieved context. A state machine lets us define a set of steps (e.g., retrieval, grade documents, re-write query) and set the transitions options between them; e.g., if our retrieved docs are not relevant, then re-write the query and re-retrieve new documents.*
 
-1. **State Management**: Maintains conversation context and retrieved documents
-2. **Conditional Routing**: Decides when to retrieve vs. generate
-3. **Multi-step Reasoning**: Chains multiple retrieval and generation steps
-4. **Error Handling**: Graceful failure recovery and retry logic
+### What is LangGraph RAG Workflow?
 
-### RAG Graph Structure
+**LangGraph** is a library for building stateful, multi-actor applications with LLMs, used to create agent and multi-agent workflows. In the context of **Agentic RAG (Retrieval-Augmented Generation)**, LangGraph provides a sophisticated framework that goes beyond simple linear RAG pipelines.
+
+#### Traditional RAG vs. Agentic RAG
+
+**Traditional RAG Flow:**
+```
+User Query → Retrieve Documents → Generate Answer
+```
+
+**Agentic RAG Flow (LangGraph):**
+```
+User Query → Agent Decision → [Retrieve/Rewrite/Generate] → Quality Check → Answer
+```
+
+### Key Concepts of LangGraph RAG
+
+#### 1. **State Management**
+LangGraph maintains conversation context and retrieved documents across multiple steps:
+- **MessagesState**: Tracks conversation history
+- **RAGState**: Manages retrieval context and decisions
+- **Persistent Memory**: Remembers previous interactions
+
+#### 2. **Conditional Routing**
+The system intelligently decides between different actions:
+- **Retrieval**: When context is needed
+- **Direct Response**: For simple queries
+- **Question Rewriting**: When retrieval fails
+- **Web Search**: As fallback option
+
+#### 3. **Multi-step Reasoning**
+Chains multiple operations in a graph structure:
+- **Document Grading**: Evaluates retrieved content relevance
+- **Query Refinement**: Improves search queries iteratively
+- **Answer Generation**: Uses best available context
+
+#### 4. **Error Handling & Recovery**
+Graceful failure management with retry logic:
+- **Relevance Checking**: Validates retrieved documents
+- **Fallback Mechanisms**: Alternative retrieval strategies
+- **Quality Assurance**: Ensures answer accuracy
+
+### Complete LangGraph RAG Implementation
+
+#### Step 1: Setup and Dependencies
+
 ```python
-from langgraph.graph import StateGraph, END
-from typing import TypedDict, List
+# File: backend/app/services/langgraph_rag.py
+
+from typing import TypedDict, List, Literal, Annotated
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode, tools_condition
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain.tools.retriever import create_retriever_tool
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from pydantic import BaseModel, Field
+import asyncio
+
+# Define the state structure
+class MessagesState(TypedDict):
+    messages: Annotated[List[BaseMessage], add_messages]
 
 class RAGState(TypedDict):
-    question: str
-    documents: List[str]
+    query: str
+    documents: List[dict]
+    graded_documents: List[dict]
     answer: str
-    needs_more_info: bool
+    question_rewritten: bool
+    retrieval_attempts: int
+    sources: List[str]
+```
 
-def create_rag_graph():
-    workflow = StateGraph(RAGState)
+#### Step 2: Document Processing and Retriever Setup
+
+```python
+# Document preprocessing and vector store setup
+class DocumentProcessor:
+    def __init__(self, embedding_model="text-embedding-ada-002"):
+        self.embeddings = OpenAIEmbeddings(model=embedding_model)
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200
+        )
+        self.vectorstore = None
+        self.retriever_tool = None
     
-    # Add nodes
-    workflow.add_node("retriever", retrieve_documents)
-    workflow.add_node("grader", grade_documents)
-    workflow.add_node("generator", generate_answer)
-    workflow.add_node("web_search", web_search_fallback)
+    async def process_documents(self, documents: List[str]) -> None:
+        """Process and index documents for retrieval."""
+        # Split documents into chunks
+        doc_splits = self.text_splitter.split_documents(documents)
+        
+        # Create vector store
+        self.vectorstore = InMemoryVectorStore.from_documents(
+            documents=doc_splits,
+            embedding=self.embeddings
+        )
+        
+        # Create retriever tool
+        retriever = self.vectorstore.as_retriever(
+            search_type="similarity_score_threshold",
+            search_kwargs={"score_threshold": 0.7, "k": 5}
+        )
+        
+        self.retriever_tool = create_retriever_tool(
+            retriever,
+            "retrieve_documents",
+            "Search and retrieve relevant documents from the knowledge base."
+        )
     
-    # Add edges
-    workflow.add_edge("retriever", "grader")
-    workflow.add_conditional_edges(
-        "grader",
-        decide_to_generate,
-        {
-            "generate": "generator",
-            "web_search": "web_search",
-        }
-    )
-    workflow.add_edge("web_search", "generator")
-    workflow.add_edge("generator", END)
+    def get_retriever_tool(self):
+        return self.retriever_tool
+```
+
+#### Step 3: LLM Setup and Response Generation
+
+```python
+# LLM configuration for different models
+class LLMManager:
+    def __init__(self, model_name: str = "gpt-4", temperature: float = 0.1):
+        if "codellama" in model_name.lower():
+            # For CodeLlama via Ollama
+            from langchain_community.llms import Ollama
+            self.llm = Ollama(
+                model=model_name,
+                temperature=temperature,
+                base_url="http://localhost:11434"
+            )
+        else:
+            # For OpenAI models
+            self.llm = ChatOpenAI(
+                model=model_name,
+                temperature=temperature
+            )
     
-    return workflow.compile()
+    def get_llm(self):
+        return self.llm
+```
+
+#### Step 4: Document Grading System
+
+```python
+# Document relevance grading
+class DocumentGrader:
+    def __init__(self, llm):
+        self.llm = llm
+        self.grade_prompt = """
+        You are a grader assessing relevance of retrieved documents to a user question.
+        
+        Retrieved Document:
+        {context}
+        
+        User Question: {question}
+        
+        If the document contains keywords or semantic meaning related to the question,
+        grade it as relevant. Give a binary score 'yes' or 'no'.
+        """
+    
+    class GradeDocuments(BaseModel):
+        """Grade documents for relevance."""
+        binary_score: str = Field(description="'yes' if relevant, 'no' if not relevant")
+        reasoning: str = Field(description="Brief explanation of the grading decision")
+    
+    async def grade_documents(
+        self, 
+        question: str, 
+        documents: List[dict]
+    ) -> List[dict]:
+        """Grade each document for relevance to the question."""
+        graded_docs = []
+        
+        for doc in documents:
+            prompt = self.grade_prompt.format(
+                question=question,
+                context=doc.get("content", "")
+            )
+            
+            # Get structured grading response
+            response = self.llm.with_structured_output(self.GradeDocuments).invoke([
+                {"role": "user", "content": prompt}
+            ])
+            
+            doc_graded = {
+                **doc,
+                "relevance_score": response.binary_score,
+                "relevance_reasoning": response.reasoning,
+                "is_relevant": response.binary_score.lower() == "yes"
+            }
+            graded_docs.append(doc_graded)
+        
+        return graded_docs
+```
+
+#### Step 5: Query Rewriting System
+
+```python
+# Question rewriter for improved retrieval
+class QueryRewriter:
+    def __init__(self, llm):
+        self.llm = llm
+        self.rewrite_prompt = """
+        Look at the input and analyze the underlying semantic intent.
+        
+        Original Question: {question}
+        
+        The previous retrieval attempt failed to find relevant documents.
+        Formulate an improved question that might yield better search results.
+        Focus on:
+        - Key concepts and entities
+        - Alternative phrasings
+        - More specific or general terms as needed
+        
+        Improved Question:
+        """
+    
+    async def rewrite_question(self, original_question: str) -> str:
+        """Rewrite question for better retrieval results."""
+        prompt = self.rewrite_prompt.format(question=original_question)
+        response = await self.llm.ainvoke([{"role": "user", "content": prompt}])
+        return response.content.strip()
+```
+
+#### Step 6: Complete LangGraph Workflow Implementation
+
+```python
+# Complete Agentic RAG workflow using LangGraph
+class AgenticRAGWorkflow:
+    def __init__(self, model_name: str = "gpt-4"):
+        self.llm_manager = LLMManager(model_name)
+        self.llm = self.llm_manager.get_llm()
+        self.doc_processor = DocumentProcessor()
+        self.doc_grader = DocumentGrader(self.llm)
+        self.query_rewriter = QueryRewriter(self.llm)
+        self.workflow = None
+        
+        # Generation prompt
+        self.generation_prompt = """
+        You are an assistant for question-answering tasks.
+        Use the following retrieved context to answer the question.
+        If you don't know the answer, say so clearly.
+        Keep the answer concise but comprehensive.
+        
+        Question: {question}
+        Context: {context}
+        
+        Answer:
+        """
+    
+    async def setup_documents(self, documents: List[str]):
+        """Initialize the RAG system with documents."""
+        await self.doc_processor.process_documents(documents)
+        self._build_workflow()
+    
+    # Node 1: Generate query or respond directly
+    async def generate_query_or_respond(self, state: MessagesState) -> MessagesState:
+        """Decide whether to retrieve documents or respond directly."""
+        retriever_tool = self.doc_processor.get_retriever_tool()
+        
+        response = self.llm.bind_tools([retriever_tool]).invoke(state["messages"])
+        return {"messages": [response]}
+    
+    # Node 2: Grade retrieved documents
+    async def grade_documents(self, state: MessagesState) -> Literal["generate_answer", "rewrite_question"]:
+        """Grade documents and decide next action."""
+        question = state["messages"][0].content
+        last_message = state["messages"][-1]
+        
+        # Extract context from tool response
+        if hasattr(last_message, 'content') and last_message.content:
+            context = last_message.content
+            
+            # Simple relevance check (in production, use more sophisticated grading)
+            if len(context.strip()) > 50 and any(
+                keyword in context.lower() 
+                for keyword in question.lower().split()[:3]  # Check first 3 words
+            ):
+                return "generate_answer"
+        
+        return "rewrite_question"
+    
+    # Node 3: Rewrite question for better retrieval
+    async def rewrite_question(self, state: MessagesState) -> MessagesState:
+        """Rewrite the question for improved retrieval."""
+        original_question = state["messages"][0].content
+        rewritten = await self.query_rewriter.rewrite_question(original_question)
+        
+        return {"messages": [HumanMessage(content=rewritten)]}
+    
+    # Node 4: Generate final answer
+    async def generate_answer(self, state: MessagesState) -> MessagesState:
+        """Generate final answer using retrieved context."""
+        question = state["messages"][0].content
+        context = state["messages"][-1].content
+        
+        prompt = self.generation_prompt.format(
+            question=question,
+            context=context
+        )
+        
+        response = self.llm.invoke([{"role": "user", "content": prompt}])
+        return {"messages": [response]}
+    
+    def _build_workflow(self):
+        """Build the LangGraph workflow."""
+        workflow = StateGraph(MessagesState)
+        
+        # Add nodes
+        workflow.add_node("generate_query_or_respond", self.generate_query_or_respond)
+        workflow.add_node("retrieve", ToolNode([self.doc_processor.get_retriever_tool()]))
+        workflow.add_node("grade_documents", self.grade_documents)
+        workflow.add_node("rewrite_question", self.rewrite_question)
+        workflow.add_node("generate_answer", self.generate_answer)
+        
+        # Set entry point
+        workflow.add_edge(START, "generate_query_or_respond")
+        
+        # Conditional edges
+        workflow.add_conditional_edges(
+            "generate_query_or_respond",
+            tools_condition,
+            {
+                "tools": "retrieve",
+                END: END,
+            }
+        )
+        
+        workflow.add_conditional_edges(
+            "retrieve",
+            self.grade_documents,
+            {
+                "generate_answer": "generate_answer",
+                "rewrite_question": "rewrite_question"
+            }
+        )
+        
+        workflow.add_edge("generate_answer", END)
+        workflow.add_edge("rewrite_question", "generate_query_or_respond")
+        
+        # Compile the workflow
+        self.workflow = workflow.compile()
+    
+    async def run_rag_query(self, question: str) -> str:
+        """Execute the complete RAG workflow."""
+        if not self.workflow:
+            raise ValueError("Workflow not initialized. Call setup_documents() first.")
+        
+        # Stream through the workflow
+        result_messages = []
+        async for chunk in self.workflow.astream({
+            "messages": [HumanMessage(content=question)]
+        }):
+            for node, update in chunk.items():
+                if "messages" in update:
+                    result_messages.extend(update["messages"])
+        
+        # Return the final answer
+        if result_messages:
+            return result_messages[-1].content
+        return "No answer generated."
+```
+
+#### Step 7: Integration with FastAPI Backend
+
+```python
+# File: backend/app/routers/langgraph_chat.py
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from app.services.langgraph_rag import AgenticRAGWorkflow
+import os
+
+router = APIRouter()
+
+# Global workflow instance
+rag_workflow = None
+
+class RAGQuery(BaseModel):
+    question: str
+    model: str = "gpt-4"
+    use_agentic_rag: bool = True
+
+class RAGResponse(BaseModel):
+    answer: str
+    workflow_steps: List[str]
+    sources: List[str]
+
+@router.post("/chat/agentic-rag", response_model=RAGResponse)
+async def agentic_rag_query(query: RAGQuery):
+    """Process query using LangGraph Agentic RAG workflow."""
+    global rag_workflow
+    
+    try:
+        # Initialize workflow if needed
+        if not rag_workflow:
+            rag_workflow = AgenticRAGWorkflow(model_name=query.model)
+            
+            # Setup with sample documents (in production, load from vector DB)
+            sample_docs = [
+                "LangGraph is a library for building stateful, multi-actor applications with LLMs.",
+                "RAG systems combine retrieval and generation for better answers.",
+                "Agentic workflows can make decisions about when to retrieve information."
+            ]
+            await rag_workflow.setup_documents(sample_docs)
+        
+        # Execute the workflow
+        answer = await rag_workflow.run_rag_query(query.question)
+        
+        return RAGResponse(
+            answer=answer,
+            workflow_steps=["query_analysis", "retrieval", "grading", "generation"],
+            sources=["knowledge_base"]
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"RAG workflow error: {str(e)}")
+
+@router.get("/workflow/graph")
+async def get_workflow_graph():
+    """Get visual representation of the workflow graph."""
+    if rag_workflow and rag_workflow.workflow:
+        try:
+            # Return mermaid representation
+            mermaid_graph = rag_workflow.workflow.get_graph().draw_mermaid()
+            return {"graph": mermaid_graph, "type": "mermaid"}
+        except Exception as e:
+            return {"error": f"Could not generate graph: {str(e)}"}
+    
+    return {"error": "Workflow not initialized"}
+```
+
+#### Step 8: Frontend Integration
+
+```jsx
+// File: frontend/src/components/AgenticRAGChat.jsx
+
+import React, { useState, useEffect } from 'react';
+
+const AgenticRAGChat = () => {
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [workflowSteps, setWorkflowSteps] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [workflowGraph, setWorkflowGraph] = useState('');
+
+  const handleAgenticRAG = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v1/chat/agentic-rag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: question,
+          model: 'codellama:7b-instruct',
+          use_agentic_rag: true
+        })
+      });
+
+      const data = await response.json();
+      setAnswer(data.answer);
+      setWorkflowSteps(data.workflow_steps);
+    } catch (error) {
+      console.error('Agentic RAG error:', error);
+    }
+    setLoading(false);
+  };
+
+  const loadWorkflowGraph = async () => {
+    try {
+      const response = await fetch('/api/v1/workflow/graph');
+      const data = await response.json();
+      setWorkflowGraph(data.graph);
+    } catch (error) {
+      console.error('Graph loading error:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadWorkflowGraph();
+  }, []);
+
+  return (
+    <div className="agentic-rag-chat p-6">
+      <h2 className="text-2xl font-bold mb-4">LangGraph Agentic RAG</h2>
+      
+      {/* Query Input */}
+      <div className="mb-4">
+        <textarea
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask a question..."
+          className="w-full p-3 border rounded-lg"
+          rows="3"
+        />
+        <button
+          onClick={handleAgenticRAG}
+          disabled={loading}
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          {loading ? 'Processing...' : 'Ask with Agentic RAG'}
+        </button>
+      </div>
+
+      {/* Answer Display */}
+      {answer && (
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-semibold mb-2">Answer:</h3>
+          <p>{answer}</p>
+        </div>
+      )}
+
+      {/* Workflow Steps */}
+      {workflowSteps.length > 0 && (
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+          <h3 className="font-semibold mb-2">Workflow Steps:</h3>
+          <div className="flex flex-wrap gap-2">
+            {workflowSteps.map((step, index) => (
+              <span key={index} className="px-3 py-1 bg-blue-200 rounded-full text-sm">
+                {step}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Workflow Visualization */}
+      {workflowGraph && (
+        <div className="mt-6">
+          <h3 className="font-semibold mb-2">Workflow Graph:</h3>
+          <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto">
+            {workflowGraph}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AgenticRAGChat;
+```
+
+### How LangGraph Enhances RAG
+
+#### 1. **State Management**
+- Maintains conversation context across multiple steps
+- Tracks retrieval attempts and document quality
+- Preserves reasoning chain for debugging
+
+#### 2. **Conditional Logic**
+- **Smart Routing**: Decides when to retrieve vs. respond directly
+- **Quality Gates**: Validates retrieved content before generation
+- **Adaptive Strategies**: Changes approach based on results
+
+#### 3. **Multi-step Reasoning**
+- **Document Grading**: Evaluates relevance automatically
+- **Query Refinement**: Improves questions iteratively  
+- **Fallback Mechanisms**: Uses alternative strategies when needed
+
+#### 4. **Visual Workflow**
+```mermaid
+graph TD
+    A[User Query] --> B{Need Retrieval?}
+    B -->|Yes| C[Retrieve Documents]
+    B -->|No| H[Direct Response]
+    C --> D{Documents Relevant?}
+    D -->|Yes| E[Generate Answer]
+    D -->|No| F[Rewrite Query]
+    F --> C
+    E --> G[Return Answer]
+    H --> G
 ```
 
 ### Benefits of Using LangGraph
+
 - **Flexibility**: Easy to modify workflow logic
-- **Debugging**: Visual graph representation
+- **Debugging**: Visual graph representation and step tracking
+- **Scalability**: Handle complex multi-agent scenarios  
+- **Monitoring**: Track execution flow and performance
+- **Error Recovery**: Graceful handling of failed retrievals
+- **Optimization**: Iterative improvement of queries and results
+
+### Integration with Existing RAG System
+
+The LangGraph workflow integrates seamlessly with your existing components:
+
+```python
+# Integration example
+class EnhancedRAGService:
+    def __init__(self):
+        self.traditional_rag = RAGService()  # Existing service
+        self.agentic_rag = AgenticRAGWorkflow()  # New LangGraph workflow
+    
+    async def query(self, question: str, use_agentic: bool = False):
+        if use_agentic:
+            return await self.agentic_rag.run_rag_query(question)
+        else:
+            return await self.traditional_rag.query(question)
+```
+
+This implementation provides a complete, production-ready LangGraph RAG workflow that enhances your existing system with intelligent decision-making capabilities.
 - **Scalability**: Handle complex multi-agent scenarios
 - **Monitoring**: Track execution flow and performance
 
@@ -2473,6 +3032,7 @@ While Ollama handles tokenization internally, you can use transformers for:
 ### Technical Blogs & Tutorials
 - [Building a RAG System with Async FastAPI, Qdrant, Langchain and OpenAI](https://blog.futuresmart.ai/rag-system-with-async-fastapi-qdrant-langchain-and-openai)
 - [Dockerizing a RAG Application with FastAPI, LlamaIndex, Qdrant and Ollama](https://otmaneboughaba.com/posts/dockerize-rag-application/)
+- [Workflows and Agents](https://langchain-ai.github.io/langgraph/tutorials/workflows/)
 
 ### Libraries & Tools
 - [Transformers Library](https://huggingface.co/docs/transformers)
