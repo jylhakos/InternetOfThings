@@ -1,0 +1,59 @@
+# Sample Text Document for Testing
+# This file can be used to test the document upload functionality
+
+## Introduction to Retrieval-Augmented Generation (RAG)
+
+Retrieval-Augmented Generation (RAG) is a powerful technique that combines the strengths of retrieval-based and generation-based approaches in natural language processing.
+
+### How RAG Works
+
+1. **Document Ingestion**: Documents are processed and converted into vector embeddings
+2. **Vector Storage**: Embeddings are stored in a vector database like Qdrant
+3. **Query Processing**: User queries are converted to embeddings
+4. **Retrieval**: Similar documents/chunks are retrieved using vector similarity
+5. **Generation**: Retrieved context is combined with the query and sent to an LLM
+6. **Response**: The LLM generates a response based on the provided context
+
+### Benefits of RAG
+
+- **Up-to-date Information**: Can work with current documents without retraining
+- **Domain Specificity**: Provides relevant context from your specific documents
+- **Transparency**: Sources can be cited and verified
+- **Cost Effective**: No need to fine-tune large models
+- **Scalability**: Can handle large document collections efficiently
+
+### LangGraph Integration
+
+LangGraph enhances RAG systems by providing:
+- **Multi-step Reasoning**: Complex workflows with conditional logic
+- **State Management**: Maintaining context across multiple interactions
+- **Error Handling**: Robust error recovery and fallback mechanisms
+- **Flexibility**: Easy to modify and extend workflows
+
+### Technical Implementation
+
+This RAG system uses:
+- **FastAPI**: High-performance async web framework
+- **Qdrant**: Vector database for similarity search
+- **Ollama**: Local LLM inference server
+- **LangGraph**: Workflow orchestration
+- **React**: Modern frontend interface
+
+### Use Cases
+
+RAG systems are particularly useful for:
+- Customer support chatbots
+- Document question-answering
+- Research assistants
+- Knowledge base queries
+- Code documentation search
+
+### Best Practices
+
+1. **Chunk Size**: Optimize document chunk sizes for your use case
+2. **Embedding Model**: Choose appropriate embedding models for your domain
+3. **Retrieval Strategy**: Fine-tune similarity thresholds and result counts
+4. **Prompt Engineering**: Craft effective prompts for your LLM
+5. **Evaluation**: Implement metrics to measure RAG performance
+
+This sample document demonstrates various concepts that the RAG system can use to answer questions about retrieval-augmented generation, LangGraph workflows, and the technical implementation details.

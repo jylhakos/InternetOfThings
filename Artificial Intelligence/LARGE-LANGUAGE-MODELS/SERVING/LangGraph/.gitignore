@@ -1,10 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# PyTorch
+*.pth
+*.pt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
 # Node.js dependencies
 node_modules/
+*/node_modules/
+**/node_modules/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-debug.log*
 
 # npm debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
 # Runtime data
 pids
@@ -50,6 +102,63 @@ jspm_packages/
 .env
 .env.test
 .env.production
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# React / Vite
+dist/
+dist-ssr/
+build/
+*.local
+.vite/
+
+# Frontend build artifacts
+frontend/dist/
+frontend/build/
+*/dist/
+*/build/
+
+# Vector Database
+qdrant_storage/
+vector_data/
+data/qdrant_storage/
+*/qdrant_storage/
+
+# Model files and AI/ML artifacts
+models/
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.h5
+*.pkl
+*.joblib
+*.model
+checkpoint*/
+runs/
+
+# Hugging Face cache
+.cache/huggingface/
+transformers_cache/
+
+# Ollama
+ollama_models/
+.ollama/
+
+# Logs
+logs/
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Backup files
+*.bak
+*.backup
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -97,3 +206,97 @@ awscliv2.zip
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+docker-data/
+postgres-data/
+redis-data/
+
+# IDE and Editor files
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# JetBrains IDEs
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Binary files and executables
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+*.lib
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+.tmp/
+temp/
+
+# System files
+.fseventsd
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Network files
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
