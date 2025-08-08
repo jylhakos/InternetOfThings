@@ -1,6 +1,6 @@
 # Open Source Tools For Evaluating Large Language Models
 
-This document presents how to evaluate Large Language Models (LLM) models like BERT model.
+This document presents open-source tools and metrics to evaluate Large Language Models models like BERT model.
 
 ## 🛠️ Open Source Evaluation Tools for Large Language Models (August - 2025)
 
