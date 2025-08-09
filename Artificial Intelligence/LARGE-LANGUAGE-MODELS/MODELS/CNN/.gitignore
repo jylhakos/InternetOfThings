@@ -1,13 +1,134 @@
-# Node.js dependencies
-node_modules/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# npm debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Virtual Environments
+mnist_env/
+venv/
+env/
+ENV/
+.venv/
+.env/
+pytorch_env/
+tf_env/
+conda_env/
 
-# Runtime data
-pids
+# PyTorch Model Files & Checkpoints
+*.pth
+*.pt
+*.ckpt
+checkpoints/
+models/
+
+# Large Dataset Files
+data/
+dataset/
+datasets/
+*.csv
+*.h5
+*.hdf5
+*.npz
+*.npy
+*.pkl
+*.pickle
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Generated Images and Plots
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.svg
+plots/
+images/
+outputs/
+results/
+!sample_*.png
+!example_*.png
+!architecture_*.png
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.spyderproject
+.spyproject
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and Debug Files
+*.log
+logs/
+debug.log
+error.log
+training.log
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Weights & Biases (wandb) artifacts
+wandb/
+
+# TensorBoard logs
+runs/
+tensorboard/
+
+# Conda
+.conda/
+
+# MLflow
+mlruns/
+
+# Cache directories
+.cache/
+__pycache__/
+
+# Backup files
+*.bak
+*.backup
+*~
 *.pid
 *.seed
 *.pid.lock
