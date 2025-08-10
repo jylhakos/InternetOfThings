@@ -1,0 +1,13 @@
+# Feature Engineering Outputs
+
+This directory is automatically populated when running feature engineering scripts.
+
+## Current Status: Empty
+Run feature engineering scripts to generate outputs here.
+
+Example commands:
+```bash
+python src/feature_engineering/cnn_feature_engineering.py --dataset MNIST --save-features
+python src/feature_engineering/rnn_feature_engineering.py --dataset IMDB --save-features  
+python src/feature_engineering/transformer_feature_engineering.py --dataset CoLA --save-features
+```

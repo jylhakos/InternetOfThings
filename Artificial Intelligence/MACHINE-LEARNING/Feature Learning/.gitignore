@@ -1,0 +1,298 @@
+# =============================================================================
+# PyTorch Feature Learning Project - Git Ignore Configuration
+# =============================================================================
+# This file excludes files and directories from Git version control to:
+# - Keep repository size manageable
+# - Exclude generated files and outputs
+# - Protect sensitive configuration
+# - Avoid committing large datasets and models
+# =============================================================================
+
+# Virtual Environments
+venv/
+env/
+.venv/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python Generated Files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch Models and Checkpoints (EXCLUDE ALL MODEL FILES)
+*.pth
+*.pt
+*.bin
+*.ckpt
+*.model
+*.safetensors
+*.pkl
+*.pickle
+*.joblib
+
+# Model and Training Directories
+#models/
+checkpoints/
+saved_models/
+weights/
+pretrained/
+model_cache/
+
+# Datasets and Data Files (EXCLUDE ALL LARGE DATASETS)
+datasets/
+data/
+*.csv
+*.json
+*.txt
+*.tsv
+*.parquet
+*.hdf5
+*.h5
+*.npy
+*.npz
+*.mat
+*.dat
+*.arrow
+*.feather
+*.msgpack
+*.avro
+*.orc
+
+# Specific Large Dataset Exclusions
+datasets/cifar-10-batches-py/
+datasets/cifar-10-python.tar.gz
+datasets/MNIST/
+datasets/ImageNet/
+datasets/COCO/
+datasets/WikiText-2/
+datasets/IMDB/
+datasets/CoLA/
+datasets/SQuAD/
+datasets/mnist/
+datasets/cifar10/
+datasets/fashion-mnist/
+
+**/datasets/
+
+# CIFAR-10 Specific Files (requested exclusion)
+datasets/cifar-10-batches-py/data_batch_1
+datasets/cifar-10-batches-py/data_batch_2
+datasets/cifar-10-batches-py/data_batch_3
+datasets/cifar-10-batches-py/data_batch_4
+datasets/cifar-10-batches-py/data_batch_5
+datasets/cifar-10-batches-py/test_batch
+datasets/cifar-10-batches-py/batches.meta
+
+# MNIST Specific Files (requested exclusion)
+datasets/MNIST/raw/t10k*
+datasets/MNIST/raw/train*
+datasets/MNIST/raw/t10k-labels-idx1-ubyte.*
+
+# Feature Engineering Outputs
+feature_engineering/extracted_features/
+feature_engineering/processed_datasets/
+feature_engineering/visualizations/
+feature_engineering/reports/
+
+# Any data files in subdirectories
+**/data/
+**/datasets/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-*
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs and Monitoring
+logs/
+*.log
+wandb/
+mlruns/
+.mlflow/
+
+# Results and Output Files (EXCLUDE ALL IMAGE RESULTS)
+results/
+outputs/
+figures/
+plots/
+visualizations/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.pdf
+*.eps
+*.tiff
+*.bmp
+*.webp
+
+# Training Output Directories
+training_curves/
+attention_maps/
+feature_plots/
+loss_plots/
+accuracy_plots/
+confusion_matrices/
+
+# Experiment Tracking
+experiments/
+runs/
+mlruns/
+wandb/
+tensorboard_logs/
+*.tensorboard
+
+# Cache and Temporary Files
+.cache/
+*.cache
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary Training Files
+tmp/
+temp/
+*.tmp
+*.temp
+*.lock
+*.swp
+*.swo
+*~
+
+# Machine Learning Framework Caches
+.huggingface/
+transformers_cache/
+.torch/
+.torchvision/
+.sklearn/
+
+# Download Temporary Files
+*.downloading
+*.partial
+
+# Testing and Coverage
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.coverage.*
+coverage.xml
+nosetests.xml
+test_outputs/
+test_checkpoints/
+
+# Documentation Build
+docs/_build/
+.doctrees
+.doctest
+
+# Environment Variables and Secrets
+.env
+.env.local
+.env.*.local
+config.yaml
+secrets.yaml
+*.key
+*.pem
+*.crt
+
+# Large Files and Archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.rar
+*.7z
+*.iso
+*.dmg
+*.deb
+*.rpm
+*.msi
+*.exe
+
+# Media Files (if generated during training)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+*.wav
+*.mp3
+*.flac
+*.ogg
+
+# GPU Memory Dumps and System Files
+*.dmp
+*.dump
+core.*
+*.stackdump
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*~
+
+# Compiled Extensions
+*.dll
+*.dylib
+*.so
+*.pyd
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration Files (if containing sensitive data)
+*.ini
+*.conf
+local_settings.py
+
+# Custom Project Excludes
+# Add any project-specific files to exclude here
+validation_outputs/
+benchmark_results/
+profiling_data/
