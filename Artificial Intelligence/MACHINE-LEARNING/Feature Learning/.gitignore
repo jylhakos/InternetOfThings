@@ -59,6 +59,9 @@ weights/
 pretrained/
 model_cache/
 
+# Specific Model Files (requested exclusion)
+models/cnn_features_custom_mnist.pth
+
 # Datasets and Data Files (EXCLUDE ALL LARGE DATASETS)
 datasets/
 data/
@@ -108,6 +111,7 @@ datasets/cifar-10-batches-py/batches.meta
 datasets/MNIST/raw/t10k*
 datasets/MNIST/raw/train*
 datasets/MNIST/raw/t10k-labels-idx1-ubyte.*
+datasets/MNIST/raw/
 
 # Feature Engineering Outputs
 feature_engineering/extracted_features/
