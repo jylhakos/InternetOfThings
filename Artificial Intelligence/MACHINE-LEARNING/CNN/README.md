@@ -1281,7 +1281,7 @@ for exp in experiments:
 - [CIFAR-10 Tutorial](https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html)
 
 ### MNIST Dataset:
-- [MNIST Database](http://yann.lecun.com/exdb/mnist/)
+- [MNIST Database](https://huggingface.co/datasets/ylecun/mnist/)
 - [PyTorch MNIST Examples](https://github.com/pytorch/examples/tree/main/mnist)
 
 ### Deep Learning Resources:
