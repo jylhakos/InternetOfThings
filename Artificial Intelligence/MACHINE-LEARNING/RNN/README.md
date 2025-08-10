@@ -1448,7 +1448,7 @@ class RNNLanguageModel(nn.Module):
 
 - [PyTorch Autograd and Tensors Tutorial](https://docs.pytorch.org/tutorials/beginner/pytorch_with_examples.html)
 - [PyTorch RNN Examples](https://github.com/pytorch/examples/tree/main/word_language_model)
-- [WikiText Dataset - HuggingFace](https://huggingface.co/datasets/wikitext)
+- [WikiText Dataset - HuggingFace](https://huggingface.co/datasets/Salesforce/wikitext)
 - [WikiText Dataset - mindchain](https://huggingface.co/datasets/mindchain/wikitext2)
 - [PyTorch Data Tutorial](https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html)
 - [Language Modeling from Scratch](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/language_modeling_from_scratch-tf.ipynb)
