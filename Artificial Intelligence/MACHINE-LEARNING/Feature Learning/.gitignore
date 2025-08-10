@@ -121,7 +121,7 @@ feature_engineering/reports/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
+#*.ipynb
 
 # IDE and Editor Files
 .vscode/
