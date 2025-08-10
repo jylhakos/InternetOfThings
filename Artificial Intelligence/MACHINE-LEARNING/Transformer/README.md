@@ -27,7 +27,7 @@ This project presents the evolution from Recurrent Neural Networks (RNNs) to Tra
 
 This implementation showcases three different approaches to language modeling.
 
-1. **RNN (LSTM)**: Traditional recurrent approach for sequential processing
+1. **RNN (Long Short Term Memory - LSTM)**: Traditional recurrent approach for sequential processing
 2. **Transformer**: Modern attention-based architecture for parallel processing
 3. **Hybrid RNN + Transformer**: Novel combination leveraging benefits of both architectures
 
@@ -35,9 +35,13 @@ The project uses the **WikiText-2 dataset** for training and provides a complete
 
 ## Architecture Comparison
 
-### RNN (LSTM) Architecture
+### RNN (Long Short Term Memory - LSTM) Architecture
+
 - **Sequential Processing**: Processes tokens one by one
+- **Natural Language Processing**: Operates sequentially over data sets
 - **Hidden State**: Maintains memory through recurrent connections
+- **An input sentence translation**: Generating a sequential output
+- **A memory cell**: LSTM uses a series of different gates
 - **Pros**: Memory efficient, good for long sequences
 - **Cons**: Sequential bottleneck, vanishing gradients for long sequences
 
@@ -50,6 +54,7 @@ The project uses the **WikiText-2 dataset** for training and provides a complete
 
 ### Hybrid RNN + Transformer
 - **Best of Both**: RNN provides sequential inductive bias, Transformer adds global attention
+- **Classify Text Data Using BERT**: Use the BERT model to convert documents to feature vectors
 - **Efficient**: More parameter-efficient than pure Transformer
 - **Architecture Flow**: Input → Embedding → RNN → Linear Projection → Transformer → Output
 
