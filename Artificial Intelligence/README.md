@@ -46,6 +46,25 @@ Resources for working with large language models:
 - **MODELS/**: Model configurations and implementations
 - **SERVING/**: Deployment and serving infrastructure for LLMs
 
+### 📁 MACHINE-LEARNING/
+**Machine Learning and Deep Learning**
+
+Core machine learning algorithms, techniques, and implementations.
+
+- **CNN/**: Convolutional Neural Networks for computer vision and image processing
+
+- **Feature Learning/**: Pre-trained model adaptation and domain transfer techniques
+
+- **RNN/**: Recurrent Neural Networks for sequential data and time series analysis
+
+- **Transformer/**: Transformer architectures for natural language processing and beyond
+
+- **Unsupervised Learning/**: Clustering, dimensionality reduction, and pattern discovery methods
+
+- **Reinforcement Learning/**: Agent-based learning through interaction with environments
+- **Deep Learning/**: Neural network architectures and deep learning frameworks
+
+
 ## Concepts
 
 ### Agents (AI)
@@ -87,6 +106,38 @@ Large Language Models are neural networks trained on vast amounts of text data t
 - **Applications**: Chatbots, content creation, code assistance, research tools
 - **Deployment Considerations**: Hardware requirements, latency, cost optimization
 
+### Feature Learning
+Feature Learning is the process of automatically discovering representations or features from raw data that are useful for machine learning tasks. This approach reduces the need for manual feature engineering by allowing models to learn meaningful patterns directly from data:
+- **Representation Learning**: Learning abstract representations that capture underlying data structure
+- **Automatic Feature Extraction**: Eliminating manual feature engineering through learned representations
+- **Hierarchical Features**: Building complex features from simpler ones (as in deep learning)
+- **Dimensionality Reduction**: Learning compact representations that preserve important information
+- **Transfer Learning**: Utilizing learned features from one domain to improve performance in another
+
+### Convolutional Neural Networks (CNN)
+Convolutional Neural Networks are deep learning architectures specifically designed for processing grid-like data such as images. CNNs use convolutional layers to detect local features and patterns:
+- **Convolutional Layers**: Apply filters to detect features like edges, textures, and patterns
+- **Pooling Layers**: Reduce spatial dimensions while preserving important information
+- **Feature Maps**: Hierarchical representations learned at different network depths
+- **Applications**: Image classification, object detection, medical imaging, computer vision
+- **Architectures**: LeNet, AlexNet, VGG, ResNet, EfficientNet
+
+### Recurrent Neural Networks (RNN)
+Recurrent Neural Networks are designed to process sequential data by maintaining hidden states that capture information from previous time steps:
+- **Sequential Processing**: Handle variable-length sequences and temporal dependencies
+- **Memory Mechanisms**: Maintain information across time steps through hidden states
+- **Variants**: LSTM (Long Short-Term Memory), GRU (Gated Recurrent Unit)
+- **Applications**: Natural language processing, speech recognition, time series prediction
+- **Challenges**: Vanishing gradients, long-term dependency modeling
+
+### Transformer
+Transformer architecture revolutionized natural language processing by using self-attention mechanisms instead of recurrence or convolution:
+- **Self-Attention**: Allows models to weigh the importance of different parts of the input
+- **Parallel Processing**: Enables efficient training compared to sequential RNN processing
+- **Multi-Head Attention**: Multiple attention mechanisms working in parallel
+- **Applications**: Machine translation, text summarization, language modeling, vision tasks
+- **Notable Models**: BERT, GPT series, T5, Vision Transformer (ViT)
+
 ## References
 
 - **Amazon SageMaker**: https://aws.amazon.com/sagemaker/
@@ -96,4 +147,5 @@ Large Language Models are neural networks trained on vast amounts of text data t
 - **LangChain Documentation**: https://docs.langchain.com/
 - **PyTorch**: https://pytorch.org/
 - **MLflow**: https://mlflow.org/
+- **Transfer Learning for Computer Vision Tutorial**: https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
 
