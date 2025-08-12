@@ -107,7 +107,7 @@ Microservices development using Go or Java, HTTP or gRPC communication, and AWS 
 
 ### Go Deployment Architecture on AWS
 
-**Figure: Go-based Microservices Architecture with gRPC Communication**  
+**Figure: Go-based Microservices Architecture with gRPC Communication**
 This diagram illustrates a complete Go microservices ecosystem deployed on AWS, showcasing gRPC-based internal communication, service discovery, and load balancing components.
 
 ```
@@ -137,7 +137,7 @@ This diagram illustrates a complete Go microservices ecosystem deployed on AWS, 
 
 ### Hybrid Architecture: Go Internal + Spring Boot External
 
-**Figure: Hybrid Microservices Architecture Pattern**  
+**Figure: Hybrid Microservices Architecture Pattern**
 This architecture diagram demonstrates the hybrid approach where Go services handle internal gRPC communication while Spring Boot services expose external RESTful APIs, providing optimal performance and compatibility.
 
 ```
@@ -154,11 +154,11 @@ This architecture diagram demonstrates the hybrid approach where Go services han
            ▼ gRPC                               ▼
     ┌──────────────────────────────────────────────────────────┐
     │           Internal Go Microservices (gRPC)               │
-    │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
-    │  │   Product    │  │   Order      │  │   Payment    │   │
-    │  │   Service    │◄─┤   Service    │◄─┤   Service    │   │
-    │  │   (Go)       │  │   (Go)       │  │   (Go)       │   │
-    │  └──────────────┘  └──────────────┘  └──────────────┘   │
+    │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+    │  │   Product    │  │   Order      │  │   Payment    │    │
+    │  │   Service    │◄─┤   Service    │◄─┤   Service    │    │
+    │  │   (Go)       │  │   (Go)       │  │   (Go)       │    │
+    │  └──────────────┘  └──────────────┘  └──────────────┘    │
     └──────────────────────────────────────────────────────────┘
            │                     │                     │
            ▼                     ▼                     ▼
@@ -168,7 +168,7 @@ This architecture diagram demonstrates the hybrid approach where Go services han
     └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
-**Figure: Go Project Structure for Cloud Deployment**  
+**Figure: Go Project Structure for Cloud Deployment**
 This structure illustrates a well-organized Go microservices project designed for containerization and Kubernetes deployment on AWS.
 
 ```
