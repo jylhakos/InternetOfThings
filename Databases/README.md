@@ -33,12 +33,12 @@ MongoDB is a document-oriented NoSQL database designed for modern applications t
 - Flexible schema design
 - Built-in replication
 
-### 🐘 PostgreSQL - Advanced Relational Database
-PostgreSQL is a powerful, open-source object-relational database system with strong ACID compliance and extensive SQL features. Ideal for IoT applications requiring complex queries and data integrity.
+### 🐘 PostgreSQL - Relational Database
+PostgreSQL is an open-source object-relational database system with strong ACID compliance and extensive SQL features. Ideal for IoT applications requiring complex queries and data integrity.
 
 **Features:**
 - ACID compliance
-- Advanced SQL features
+- SQL features
 - JSON and JSONB support
 - Full-text search
 - Extensible with custom functions
