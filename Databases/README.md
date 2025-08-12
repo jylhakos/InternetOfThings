@@ -29,7 +29,7 @@ MongoDB is a document-oriented NoSQL database designed for modern applications t
 **Features:**
 - Document-based storage (JSON-like BSON format)
 - Horizontal scaling with sharding
-- Rich query language
+- Query language
 - Flexible schema design
 - Built-in replication
 
