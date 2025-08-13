@@ -1,8 +1,8 @@
-# RESTful API (REST)
+# REST API for Go applications
 
-The application consists of RESTful (Representational State Transfer) APIs with Golang and the Gin framework.
+The application consists of REST (Representational State Transfer) APIs (RESTful) with Go and the Gin framework.
 
-The goal of RESTful model is that a resource, for example a document, is transferred via client and server interactions.
+The goal of REST model is that a resource, for example a document, is transferred via client and server interactions.
 
 The starting point for the RESTful model is using Hypertext Transfer Protocol (HTTP) as a transport system for remote interactions.
 
@@ -74,7 +74,7 @@ curl http://localhost:8000/notes \
     --request "GET"
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_GET.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/REST/HTTP_GET.png?raw=true)
 
 A handler returns data from a GET request.
 
@@ -91,7 +91,7 @@ Use curl command to make a request to the running web service.
 $ curl http://localhost:8000/notes/2
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_GET_ID.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/REST/HTTP_GET_ID.png?raw=true)
 
 **POST**
 
@@ -147,7 +147,7 @@ $ curl http://localhost:8000/notes \
     --data '{"id": "4","content": "POST is used to add data to REST API","date": "2019-06-15T20:40:22.098Z","important": false}'
 
 ```
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/REST/HTTP_POST.png?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Messaging/REST/HTTP_POST.png?raw=true)
 
 **OPTIONS**
 
