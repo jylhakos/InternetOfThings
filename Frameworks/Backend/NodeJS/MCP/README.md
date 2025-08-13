@@ -1,8 +1,8 @@
 # MCP (Model Context Protocol) with Node.js, TypeScript, and Llama-3.x
 
-This project demonstrates a comprehensive implementation of the Model Context Protocol (MCP) using Node.js with TypeScript, integrated with Llama-3.x via Ollama, and provides a foundation for building AI applications with enhanced context and tool capabilities.
+This project demonstrates the Model Context Protocol (MCP) using Node.js with TypeScript, integrated with Llama-3.x via Ollama, and provides a foundation for building AI applications with context and tool capabilities.
 
-## 🎯 Overview
+## Overview
 
 The Model Context Protocol (MCP) is an open standard for connecting AI assistants to various data sources and tools. This implementation provides:
 
@@ -11,7 +11,7 @@ The Model Context Protocol (MCP) is an open standard for connecting AI assistant
 - **Llama-3.x Integration**: Leverages Ollama for local AI model execution
 - **Open WebUI Support**: Compatible with Open WebUI for web-based interactions
 
-## 🏗️ Architecture & Data Flow
+## Architecture & Data Flow
 
 ### High-Level Architecture
 
@@ -71,7 +71,7 @@ sequenceDiagram
     Note over MCP,C: {"result": {"content": [{"type": "text", "text": "Hello! How can I help you?"}]}}
 ```
 
-## 🧠 Core Concepts
+## Concepts
 
 ### Model Context Protocol (MCP)
 
@@ -91,7 +91,7 @@ The Model Context Protocol is an open standard that enables AI applications to s
 ### Large Language Model (LLM) Inference
 
 **What is LLM Inference?**
-LLM inference is the process of generating text responses from a trained language model. Here's how it works:
+LLM inference is the process of generating text responses from a trained language model.
 
 1. **Tokenization**: Input text is converted into numerical tokens
    ```
@@ -156,7 +156,7 @@ const processedPrompt = template
 // Result: "System: You are a coding assistant\nUser: How do I create a REST API?"
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -454,7 +454,7 @@ async executeWithFallback(request: ToolRequest): Promise<ToolResponse> {
 6. **Monitoring & Logging**: Detailed analytics and debugging
 7. **Extensibility**: Easy to add new tools and capabilities
 
-## �🛠️ Available Tools
+## 🛠️ Tools
 
 The MCP server exposes several tools that can be used by AI models:
 
@@ -473,7 +473,7 @@ The MCP server exposes several tools that can be used by AI models:
 
 // Chat with conversation context
 {
-  "name": "llama_chat", 
+  "name": "llama_chat",
   "arguments": {
     "messages": [
       {"role": "user", "content": "Hello!"},
@@ -495,7 +495,7 @@ The MCP server exposes several tools that can be used by AI models:
 
 // List available Ollama models
 {
-  "name": "list_ollama_models", 
+  "name": "list_ollama_models",
   "arguments": {}
 }
 ```
@@ -522,7 +522,7 @@ The MCP server exposes several tools that can be used by AI models:
 }
 ```
 
-## 📚 Resources
+## Resources
 
 The server provides access to various resources:
 
@@ -538,7 +538,7 @@ Pre-configured prompts for different use cases:
 - `code_assistant` - Programming and debugging assistance  
 - `data_analyst` - Data analysis and insights
 
-## 🌐 Open WebUI Integration
+## Open WebUI Integration
 
 ### Docker Setup
 
@@ -609,7 +609,7 @@ class MCPPipeline:
         print("MCP Pipeline shutdown")
         
     def pipe(
-        self, 
+        self,
         prompt: str,
         model_id: str,
         messages: List[dict],
@@ -636,7 +636,7 @@ class MCPPipeline:
    - Upload the `mcp_pipeline.py` file
    - Configure MCP server URL in pipeline settings
 
-## 🐳 Complete Docker Setup
+## 🐳 Docker Setup
 
 ### Dockerfile for MCP Server
 
@@ -741,7 +741,7 @@ NodeJS/MCP/
 ├── src/
 │   ├── server/          # MCP server implementation
 │   │   └── index.ts     # Main server logic
-│   ├── client/          # MCP client implementation  
+│   ├── client/          # MCP client implementation
 │   │   └── index.ts     # Interactive client
 │   ├── shared/          # Shared utilities
 │   │   ├── types.ts     # TypeScript interfaces
@@ -757,7 +757,7 @@ NodeJS/MCP/
 └── README.md           # This file
 ```
 
-### Available Scripts
+### Scripts
 
 ```bash
 # Development
@@ -795,7 +795,7 @@ npm run test:watch     # Run tests in watch mode
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
-    "module": "ESNext", 
+    "module": "ESNext",
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -808,9 +808,9 @@ npm run test:watch     # Run tests in watch mode
 }
 ```
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
-### Common Issues
+### Issues
 
 1. **Ollama Connection Failed**
    ```bash
@@ -892,14 +892,14 @@ Check log files:
 # Application logs
 tail -f logs/combined.log
 
-# Error logs only  
+# Error logs only
 tail -f logs/error.log
 
 # System logs
 sudo journalctl -f
 ```
 
-## 📖 API Documentation
+## API
 
 ### MCP Server Endpoints
 
@@ -934,7 +934,7 @@ Content-Type: application/json
 The server communicates with Ollama using these endpoints:
 
 - `GET /api/version` - Check Ollama version
-- `GET /api/tags` - List available models  
+- `GET /api/tags` - List available models
 - `POST /api/generate` - Generate text
 - `POST /api/chat` - Chat completion
 - `POST /api/pull` - Pull model
@@ -951,27 +951,11 @@ The server communicates with Ollama using these endpoints:
 | `LOG_LEVEL` | `info` | Logging level |
 | `NODE_ENV` | `development` | Environment mode |
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)  
-5. Open Pull Request
-
-### Development Guidelines
-
-- Use TypeScript for type safety
-- Follow ESLint configuration
-- Write tests for new features
-- Update documentation
-- Use conventional commit messages
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Resources
+## Resources
 
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
@@ -979,16 +963,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Open WebUI Documentation](https://docs.openwebui.com/)
 - [Llama-3.x Model Documentation](https://llama.meta.com/docs/)
 
-## 🙏 Acknowledgments
-
-- Model Context Protocol team for the excellent SDK
-- Ollama team for local LLM execution
-- Open WebUI community for the web interface
-- Meta for the Llama-3.x models
-- Node.js and TypeScript communities
-
 ---
-
-**Happy coding!** 🚀
-
-For questions or support, please open an issue in the repository or contact the development team.

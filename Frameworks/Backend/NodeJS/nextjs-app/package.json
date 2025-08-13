@@ -1,0 +1,30 @@
+{
+  "name": "nextjs-app-example",
+  "version": "1.0.0",
+  "description": "Next.js full-stack application with SSR/SSG examples",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "export": "next build && next export"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.5.0",
+    "swr": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.47.0",
+    "eslint-config-next": "^14.0.0",
+    "typescript": "^5.1.0"
+  },
+  "keywords": ["nextjs", "react", "ssr", "ssg", "full-stack"],
+  "author": "IoT Framework Example",
+  "license": "MIT"
+}

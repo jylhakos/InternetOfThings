@@ -1,6 +1,6 @@
-# MCP Examples
+# MCP
 
-This directory contains example code demonstrating how to interact with the MCP server.
+This directory contains code demonstrating how to interact with the MCP server.
 
 ## Examples
 
@@ -36,7 +36,7 @@ npm run build
 python3 examples/python-client.py
 ```
 
-## Integration Patterns
+## Integrations
 
 ### Web Applications
 
@@ -113,7 +113,7 @@ case "$1" in
 esac
 ```
 
-### Docker Integration
+### Docker
 
 Run examples in Docker:
 
@@ -139,12 +139,3 @@ npm test
 # Run specific example tests
 npm run test:examples
 ```
-
-## Contributing
-
-When adding new examples:
-
-1. Include error handling
-2. Add usage documentation
-3. Test with different Ollama models
-4. Follow the established patterns
