@@ -100,7 +100,7 @@ npm run dev -- --profile
 
 Vite will start a development server, accessible at http://localhost:5173 (or a similar port).
 
-### 🚀 Development Server Comparison: Vite vs Next.js
+### Development Server Comparison: Vite vs Next.js
 
 For comprehensive information about Next.js development server setup and migration guidance, see the [MIGRATION.md](./MIGRATION.md) file.
 
