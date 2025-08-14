@@ -1,6 +1,6 @@
-# Flutter SPA with Amazon AWS Backend Integration
+# Single Page Application (SPA) with Flutter and Amazon AWS
 
-A Flutter Single Page Application (SPA) with Amazon AWS backend services for user management, authentication, and data persistence.
+Single Page Application (SPA) with Flutter and Amazon AWS services for user management, authentication, and data persistence.
 
 ## Platforms
 
