@@ -10,6 +10,10 @@ build/
 dist/
 **/packages/
 
+# Include Flutter source code
+!lib/
+!lib/**/*.dart
+
 # Flutter Web
 web/assets/packages/
 web/assets/AssetManifest.json
@@ -234,7 +238,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  # Commented out for Flutter - lib/ folder contains Dart source code
 lib64/
 parts/
 sdist/
