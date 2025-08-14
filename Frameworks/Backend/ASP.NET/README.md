@@ -1,4 +1,4 @@
-# Development of microservices with ASP.NET Core on Linux/Debian
+# Development of microservices with ASP.NET Core
 
 This document provides instructions to setup ASP.NET Core environment with Visual Studio Code on Linux/Debian. The application implements communications with gRPC for microservices, React integration (Vite), and Docker deployment on Azure services.
 
