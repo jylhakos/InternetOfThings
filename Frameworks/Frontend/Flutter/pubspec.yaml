@@ -1,0 +1,92 @@
+name: flutter_spa_aws
+description: A Flutter SPA with AWS backend integration for user management and authentication.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # HTTP and API clients
+  http: ^1.1.0
+  dio: ^5.3.2
+  
+  # AWS Amplify
+  amplify_flutter: ^1.5.0
+  amplify_auth_cognito: ^1.5.0
+  amplify_api: ^1.5.0
+  amplify_storage_s3: ^1.5.0
+  
+  # State management
+  provider: ^6.0.5
+  riverpod: ^2.4.6
+  flutter_riverpod: ^2.4.6
+  
+  # Local storage
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  
+  # UI components
+  cupertino_icons: ^1.0.2
+  flutter_spinkit: ^5.2.0
+  cached_network_image: ^3.3.0
+  
+  # Forms and validation
+  flutter_form_builder: ^9.1.1
+  form_builder_validators: ^9.1.0
+  
+  # Routing
+  go_router: ^12.1.1
+  
+  # JSON serialization
+  json_annotation: ^4.8.1
+  
+  # Networking
+  connectivity_plus: ^5.0.1
+  
+  # Device info
+  device_info_plus: ^9.1.1
+  package_info_plus: ^4.2.0
+  
+  # Security
+  crypto: ^3.0.3
+  
+  # Date and time
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Linting
+  flutter_lints: ^3.0.0
+  
+  # Code generation
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  
+  # Testing
+  mockito: ^5.4.2
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/
+  
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
