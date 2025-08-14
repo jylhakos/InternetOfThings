@@ -1071,7 +1071,7 @@ docker tag flutter-spa:latest <account>.dkr.ecr.us-east-1.amazonaws.com/flutter-
 docker push <account>.dkr.ecr.us-east-1.amazonaws.com/flutter-spa:latest
 ```
 
-## ☁️ AWS Deployment
+## ☁️ Amazon AWS Deployment
 
 ### Using AWS Amplify Hosting
 ```bash
@@ -1124,10 +1124,18 @@ terraform apply
 - SSL termination
 - Rate limiting and security headers
 
-### AWS Application Load Balancer
+### Amazon AWS Application Load Balancer (ALB)
 - Health checks for backend services
 - Auto-scaling based on CPU/memory metrics
 - Multi-AZ deployment for high availability
+
+**What is an Application Load Balancer?**
+
+A load balancer serves as the single point of contact for clients. The load balancer distributes incoming application traffic across multiple targets, such as EC2 instances, in multiple Availability Zones.
+
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Frameworks/Frontend/Flutter/load_balancer.png?raw=true)
+
+*Figure: Application Load Balancer*
 
 ## 🔒 Security
 
