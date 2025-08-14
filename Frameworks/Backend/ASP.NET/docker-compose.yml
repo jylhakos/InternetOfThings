@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # gRPC Greeter Service
+  grpc-greeter:
+    build:
+      context: ./gRPC/GrpcGreeterService
+      dockerfile: Dockerfile
+    ports:
+      - "7042:8080"  # gRPC service port
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - aspnet-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=DevPassword123!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    networks:
+      - aspnet-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P DevPassword123! -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - aspnet-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      - grpc-greeter
+    networks:
+      - aspnet-network
+    restart: unless-stopped
+
+networks:
+  aspnet-network:
+    driver: bridge
+
+volumes:
+  mssql-data:
+    driver: local
+  redis-data:
+    driver: local

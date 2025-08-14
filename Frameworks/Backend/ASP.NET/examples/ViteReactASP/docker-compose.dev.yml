@@ -1,0 +1,71 @@
+# Development Override Configuration
+# Use this file for local development with hot reload and debugging
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  # Override main application for development
+  vite-react-asp:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount source code for hot reload
+      - ./Server:/app/server:cached
+      - ./Client:/app/client:cached
+      # Exclude build artifacts from sync
+      - /app/server/bin
+      - /app/server/obj  
+      - /app/client/node_modules
+      - /app/client/dist
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+      # Use SQLite for development (simpler setup)
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/contacts-dev.db
+    ports:
+      - "8080:8080"
+      - "5001:5001"  # Additional port for debugging
+    command: >
+      sh -c "cd /app/server && 
+             dotnet watch run --no-restore --urls http://+:8080"
+
+  # Separate Vite dev server for optimal development experience
+  vite-dev:
+    build:
+      context: ./Client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./Client:/app:cached
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://vite-react-asp:8080
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "5173:5173"  # Vite dev server
+      - "5174:5174"  # HMR port
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - vite-react-asp
+    networks:
+      - app-network
+
+  # Use lighter database for development
+  postgres:
+    profiles: ["full-dev"]  # Only start with --profile full-dev
+
+  # Disable heavy services in development
+  redis:
+    profiles: ["full-dev"]
+
+  nginx:
+    profiles: ["full-dev"]
+
+# Development-specific volumes
+volumes:
+  dev_data:
+    driver: local
