@@ -268,6 +268,15 @@ scripts/test-api.sh              # API testing
 - **iPad iOS**: PWA with native feel
 - **Desktop**: Flutter desktop support
 
+### Git Repository Configuration
+The `.gitignore` file has been configured specifically for Flutter development:
+- **Flutter Source Code**: `lib/` folder and all `*.dart` files are tracked in version control
+- **Generated Files**: Build artifacts, dependencies, and generated files are excluded
+- **Platform-Specific**: Android, iOS, web, and desktop build outputs are ignored
+- **Development Tools**: IDE configurations and temporary files are excluded
+
+**Important Note**: The `lib/` folder contains your Flutter application's source code and should be committed to version control.
+
 ## 🛠️ Prerequisites
 
 ### Development Environment
