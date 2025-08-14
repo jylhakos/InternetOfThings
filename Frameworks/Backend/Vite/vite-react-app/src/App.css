@@ -1,0 +1,18 @@
+/* This file is needed for the Vite React app but components will be styled with Tailwind */
+.App {
+  text-align: center;
+}
+
+.device-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.device-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}

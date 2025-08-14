@@ -1,0 +1,322 @@
+# ======================================
+# IoT Project .gitignore Template
+# Copy this to your project root or specific directories
+# ======================================
+
+# Dependencies and Package Managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.yarn/
+.yarnrc.yml
+vendor/
+Godeps/
+glide.lock
+go.sum
+
+# Build outputs and distributions
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.vercel/
+.netlify/
+bin/
+pkg/
+target/
+
+# Cache directories
+.cache/
+.vite/
+.temp/
+.tmp/
+.parcel-cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# IDE and Editor files (COMPLETE EXCLUSION)
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+.atom/
+.brackets.json
+.history/
+.project
+.metadata
+.classpath
+.settings/
+*.iws
+*.iml
+*.ipr
+.vs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*~
+
+# Environment and configuration files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+config.local.*
+*.secret
+*.private
+.secrets/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage and test reports
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+*.lcov
+junit.xml
+coverage.xml
+
+# Binaries and executables (COMPREHENSIVE)
+*.exe
+*.bin
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.app
+*.run
+*.AppImage
+*.snap
+*.flatpak
+*.out
+
+# Compiled libraries and object files
+*.so
+*.so.*
+*.dylib
+*.dll
+*.lib
+*.a
+*.o
+*.obj
+*.lo
+*.la
+*.al
+*.libs
+*.ko
+*.elf
+
+# Archive files
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+*.Z
+
+# Language-specific compiled files
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# C/C++
+*.out
+*.gch
+*.pch
+
+# Rust
+target/
+Cargo.lock
+
+# Go
+# Go binaries are covered above
+
+# JavaScript/Node.js
+node_modules/
+*.tgz
+.yarn-integrity
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+*.database
+
+# Certificate and key files
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# IoT and Hardware specific files
+# Microcontroller firmware
+*.hex
+*.ino.bin
+*.ino.elf
+*.ino.map
+*.fqbn
+*.partitions.csv
+
+# Arduino/ESP32/ESP8266/PlatformIO
+libraries/
+hardware/
+.pio/
+.platformio/
+
+# Raspberry Pi
+*.img
+*.iso
+boot/
+rootfs/
+
+# Circuit design files
+*.pcb~
+*.sch~
+*.brd~
+*.kicad_pcb-bak
+*.net
+*.dsn
+*.ses
+
+# 3D models and CAD files (if large/binary)
+*.stl
+*.step
+*.stp
+*.iges
+*.igs
+
+# MQTT and IoT configuration
+mqtt-config.json
+broker-config.json
+device-config.json
+
+# Cloud and deployment
+.vercel/
+.netlify/
+.aws/
+.gcp/
+.heroku/
+aws-exports.js
+gcp-key.json
+
+# Auto-generated files
+auto-imports.d.ts
+components.d.ts
+*.tsbuildinfo
+
+# WebAssembly files (unless explicitly needed)
+*.wasm
+
+# Temporary and backup files
+*.bak
+*.backup
+*.orig
+*.tmp
+*.temp
+*~
+
+# Linting and formatting cache
+.eslintcache
+.prettiercache
+.stylelintcache
+
+# Documentation build
+docs/build/
+site/
+*.pdf
+*.docx
+
+# Reports and benchmarks
+reports/
+benchmarks/
+
+# Package lock files (uncomment if you want to exclude them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Docker (uncomment if you don't want to track these)
+# Dockerfile*
+# docker-compose*.yml
+# .dockerignore
+
+# Kubernetes
+# *.yaml
+# *.yml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Vagrant
+.vagrant/
+
+# Local development
+*.local
+
+# Editor backups
+*~
+.#*
+\#*#
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/

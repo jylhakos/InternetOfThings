@@ -1,0 +1,29 @@
+# Development Dockerfile for Vite
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache git
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Expose development ports
+EXPOSE 5173 4173
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S vite -u 1001
+RUN chown -R vite:nodejs /app
+USER vite
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

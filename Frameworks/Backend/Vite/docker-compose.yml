@@ -1,0 +1,41 @@
+# Docker Compose for Vite Development
+version: '3.8'
+
+services:
+  vite-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+      - "4173:4173"  # Preview server
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_DEV_HOST=0.0.0.0
+      - VITE_DEV_PORT=5173
+    command: npm run dev
+    networks:
+      - vite-network
+
+  vite-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - vite-network
+    depends_on:
+      - vite-dev
+
+networks:
+  vite-network:
+    driver: bridge
+
+volumes:
+  node_modules:
