@@ -205,7 +205,7 @@ export default defineConfig({
 })
 ```
 
-## Troubleshooting Common Issues
+## Troubleshooting
 
 1. **DevTools not showing Vue tab**: Ensure you're running the development build, not production/minified version
 2. **Breakpoints not hitting**: Verify source map generation and paths in launch configuration
