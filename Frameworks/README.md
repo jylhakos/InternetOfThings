@@ -1,4 +1,4 @@
-# Open Source Frameworks for Software Development and Production Deployment
+# Open Source Frameworks for Development and Deployment
 
 This repository provides a collection of open source frameworks and tools for software development and production deployment, focusing on web applications, APIs, machine learning systems and support the software development lifecycle from development to production.
 
@@ -33,25 +33,11 @@ Frameworks/
 │   │       ├── src/ (client/, server/, shared/)
 │   │       ├── dist/, examples/, logs/
 │   │       └── .env.example, .eslintrc.json
-│   ├── Spring Boot/
-│   │   ├── build-and-push.sh, build.gradle, deploy.sh
-│   │   ├── docker-compose.yml, Dockerfile
-│   │   ├── k8s-deployment.yml, main.tf
-│   │   ├── bin/, build/, src/
-│   └── Vite/
-│       ├── README.md, package.json, vite.config.ts
-│       ├── COMPARISON.md, MIGRATION.md, GITIGNORE.md
-│       ├── Dockerfile, Dockerfile.dev, docker-compose.yml
-│       ├── build.sh, nginx.conf, .env.example
-│       ├── src/ (main.ts, app.ts, styles/, vite-env.d.ts)
-│       ├── nextjs-app/
-│       │   ├── next.config.js, tailwind.config.js
-│       │   ├── Dockerfile, docker-compose.yml
-│       │   └── src/, package.json, tsconfig.json
-│       └── vite-react-app/
-│           ├── vite.config.ts, package.json
-│           ├── server/, src/, index.html
-│           └── README.md, .env.example
+│   └── Spring Boot/
+│       ├── build-and-push.sh, build.gradle, deploy.sh
+│       ├── docker-compose.yml, Dockerfile
+│       ├── k8s-deployment.yml, main.tf
+│       └── bin/, build/, src/
 └── Frontend/
     ├── README.md
     ├── Flutter/
@@ -65,6 +51,20 @@ Frameworks/
     ├── ReactNative/
     │   ├── albums/
     │   └── assets/
+    ├── Vite/
+    │   ├── README.md, package.json, vite.config.ts
+    │   ├── COMPARISON.md, MIGRATION.md, GITIGNORE.md
+    │   ├── Dockerfile, Dockerfile.dev, docker-compose.yml
+    │   ├── build.sh, nginx.conf, .env.example
+    │   ├── src/ (main.ts, app.ts, styles/, vite-env.d.ts)
+    │   ├── nextjs-app/
+    │   │   ├── next.config.js, tailwind.config.js
+    │   │   ├── Dockerfile, docker-compose.yml
+    │   │   └── src/, package.json, tsconfig.json
+    │   └── vite-react-app/
+    │       ├── vite.config.ts, package.json
+    │       ├── server/, src/, index.html
+    │       └── README.md, .env.example
     └── Vue/
         └── README.md
 ```
@@ -164,46 +164,6 @@ export default defineConfig({
 - **Nginx** - Reverse proxy on Linux
 - **Docker containers** - Cross-platform deployment
 
-### Vite - Universal Build Tool
-**Development Environment:**
-- **Lightning-fast HMR** for instant development feedback
-- **Native TypeScript support** without additional compilation
-- **Universal framework support** - React, Vue, Vanilla JS/TS
-- **Next.js migration** capabilities for seamless upgrades
-- **VS Code integration** with debugging configurations
-
-**Key Features:**
-```typescript
-// vite.config.ts - Universal configuration
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 3000,
-    host: '0.0.0.0'
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: true
-  }
-})
-```
-
-**Project Structure:**
-- **Vanilla TypeScript** setup for full control
-- **React integration** with `vite-react-app/`
-- **Next.js migration** path with `nextjs-app/`
-- **Docker containerization** for production deployment
-- **DevOps configurations** with build scripts and CI/CD
-
-**Production Deployment:**
-- **Nginx** - Static file serving and reverse proxy
-- **Docker containers** - Multi-stage builds for optimization
-- **CDN integration** - CloudFront, Cloudflare
-- **Progressive Web Apps** - Service worker support
-
 ## Frontend Frameworks
 
 ### React & Next.js
@@ -243,6 +203,46 @@ export default defineConfig({
 - **Static site generation** - Nuxt.js
 - **SPA deployment** - Traditional web servers
 - **JAMstack** - Pre-built markup and APIs
+
+### Vite - Universal Build Tool & Development Environment
+**Development Environment:**
+- **Lightning-fast HMR** for instant development feedback
+- **Native TypeScript support** without additional compilation
+- **Universal framework support** - React, Vue, Vanilla JS/TS
+- **Next.js migration** capabilities for seamless upgrades
+- **VS Code integration** with debugging configurations
+
+**Key Features:**
+```typescript
+// vite.config.ts - Universal configuration
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000,
+    host: '0.0.0.0'
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true
+  }
+})
+```
+
+**Project Structure:**
+- **Vanilla TypeScript** setup for full control
+- **React integration** with `vite-react-app/`
+- **Next.js migration** path with `nextjs-app/`
+- **Docker containerization** for production deployment
+- **DevOps configurations** with build scripts and CI/CD
+
+**Production Deployment:**
+- **Nginx** - Static file serving and reverse proxy
+- **Docker containers** - Multi-stage builds for optimization
+- **CDN integration** - CloudFront, Cloudflare
+- **Progressive Web Apps** - Service worker support
 
 ### Mobile Frameworks
 
@@ -686,14 +686,6 @@ MCP can be integrated into various backend frameworks to provide AI applications
 - [FastAPI](https://fastapi.tiangolo.com/project-generation/) - Modern Python web framework
 - [Gin](https://gin-gonic.com/) - High-performance HTTP web framework for Go
 - [ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/client-side/spa/angular) - Cross-platform web framework
-- [Vite Setup Guide](Backend/Vite/README.md) - Complete Vite setup for JavaScript and TypeScript development
-
-### Vite Implementation Resources
-- [Vite Configuration](Backend/Vite/vite.config.ts) - Universal Vite configuration for development and production
-- [Next.js Migration Guide](Backend/Vite/MIGRATION.md) - Step-by-step migration from Vite to Next.js
-- [Docker Setup](Backend/Vite/Dockerfile) - Production-ready Docker configurations
-- [React Integration](Backend/Vite/vite-react-app/) - Vite with React and TypeScript
-- [Next.js Example](Backend/Vite/nextjs-app/) - Complete Next.js application setup
 
 ### Frontend Frameworks
 - [React](https://create-react-app.dev/docs/adding-typescript/) - JavaScript library for user interfaces
@@ -701,6 +693,14 @@ MCP can be integrated into various backend frameworks to provide AI applications
 - [Angular](https://angular.dev/tutorials/learn-angular) - Platform for building web applications
 - [Vue.js](https://vuejs.org/) - Progressive JavaScript framework
 - [Flutter](https://flutter.dev/) - UI toolkit for cross-platform applications
+- [Vite Setup Guide](Frontend/Vite/README.md) - Complete Vite setup for JavaScript and TypeScript development
+
+### Vite Implementation Resources
+- [Vite Configuration](Frontend/Vite/vite.config.ts) - Universal Vite configuration for development and production
+- [Next.js Migration Guide](Frontend/Vite/MIGRATION.md) - Step-by-step migration from Vite to Next.js
+- [Docker Setup](Frontend/Vite/Dockerfile) - Production-ready Docker configurations
+- [React Integration](Frontend/Vite/vite-react-app/) - Vite with React and TypeScript
+- [Next.js Example](Frontend/Vite/nextjs-app/) - Complete Next.js application setup
 
 ### Development and Production Tools
 - [Docker](https://www.docker.com/) - Containerization platform
