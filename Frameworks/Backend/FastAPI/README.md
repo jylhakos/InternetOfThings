@@ -336,6 +336,599 @@ export default defineConfig({
 });
 ```
 
+### 🔒 SSL/HTTPS Configuration for Frontend
+
+#### 1. Development HTTPS with Vite
+
+For local development with HTTPS, update `vite.config.ts`:
+
+```typescript
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import fs from "fs";
+import path from "path";
+
+export default defineConfig(({ mode }) => ({
+  plugins: [react()],
+
+  server: {
+    port: 5173,
+    host: "0.0.0.0",
+
+    // HTTPS configuration for development
+    https:
+      mode === "development"
+        ? {
+            key: fs.readFileSync(
+              path.resolve(__dirname, "certs/localhost-key.pem")
+            ),
+            cert: fs.readFileSync(
+              path.resolve(__dirname, "certs/localhost.pem")
+            ),
+          }
+        : false,
+
+    proxy: {
+      "/api": {
+        target:
+          mode === "development"
+            ? "https://localhost:8000" // HTTPS backend
+            : "https://api.yourdomain.com",
+        changeOrigin: true,
+        secure: false, // Accept self-signed certificates in development
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
+
+  // Build configuration
+  build: {
+    outDir: "dist",
+    sourcemap: mode !== "production",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          router: ["react-router-dom"],
+          ui: ["@headlessui/react", "lucide-react"],
+        },
+      },
+    },
+  },
+
+  // Environment variables
+  define: {
+    __API_BASE_URL__: JSON.stringify(
+      mode === "production"
+        ? "https://api.yourdomain.com"
+        : "https://localhost:8000"
+    ),
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+  },
+
+  // Preview server (for testing production builds)
+  preview: {
+    port: 4173,
+    host: "0.0.0.0",
+    https:
+      mode === "production"
+        ? {
+            key: fs.readFileSync(
+              path.resolve(__dirname, "certs/localhost-key.pem")
+            ),
+            cert: fs.readFileSync(
+              path.resolve(__dirname, "certs/localhost.pem")
+            ),
+          }
+        : false,
+  },
+}));
+```
+
+#### 2. Generate Local SSL Certificates for Development
+
+Create SSL certificates for local development:
+
+```bash
+# Create certificates directory
+mkdir -p frontend/certs
+
+# Generate private key
+openssl genrsa -out frontend/certs/localhost-key.pem 2048
+
+# Generate certificate signing request
+openssl req -new -key frontend/certs/localhost-key.pem -out frontend/certs/localhost.csr \
+    -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+
+# Generate self-signed certificate
+openssl x509 -req -in frontend/certs/localhost.csr \
+    -signkey frontend/certs/localhost-key.pem \
+    -out frontend/certs/localhost.pem \
+    -days 365 \
+    -extensions v3_req \
+    -extfile <(echo "[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = localhost
+DNS.2 = 127.0.0.1
+IP.1 = 127.0.0.1")
+
+# Set proper permissions
+chmod 600 frontend/certs/localhost-key.pem
+chmod 644 frontend/certs/localhost.pem
+
+echo " SSL certificates generated for local development"
+```
+
+#### 3. Environment Specific Configuration
+
+Create different environment files for SSL configuration:
+
+**frontend/.env.development:**
+
+```bash
+# Development Environment
+VITE_API_BASE_URL=https://localhost:8000
+VITE_APP_ENVIRONMENT=development
+VITE_ENABLE_HTTPS=true
+VITE_SSL_VERIFY=false
+VITE_APP_NAME=FastAPI Microservices (Dev)
+```
+
+**frontend/.env.staging:**
+
+```bash
+# Staging Environment
+VITE_API_BASE_URL=https://staging-api.yourdomain.com
+VITE_APP_ENVIRONMENT=staging
+VITE_ENABLE_HTTPS=true
+VITE_SSL_VERIFY=true
+VITE_APP_NAME=FastAPI Microservices (Staging)
+```
+
+**frontend/.env.production:**
+
+```bash
+# Production Environment
+VITE_API_BASE_URL=https://api.yourdomain.com
+VITE_APP_ENVIRONMENT=production
+VITE_ENABLE_HTTPS=true
+VITE_SSL_VERIFY=true
+VITE_APP_NAME=FastAPI Microservices
+```
+
+#### 4. Frontend Production Deployment
+
+**Choose the right deployment strategy**
+
+| Aspect               | Option A: Nginx | Option B: Node.js   | Option C: FastAPI  |
+| -------------------- | --------------- | ------------------- | ------------------ |
+| **Performance**      | ⭐⭐⭐⭐⭐      | ⭐⭐⭐              | ⭐⭐               |
+| **Scalability**      | ⭐⭐⭐⭐⭐      | ⭐⭐⭐              | ⭐⭐               |
+| **Setup Complexity** | ⭐⭐            | ⭐⭐⭐⭐            | ⭐⭐⭐⭐⭐         |
+| **Resource Usage**   | ⭐⭐⭐⭐⭐      | ⭐⭐⭐              | ⭐⭐               |
+| **Security**         | ⭐⭐⭐⭐⭐      | ⭐⭐⭐⭐            | ⭐⭐⭐             |
+| **Caching**          | ⭐⭐⭐⭐⭐      | ⭐⭐                | ⭐                 |
+| **For**              | Production apps | Custom server needs | Simple deployments |
+
+### **Option A: Static Files Served by Nginx (Recommended)**
+
+**For production applications with high traffic**
+
+In production, the frontend should be built as static files and served by Nginx:
+
+```bash
+# Build production frontend
+cd frontend
+npm run build
+
+# Output goes to frontend/dist/
+ls -la frontend/dist/
+```
+
+**Nginx Configuration for Frontend + Backend:**
+
+```nginx
+# /etc/nginx/sites-available/fastapi-app
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+
+    # Security Headers
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.yourdomain.com; frame-ancestors 'none';" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+
+    # Frontend - Static files (React build)
+    location / {
+        root /var/www/yourdomain.com/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+
+    # Backend API
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        proxy_buffering off;
+
+        # CORS headers (if needed)
+        add_header Access-Control-Allow-Origin "https://yourdomain.com" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" always;
+        add_header Access-Control-Allow-Credentials "true" always;
+    }
+
+    # Health check
+    location /health {
+        proxy_pass http://127.0.0.1:8000/health;
+        access_log off;
+    }
+
+    # WebSocket support (if needed)
+    location /ws {
+        proxy_pass http://127.0.0.1:8000/ws;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+### **Option B: Node.js Production Server (Alternative)**
+
+If you prefer to run the frontend on Node.js in production:
+
+**Create production server (`frontend/server.js`):**
+
+```javascript
+// frontend/server.js
+import express from "express";
+import { createServer } from "https";
+import { readFileSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
+
+// Serve static files from dist
+app.use(express.static(path.join(__dirname, "dist")));
+
+// Security headers middleware
+app.use((req, res, next) => {
+  res.setHeader(
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains"
+  );
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
+// Handle client-side routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+// HTTPS Server for production
+if (process.env.NODE_ENV === "production") {
+  const options = {
+    key: readFileSync("/etc/ssl/private/yourdomain.com.key"),
+    cert: readFileSync("/etc/ssl/certs/yourdomain.com.crt"),
+  };
+
+  createServer(options, app).listen(HTTPS_PORT, () => {
+    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`HTTP Server running on port ${PORT}`);
+  });
+}
+```
+
+**Update package.json:**
+
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start:prod": "NODE_ENV=production node server.js",
+    "start:dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+```
+
+### **Option C: FastAPI Serving Static Files (Simple Deployment)**
+
+For smaller deployments or development environments, FastAPI can serve the frontend static files directly:
+
+**Update `main.py` to serve static files:**
+
+```python
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+app = FastAPI(title="Microservices API")
+
+# Mount static files directory
+if os.path.exists("frontend/dist"):
+    # Mount the React build directory
+    app.mount("/static", StaticFiles(directory="frontend/dist/assets"), name="static")
+
+    # Serve the React app for all routes not starting with /api
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # API routes
+        if full_path.startswith("api/"):
+            return {"error": "API endpoint not found"}
+
+        # Health check
+        if full_path == "health":
+            return {"status": "healthy", "frontend": "served_by_fastapi"}
+
+        # Serve index.html for all frontend routes (SPA routing)
+        return FileResponse("frontend/dist/index.html")
+
+    # Serve favicon and other root files
+    @app.get("/favicon.ico")
+    async def favicon():
+        return FileResponse("frontend/dist/favicon.ico")
+
+    @app.get("/manifest.json")
+    async def manifest():
+        return FileResponse("frontend/dist/manifest.json")
+
+# Your existing API routes here...
+@app.get("/api/health")
+async def api_health():
+    return {"status": "healthy", "service": "fastapi"}
+```
+
+**Production deployment with FastAPI static serving:**
+
+```bash
+# Build frontend
+cd frontend
+npm run build
+cd ..
+
+# Start FastAPI with static file serving
+gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker \
+    --bind 0.0.0.0:8000 \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level info
+
+# Or with uvicorn
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+**Pros of FastAPI Static Serving:**
+
+- Single service deployment (backend + frontend)
+- Simpler infrastructure (no Nginx setup required)
+- Good for small to medium applications
+- Built-in gzip compression available
+- Easy CORS handling (same origin)
+
+**Cons of FastAPI Static Serving:**
+
+- ❌ Less efficient than Nginx for static files
+- ❌ No advanced caching strategies
+- ❌ Higher memory usage (Python serves static files)
+- ❌ Not optimal for high-traffic applications
+- ❌ Limited SSL/security configuration
+
+#### 5. Docker Configuration for HTTPS Frontend
+
+**Dockerfile for Node.js frontend:**
+
+```dockerfile
+# frontend/Dockerfile
+FROM node:18-alpine as builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM node:18-alpine as production
+
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+COPY server.js ./
+
+RUN npm ci --only=production
+
+EXPOSE 3000 3443
+
+CMD ["npm", "run", "start:prod"]
+```
+
+**Multi-stage build for static files:**
+
+```dockerfile
+# Dockerfile for static file serving
+FROM node:18-alpine as builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+
+# Copy built files
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy SSL certificates
+COPY certs/ /etc/ssl/certs/
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+#### 6. SSL Certificate Management
+
+**Using Let's Encrypt (Recommended for Production):**
+
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Get SSL certificate
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Auto-renewal setup
+sudo crontab -e
+# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+**Manual SSL Certificate Setup:**
+
+```bash
+# Generate private key
+sudo openssl genrsa -out /etc/ssl/private/yourdomain.com.key 2048
+
+# Generate certificate signing request
+sudo openssl req -new -key /etc/ssl/private/yourdomain.com.key \
+    -out /etc/ssl/certs/yourdomain.com.csr
+
+# Get certificate from CA or generate self-signed for testing
+sudo openssl x509 -req -days 365 \
+    -in /etc/ssl/certs/yourdomain.com.csr \
+    -signkey /etc/ssl/private/yourdomain.com.key \
+    -out /etc/ssl/certs/yourdomain.com.crt
+```
+
+#### 7. Development Workflow with HTTPS
+
+```bash
+# 1. Generate local certificates (one time)
+mkdir -p frontend/certs
+./scripts/generate-dev-certs.sh
+
+# 2. Start HTTPS development servers
+# Terminal 1: Backend with HTTPS
+source venv/bin/activate
+uvicorn main:app --reload --host 0.0.0.0 --port 8000 \
+  --ssl-keyfile certs/localhost-key.pem \
+  --ssl-certfile certs/localhost.pem
+
+# Terminal 2: Frontend with HTTPS
+cd frontend
+npm run dev  # Vite automatically uses HTTPS with certificates
+
+# Access applications:
+# Frontend: https://localhost:5173
+# Backend: https://localhost:8000
+# API Docs: https://localhost:8000/docs
+```
+
+#### 8. Production Deployment Script
+
+Create `deploy-https.sh`:
+
+```bash
+#!/bin/bash
+set -e
+
+echo " Deploying FastAPI + React with HTTPS"
+
+# Build frontend
+cd frontend
+npm run build
+cd ..
+
+# Copy frontend build to web root
+sudo rm -rf /var/www/yourdomain.com/dist
+sudo mkdir -p /var/www/yourdomain.com
+sudo cp -r frontend/dist /var/www/yourdomain.com/
+
+# Set permissions
+sudo chown -R www-data:www-data /var/www/yourdomain.com
+sudo chmod -R 755 /var/www/yourdomain.com
+
+# Update Nginx configuration
+sudo cp nginx.conf /etc/nginx/sites-available/fastapi-app
+sudo ln -sf /etc/nginx/sites-available/fastapi-app /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test Nginx configuration
+sudo nginx -t
+
+# Restart services
+sudo systemctl reload nginx
+sudo systemctl restart fastapi
+
+echo " HTTPS deployment complete!"
+echo " Frontend: https://yourdomain.com"
+echo " API: https://yourdomain.com/api"
+```
+
 #### Start Development Servers
 
 ```bash
@@ -398,6 +991,661 @@ AUTH_SERVICE_URL=localhost:50051
 # Application
 DEBUG=True
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+```
+
+## CORS Configuration
+
+### 🛡️ What is CORS?
+
+**Cross-Origin Resource Sharing (CORS)** is a security feature implemented by web browsers that restricts web pages from making requests to a different domain, protocol, or port than the one serving the web page. For microservices and APIs, proper CORS configuration is essential for secure cross-origin communication.
+
+### 🔧 FastAPI CORS Configuration
+
+#### 1. Environment-based Configuration (.env)
+
+Configure CORS origins dynamically through environment variables:
+
+```bash
+# Development
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000
+CORS_CREDENTIALS=true
+CORS_METHODS=GET,POST,PUT,DELETE,OPTIONS,PATCH
+CORS_HEADERS=*
+
+# Production
+CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+CORS_CREDENTIALS=true
+CORS_METHODS=GET,POST,PUT,DELETE,OPTIONS
+CORS_HEADERS=Content-Type,Authorization,X-Requested-With
+```
+
+#### 2. Python FastAPI Implementation
+
+Update your `main.py` with comprehensive CORS configuration:
+
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic_settings import BaseSettings
+import os
+from typing import List
+
+class Settings(BaseSettings):
+    cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    cors_credentials: bool = True
+    cors_methods: str = "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    cors_headers: str = "*"
+    environment: str = "development"
+
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
+
+app = FastAPI(
+    title="Microservices API",
+    description="FastAPI microservices with CORS configuration",
+    version="1.0.0"
+)
+
+# Parse CORS origins from environment
+def get_cors_origins() -> List[str]:
+    if settings.environment == "production":
+        # Strict CORS for production
+        return [
+            "https://yourdomain.com",
+            "https://www.yourdomain.com",
+            "https://api.yourdomain.com"
+        ]
+    else:
+        # Development CORS origins
+        origins = settings.cors_origins.split(",")
+        return [origin.strip() for origin in origins if origin.strip()]
+
+# CORS middleware configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_cors_origins(),
+    allow_credentials=settings.cors_credentials,
+    allow_methods=settings.cors_methods.split(","),
+    allow_headers=settings.cors_headers.split(",") if settings.cors_headers != "*" else ["*"],
+    expose_headers=["X-Total-Count", "X-Request-ID"],
+    max_age=3600,  # Cache preflight requests for 1 hour
+)
+
+# Health check endpoint for CORS testing
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "cors_origins": get_cors_origins(),
+        "environment": settings.environment
+    }
+
+# CORS preflight handling for complex requests
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    return {"message": "OK"}
+```
+
+#### 3. Advanced CORS Configuration for Multiple Environments
+
+```python
+# config/cors.py
+from typing import List, Dict, Any
+import os
+
+class CORSConfig:
+    @staticmethod
+    def get_cors_config() -> Dict[str, Any]:
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+
+        configs = {
+            "development": {
+                "allow_origins": [
+                    "http://localhost:3000",  # React dev server
+                    "http://localhost:5173",  # Vite dev server
+                    "http://127.0.0.1:3000",
+                    "http://127.0.0.1:5173",
+                    "http://localhost:8080",  # Alternative ports
+                ],
+                "allow_credentials": True,
+                "allow_methods": ["*"],
+                "allow_headers": ["*"],
+                "expose_headers": ["*"],
+                "max_age": 300  # 5 minutes for dev
+            },
+            "staging": {
+                "allow_origins": [
+                    "https://staging.yourdomain.com",
+                    "https://staging-api.yourdomain.com"
+                ],
+                "allow_credentials": True,
+                "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Requested-With",
+                    "X-Request-ID"
+                ],
+                "expose_headers": ["X-Total-Count", "X-Request-ID"],
+                "max_age": 3600  # 1 hour
+            },
+            "production": {
+                "allow_origins": [
+                    "https://yourdomain.com",
+                    "https://www.yourdomain.com",
+                    "https://app.yourdomain.com"
+                ],
+                "allow_credentials": True,
+                "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Request-ID",
+                    "X-Client-Version"
+                ],
+                "expose_headers": ["X-Total-Count", "X-Request-ID", "X-RateLimit-*"],
+                "max_age": 86400  # 24 hours
+            }
+        }
+
+        return configs.get(environment, configs["development"])
+
+# Usage in main.py
+from config.cors import CORSConfig
+
+cors_config = CORSConfig.get_cors_config()
+app.add_middleware(CORSMiddleware, **cors_config)
+```
+
+### DevOps CORS Configuration
+
+#### 1. Jenkins Pipeline Environment Variables
+
+Update your `Jenkinsfile` to handle CORS configuration per environment:
+
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        PYTHON_VERSION = '3.11'
+        DOCKER_IMAGE = 'fastapi-microservices'
+    }
+
+    stages {
+        stage('Deploy to Development') {
+            steps {
+                script {
+                    sh """
+                        export ENVIRONMENT=development
+                        export CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+                        export CORS_CREDENTIALS=true
+                        export CORS_METHODS=*
+                        export CORS_HEADERS=*
+
+                        docker-compose -f docker-compose.dev.yml up -d
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Staging') {
+            when { branch 'staging' }
+            steps {
+                script {
+                    sh """
+                        export ENVIRONMENT=staging
+                        export CORS_ORIGINS=https://staging.yourdomain.com
+                        export CORS_CREDENTIALS=true
+                        export CORS_METHODS=GET,POST,PUT,DELETE,OPTIONS,PATCH
+                        export CORS_HEADERS=Content-Type,Authorization,X-Requested-With
+
+                        docker-compose -f docker-compose.staging.yml up -d
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Production') {
+            when { branch 'main' }
+            steps {
+                script {
+                    sh """
+                        export ENVIRONMENT=production
+                        export CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+                        export CORS_CREDENTIALS=true
+                        export CORS_METHODS=GET,POST,PUT,DELETE,OPTIONS
+                        export CORS_HEADERS=Content-Type,Authorization,X-Request-ID
+
+                        docker-compose -f docker-compose.prod.yml up -d
+                    """
+                }
+            }
+        }
+    }
+}
+```
+
+#### 2. Docker Environment Configuration
+
+Create environment-specific Docker Compose files:
+
+**docker-compose.dev.yml:**
+
+```yaml
+version: "3.8"
+services:
+  fastapi:
+    build: .
+    environment:
+      - ENVIRONMENT=development
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+      - CORS_CREDENTIALS=true
+      - CORS_METHODS=*
+      - CORS_HEADERS=*
+    ports:
+      - "8000:8000"
+```
+
+**docker-compose.prod.yml:**
+
+```yaml
+version: "3.8"
+services:
+  fastapi:
+    build: .
+    environment:
+      - ENVIRONMENT=production
+      - CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+      - CORS_CREDENTIALS=true
+      - CORS_METHODS=GET,POST,PUT,DELETE,OPTIONS
+      - CORS_HEADERS=Content-Type,Authorization,X-Request-ID
+    ports:
+      - "8000:8000"
+```
+
+### Frontend CORS Configuration
+
+#### 1. Vite Configuration (vite.config.ts)
+
+Configure Vite development server for CORS:
+
+```typescript
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig(({ mode }) => ({
+  plugins: [react()],
+
+  // Development server configuration
+  server: {
+    port: 5173,
+    host: "0.0.0.0", // Allow external connections
+    cors: true, // Enable CORS for dev server
+    proxy:
+      mode === "development"
+        ? {
+            // Proxy API calls to backend during development
+            "/api": {
+              target: "http://localhost:8000",
+              changeOrigin: true,
+              secure: false,
+              rewrite: (path) => path.replace(/^\/api/, ""),
+            },
+          }
+        : undefined,
+  },
+
+  // Build configuration
+  build: {
+    outDir: "dist",
+    sourcemap: mode !== "production",
+  },
+
+  // Environment-specific configuration
+  define: {
+    __API_BASE_URL__: JSON.stringify(
+      mode === "production"
+        ? "https://api.yourdomain.com"
+        : "http://localhost:8000"
+    ),
+  },
+}));
+```
+
+#### 2. Axios Configuration for CORS
+
+Create an HTTP client with proper CORS headers:
+
+```typescript
+// src/api/httpClient.ts
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+
+class HttpClient {
+  private instance: AxiosInstance;
+
+  constructor() {
+    const baseURL = import.meta.env.PROD
+      ? "https://api.yourdomain.com"
+      : "http://localhost:8000";
+
+    this.instance = axios.create({
+      baseURL,
+      timeout: 10000,
+      withCredentials: true, // Include cookies in CORS requests
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
+
+    this.setupInterceptors();
+  }
+
+  private setupInterceptors() {
+    // Request interceptor
+    this.instance.interceptors.request.use(
+      (config) => {
+        // Add auth token if available
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        // Add request ID for tracing
+        config.headers["X-Request-ID"] = crypto.randomUUID();
+
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor
+    this.instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          // Handle CORS authentication errors
+          localStorage.removeItem("auth_token");
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  // HTTP methods
+  get<T>(url: string, config?: AxiosRequestConfig) {
+    return this.instance.get<T>(url, config);
+  }
+
+  post<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.instance.post<T>(url, data, config);
+  }
+
+  put<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.instance.put<T>(url, data, config);
+  }
+
+  delete<T>(url: string, config?: AxiosRequestConfig) {
+    return this.instance.delete<T>(url, config);
+  }
+}
+
+export const httpClient = new HttpClient();
+```
+
+#### 3. Environment Variables for Frontend
+
+Create environment files for different deployment stages:
+
+**.env.development:**
+
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+VITE_APP_ENVIRONMENT=development
+VITE_ENABLE_CORS_CREDENTIALS=true
+```
+
+**.env.production:**
+
+```bash
+VITE_API_BASE_URL=https://api.yourdomain.com
+VITE_APP_ENVIRONMENT=production
+VITE_ENABLE_CORS_CREDENTIALS=true
+```
+
+#### 4. React Component with CORS Handling
+
+```typescript
+// src/hooks/useApi.ts
+import { useState, useEffect } from "react";
+import { httpClient } from "../api/httpClient";
+
+interface UseApiOptions {
+  onError?: (error: any) => void;
+}
+
+export function useApi<T>(url: string, options: UseApiOptions = {}) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await httpClient.get<T>(url);
+      setData(response.data);
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.detail || "CORS or network error";
+      setError(errorMessage);
+      options.onError?.(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+// Usage in component
+function UserProfile() {
+  const {
+    data: user,
+    loading,
+    error,
+  } = useApi<User>("/users/me", {
+    onError: (err) => {
+      if (err.response?.status === 0) {
+        console.error("CORS error: Check backend CORS configuration");
+      }
+    },
+  });
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!user) return <div>No user data</div>;
+
+  return <div>Welcome, {user.name}!</div>;
+}
+```
+
+### 🔒 Production CORS Security Best Practices
+
+#### 1. Strict Origin Validation
+
+```python
+# utils/cors_validator.py
+from typing import List
+import re
+from urllib.parse import urlparse
+
+class CORSValidator:
+    def __init__(self, allowed_domains: List[str]):
+        self.allowed_domains = allowed_domains
+
+    def is_valid_origin(self, origin: str) -> bool:
+        """Validate origin against allowed domains with subdomain support"""
+        try:
+            parsed = urlparse(origin)
+
+            # Check protocol (HTTPS only in production)
+            if parsed.scheme not in ['http', 'https']:
+                return False
+
+            # Check against allowed domains
+            for domain in self.allowed_domains:
+                if self._match_domain(parsed.netloc, domain):
+                    return True
+
+            return False
+        except Exception:
+            return False
+
+    def _match_domain(self, origin_domain: str, allowed_domain: str) -> bool:
+        """Match domain with wildcard support"""
+        if allowed_domain.startswith('*.'):
+            # Wildcard subdomain matching
+            base_domain = allowed_domain[2:]
+            return origin_domain.endswith(f'.{base_domain}') or origin_domain == base_domain
+
+        return origin_domain == allowed_domain
+
+# Usage in FastAPI
+from utils.cors_validator import CORSValidator
+
+def validate_cors_origin(origin: str) -> bool:
+    validator = CORSValidator([
+        'yourdomain.com',
+        '*.yourdomain.com',
+        'app.yourdomain.com'
+    ])
+    return validator.is_valid_origin(origin)
+```
+
+#### 2. CORS Monitoring and Logging
+
+```python
+# middleware/cors_middleware.py
+import logging
+from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
+
+logger = logging.getLogger(__name__)
+
+class CORSMonitoringMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        origin = request.headers.get("origin")
+
+        # Log CORS requests for monitoring
+        if origin:
+            logger.info(f"CORS request from origin: {origin}")
+
+            # Log suspicious origins
+            if not self.is_allowed_origin(origin):
+                logger.warning(f"Blocked CORS request from unauthorized origin: {origin}")
+
+        response = await call_next(request)
+
+        # Log CORS response headers
+        cors_headers = {k: v for k, v in response.headers.items()
+                       if k.lower().startswith('access-control')}
+        if cors_headers:
+            logger.debug(f"CORS headers sent: {cors_headers}")
+
+        return response
+
+    def is_allowed_origin(self, origin: str) -> bool:
+        # Implement your origin validation logic
+        allowed_origins = os.getenv("CORS_ORIGINS", "").split(",")
+        return origin in [o.strip() for o in allowed_origins]
+
+# Add to FastAPI app
+app.add_middleware(CORSMonitoringMiddleware)
+```
+
+#### 3. CORS Testing Script
+
+```bash
+#!/bin/bash
+# scripts/test-cors.sh
+
+echo " Testing CORS Configuration"
+echo "=============================="
+
+API_BASE="http://localhost:8000"
+ORIGINS=(
+    "http://localhost:3000"
+    "http://localhost:5173"
+    "https://yourdomain.com"
+    "https://malicious.com"  # Should be blocked
+)
+
+for origin in "${ORIGINS[@]}"; do
+    echo ""
+    echo "Testing origin: $origin"
+    echo "------------------------"
+
+    # Preflight OPTIONS request
+    echo "1. OPTIONS (preflight):"
+    curl -s -I -X OPTIONS \
+        -H "Origin: $origin" \
+        -H "Access-Control-Request-Method: POST" \
+        -H "Access-Control-Request-Headers: Content-Type,Authorization" \
+        "$API_BASE/users/me" | grep -i "access-control"
+
+    # Actual request
+    echo "2. GET request:"
+    curl -s -I -X GET \
+        -H "Origin: $origin" \
+        "$API_BASE/health" | grep -i "access-control"
+done
+
+echo ""
+echo " CORS testing complete!"
+```
+
+### CORS Troubleshooting
+
+#### Common CORS Issues and Solutions
+
+1. **"Access to fetch blocked by CORS policy"**
+
+   - **Cause**: Origin not in allowed list
+   - **Solution**: Add frontend URL to `CORS_ORIGINS` environment variable
+
+2. **"Preflight request doesn't pass access control check"**
+
+   - **Cause**: Missing or incorrect preflight handling
+   - **Solution**: Ensure OPTIONS method is allowed and headers match
+
+3. **"Credentials flag is true, but Access-Control-Allow-Origin is \*"**
+   - **Cause**: Cannot use wildcard with credentials
+   - **Solution**: Specify exact origins when `allow_credentials=True`
+
+#### CORS Debug Endpoint
+
+```python
+@app.get("/debug/cors")
+async def cors_debug(request: Request):
+    """Debug endpoint to check CORS configuration"""
+    return {
+        "origin": request.headers.get("origin"),
+        "configured_origins": get_cors_origins(),
+        "environment": settings.environment,
+        "cors_credentials": settings.cors_credentials,
+        "request_headers": dict(request.headers),
+    }
 ```
 
 ## Microservices
@@ -1287,6 +2535,55 @@ CRUD Operation Example (User Registration):
 ```
 
 ## DevOps Guide: Production-Ready FastAPI Deployment
+
+### Frontend Production Deployment
+
+> **Note: DevOps** Nginx serves the frontend in production. The React frontend is built as static files and served directly by Nginx, NOT as a Node.js application.
+
+#### Frontend Production Architecture
+
+```
+Client Request → Nginx (Port 443) → Static Files (React Build) OR API Proxy (FastAPI)
+                    ↓                           ↓
+            /var/www/domain/dist/         http://127.0.0.1:8000
+            (React Static Files)          (FastAPI Backend)
+```
+
+#### DevOps Frontend Deployment Checklist
+
+**Pre-Deployment:**
+
+- Build React app: `cd frontend && npm run build`
+- Verify build output exists: `ls -la frontend/dist/`
+- Test production build locally: `npm run preview`
+
+**Production Deployment:**
+
+- Copy build files: `sudo cp -r frontend/dist /var/www/yourdomain.com/`
+- Set proper permissions: `sudo chown -R www-data:www-data /var/www/yourdomain.com`
+- Configure Nginx to serve static files (see Nginx config above)
+- Nginx handles routing: `try_files $uri $uri/ /index.html` (SPA routing)
+
+**Key Points for DevOps:**
+
+1. **No Node.js in Production**: Frontend runs as static files, not a Node.js server
+2. **Nginx Handles Everything**: Static files, API proxying, SSL termination, caching
+3. **Build Process**: `npm run build` → `frontend/dist/` → copy to `/var/www/`
+4. **Zero Downtime**: Update static files without service restart
+5. **CDN Ready**: Static files can be served from CDN if needed
+
+**Deployment Commands:**
+
+```bash
+# Build and deploy frontend
+cd frontend
+npm run build
+sudo rm -rf /var/www/yourdomain.com/dist
+sudo mkdir -p /var/www/yourdomain.com
+sudo cp -r dist /var/www/yourdomain.com/
+sudo chown -R www-data:www-data /var/www/yourdomain.com
+sudo systemctl reload nginx
+```
 
 ### Virtual Environment Setup for Python (Debian/Ubuntu)
 
