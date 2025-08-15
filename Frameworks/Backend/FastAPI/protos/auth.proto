@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package auth;
+
+// Authentication Service Definition
+service AuthService {
+  // User registration
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+  
+  // User authentication (login)
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);
+  
+  // Token validation
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  
+  // Token refresh
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  
+  // User logout
+  rpc LogoutUser(LogoutUserRequest) returns (LogoutUserResponse);
+  
+  // Password reset
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}
+
+// User registration request
+message RegisterUserRequest {
+  string phone = 1;
+  string email = 2;
+  string password = 3;
+  string full_name = 4;
+  optional string country_code = 5;
+}
+
+// User registration response
+message RegisterUserResponse {
+  bool success = 1;
+  string message = 2;
+  optional string user_id = 3;
+  optional UserData user = 4;
+}
+
+// User authentication request
+message AuthenticateUserRequest {
+  string phone = 1;
+  string password = 2;
+}
+
+// User authentication response
+message AuthenticateUserResponse {
+  bool success = 1;
+  string message = 2;
+  optional string access_token = 3;
+  optional string refresh_token = 4;
+  optional int64 expires_in = 5;
+  optional UserData user = 6;
+}
+
+// Token validation request
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+// Token validation response
+message ValidateTokenResponse {
+  bool valid = 1;
+  string message = 2;
+  optional string user_id = 3;
+  optional UserData user = 4;
+  optional int64 expires_at = 5;
+}
+
+// Token refresh request
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+// Token refresh response
+message RefreshTokenResponse {
+  bool success = 1;
+  string message = 2;
+  optional string access_token = 3;
+  optional string refresh_token = 4;
+  optional int64 expires_in = 5;
+}
+
+// User logout request
+message LogoutUserRequest {
+  string token = 1;
+  string user_id = 2;
+}
+
+// User logout response
+message LogoutUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Password reset request
+message ResetPasswordRequest {
+  string phone = 1;
+  string new_password = 2;
+  string reset_code = 3;
+}
+
+// Password reset response
+message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// User data structure
+message UserData {
+  string user_id = 1;
+  string phone = 2;
+  string email = 3;
+  string full_name = 4;
+  bool is_active = 5;
+  bool is_verified = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+  optional string country_code = 9;
+  repeated string roles = 10;
+}

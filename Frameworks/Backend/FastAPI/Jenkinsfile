@@ -1,0 +1,273 @@
+pipeline {
+    agent any
+    
+    environment {
+        PYTHON_VERSION = '3.11'
+        NODE_VERSION = '18'
+        DOCKER_IMAGE = 'fastapi-microservices'
+        DOCKER_TAG = "${env.BUILD_ID}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT = sh(
+                        script: 'git rev-parse HEAD',
+                        returnStdout: true
+                    ).trim()
+                }
+            }
+        }
+        
+        stage('Setup Environment') {
+            parallel {
+                stage('Python Environment') {
+                    steps {
+                        sh '''
+                            python3 -m venv venv
+                            source venv/bin/activate
+                            pip install --upgrade pip
+                            pip install -r requirements.txt
+                        '''
+                    }
+                }
+                
+                stage('Frontend Environment') {
+                    steps {
+                        dir('frontend') {
+                            sh '''
+                                npm ci
+                                npm run build
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Generate gRPC Code') {
+            steps {
+                sh '''
+                    source venv/bin/activate
+                    chmod +x generate_grpc.sh
+                    ./generate_grpc.sh
+                '''
+                
+                // Verify gRPC code generation
+                sh '''
+                    echo " Verifying gRPC code generation..."
+                    test -f protos/auth_pb2.py || (echo "❌ auth_pb2.py not generated" && exit 1)
+                    test -f protos/auth_pb2_grpc.py || (echo "❌ auth_pb2_grpc.py not generated" && exit 1)
+                    test -f protos/user_pb2.py || (echo "❌ user_pb2.py not generated" && exit 1)
+                    test -f protos/user_pb2_grpc.py || (echo "❌ user_pb2_grpc.py not generated" && exit 1)
+                    test -f protos/common_pb2.py || (echo "❌ common_pb2.py not generated" && exit 1)
+                    test -f protos/common_pb2_grpc.py || (echo "❌ common_pb2_grpc.py not generated" && exit 1)
+                    echo " All gRPC files generated successfully"
+                    ls -la protos/*_pb2*.py
+                '''
+            }
+        }
+        
+        stage('Code Quality') {
+            parallel {
+                stage('Python Linting') {
+                    steps {
+                        sh '''
+                            source venv/bin/activate
+                            flake8 . --exclude=venv --max-line-length=88
+                            black --check .
+                            isort --check-only .
+                        '''
+                    }
+                }
+                
+                stage('Type Checking') {
+                    steps {
+                        sh '''
+                            source venv/bin/activate
+                            mypy . --ignore-missing-imports
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                sh '''
+                    source venv/bin/activate
+                    pip install bandit
+                    bandit -r . -f json -o bandit-report.json || true
+                    pip install safety
+                    safety check --json --output safety-report.json || true
+                '''
+                archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
+            }
+        }
+        
+        stage('Unit Tests') {
+            steps {
+                sh '''
+                    source venv/bin/activate
+                    pytest tests/ --junitxml=test-results.xml --cov=./ --cov-report=xml --cov-report=html
+                '''
+                publishTestResults testResultsPattern: 'test-results.xml'
+                publishCoverage adapters: [cobertura('coverage.xml')], sourceFileResolver: sourceFiles('STORE_LAST_BUILD')
+            }
+        }
+        
+        stage('Integration Tests') {
+            steps {
+                script {
+                    sh '''
+                        # Start test services
+                        docker-compose -f docker-compose.test.yml up -d postgres redis
+                        
+                        # Wait for services to be ready
+                        sleep 10
+                        
+                        # Run integration tests
+                        source venv/bin/activate
+                        pytest tests/integration/ -v
+                        
+                        # Cleanup
+                        docker-compose -f docker-compose.test.yml down
+                    '''
+                }
+            }
+        }
+        
+        stage('Performance Tests') {
+            steps {
+                sh '''
+                    # Start the application
+                    source venv/bin/activate
+                    uvicorn main:app --host 0.0.0.0 --port 8000 &
+                    APP_PID=$!
+                    
+                    # Wait for app to start
+                    sleep 5
+                    
+                    # Run performance tests
+                    ./performance-test.sh
+                    
+                    # Install and run load testing
+                    pip install locust
+                    locust -f tests/load_test.py --headless -u 50 -r 10 -t 30s --host http://localhost:8000 --csv=performance
+                    
+                    # Stop the application
+                    kill $APP_PID
+                '''
+                archiveArtifacts artifacts: 'performance*.csv', allowEmptyArchive: true
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                script {
+                    def image = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        image.push()
+                        image.push("latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh '''
+                    # Deploy to staging environment
+                    docker-compose -f docker-compose.staging.yml down || true
+                    docker-compose -f docker-compose.staging.yml pull
+                    docker-compose -f docker-compose.staging.yml up -d
+                    
+                    # Health check
+                    sleep 30
+                    curl -f http://staging.example.com/health
+                '''
+            }
+        }
+        
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                input message: 'Deploy to production?', ok: 'Deploy'
+                sh '''
+                    # Deploy to production environment
+                    docker-compose -f docker-compose.prod.yml down || true
+                    docker-compose -f docker-compose.prod.yml pull
+                    docker-compose -f docker-compose.prod.yml up -d
+                    
+                    # Health check
+                    sleep 30
+                    curl -f http://production.example.com/health
+                '''
+            }
+        }
+        
+        stage('Smoke Tests') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'develop'
+                }
+            }
+            steps {
+                sh '''
+                    # Run smoke tests against deployed environment
+                    source venv/bin/activate
+                    pytest tests/smoke/ -v
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up
+            sh 'docker system prune -f || true'
+            
+            // Archive artifacts
+            archiveArtifacts artifacts: 'test-results.xml,coverage.xml,bandit-report.json,safety-report.json', allowEmptyArchive: true
+            
+            // Publish test results
+            publishTestResults testResultsPattern: 'test-results.xml'
+            
+            // Publish coverage
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'htmlcov',
+                reportFiles: 'index.html',
+                reportName: 'Coverage Report'
+            ])
+        }
+        
+        success {
+            slackSend channel: '#deployments',
+                     color: 'good',
+                     message: "✅ Build successful: ${env.JOB_NAME} - ${env.BUILD_NUMBER}"
+        }
+        
+        failure {
+            slackSend channel: '#deployments',
+                     color: 'danger',
+                     message: "❌ Build failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}"
+        }
+        
+        unstable {
+            slackSend channel: '#deployments',
+                     color: 'warning',
+                     message: "⚠️ Build unstable: ${env.JOB_NAME} - ${env.BUILD_NUMBER}"
+        }
+    }
+}

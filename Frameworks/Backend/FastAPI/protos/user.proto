@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package user;
+
+import "google/protobuf/timestamp.proto";
+
+// User Service Definition
+service UserService {
+  // Get user profile
+  rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
+  
+  // Update user profile
+  rpc UpdateUserProfile(UpdateUserProfileRequest) returns (UpdateUserProfileResponse);
+  
+  // Delete user account
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  
+  // List users (admin)
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  
+  // Get user by phone
+  rpc GetUserByPhone(GetUserByPhoneRequest) returns (GetUserByPhoneResponse);
+  
+  // Update user status
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse);
+}
+
+// Get user profile request
+message GetUserProfileRequest {
+  string user_id = 1;
+}
+
+// Get user profile response
+message GetUserProfileResponse {
+  bool success = 1;
+  string message = 2;
+  optional UserProfile user = 3;
+}
+
+// Update user profile request
+message UpdateUserProfileRequest {
+  string user_id = 1;
+  optional string full_name = 2;
+  optional string email = 3;
+  optional string phone = 4;
+  optional UserPreferences preferences = 5;
+}
+
+// Update user profile response
+message UpdateUserProfileResponse {
+  bool success = 1;
+  string message = 2;
+  optional UserProfile user = 3;
+}
+
+// Delete user request
+message DeleteUserRequest {
+  string user_id = 1;
+}
+
+// Delete user response
+message DeleteUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// List users request
+message ListUsersRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+  optional bool is_active = 4;
+}
+
+// List users response
+message ListUsersResponse {
+  bool success = 1;
+  string message = 2;
+  repeated UserProfile users = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+}
+
+// Get user by phone request
+message GetUserByPhoneRequest {
+  string phone = 1;
+}
+
+// Get user by phone response
+message GetUserByPhoneResponse {
+  bool success = 1;
+  string message = 2;
+  optional UserProfile user = 3;
+}
+
+// Update user status request
+message UpdateUserStatusRequest {
+  string user_id = 1;
+  bool is_active = 2;
+  bool is_verified = 3;
+  optional string reason = 4;
+}
+
+// Update user status response
+message UpdateUserStatusResponse {
+  bool success = 1;
+  string message = 2;
+  optional UserProfile user = 3;
+}
+
+// User profile structure
+message UserProfile {
+  string user_id = 1;
+  string phone = 2;
+  string email = 3;
+  string full_name = 4;
+  bool is_active = 5;
+  bool is_verified = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  optional string country_code = 9;
+  repeated string roles = 10;
+  optional UserPreferences preferences = 11;
+  optional UserStats stats = 12;
+}
+
+// User preferences structure
+message UserPreferences {
+  string language = 1;
+  string timezone = 2;
+  bool email_notifications = 3;
+  bool sms_notifications = 4;
+  bool push_notifications = 5;
+  string theme = 6;
+}
+
+// User statistics structure
+message UserStats {
+  int32 login_count = 1;
+  google.protobuf.Timestamp last_login = 2;
+  int32 profile_updates = 3;
+  bool password_changed = 4;
+}

@@ -1,0 +1,118 @@
+# Python Virtual Environment
+venv/
+env/
+.env
+.venv
+ENV/
+env.bak/
+venv.bak/
+.Python
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Vite build files (exclude schema files)
+.vite/
+dist/
+*.tsbuildinfo
+vite.config.ts.timestamp-*
+# Keep schema files
+!**/schema/
+!**/*.schema.*
+
+# Build outputs
+build/
+*.egg-info/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Secrets and Configuration
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config.ini
+secrets.json
+
+# SSL Certificates
+*.pem
+*.key
+*.crt
+
+# Redis dump
+dump.rdb
+
+# Nginx
+nginx.conf.bak
+
+# Profiling
+*.prof
+
+# gRPC generated files
+*_pb2.py
+*_pb2_grpc.py
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Coverage reports
+.coverage
+coverage.xml
+*.cover
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json

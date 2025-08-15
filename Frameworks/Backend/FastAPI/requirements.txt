@@ -1,0 +1,96 @@
+# FastAPI Backend Requirements
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# ASGI Server for Production
+gunicorn==21.2.0
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Caching and Session Management
+redis==5.0.1
+hiredis==2.2.3
+
+# Authentication and Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# gRPC
+grpcio==1.59.3
+grpcio-tools==1.59.3
+protobuf==4.25.1
+
+# Monitoring and Observability
+prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+opentelemetry-instrumentation-fastapi==0.42b0
+opentelemetry-exporter-jaeger==1.21.0
+
+# Data Validation and Serialization
+pydantic[email]==2.5.0
+pydantic-settings==2.1.0
+
+# HTTP Client
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Development and Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Security Testing Tools
+bandit==1.7.5
+safety==2.3.4
+
+# Performance Testing
+locust==2.17.0
+
+# Profiling and Performance
+py-spy==0.3.14
+memory-profiler==0.61.0
+line-profiler==4.1.1
+
+# Utilities
+python-dotenv==1.0.0
+click==8.1.7
+pydantic-core==2.14.6
+anyio==4.1.0
+starlette==0.27.0
+
+# CORS
+python-cors==1.7.0
+
+# File handling
+python-magic==0.4.27
+pillow==10.1.0
+
+# Logging
+structlog==23.2.0
+colorlog==6.8.0
+
+# Email (optional)
+fastapi-mail==1.4.1
+
+# Background tasks
+celery==5.3.4
+redis==5.0.1
+
+# Rate limiting
+slowapi==0.1.9
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.4.8

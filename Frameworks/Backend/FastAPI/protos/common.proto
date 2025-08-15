@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package common;
+
+import "google/protobuf/timestamp.proto";
+
+// Common response status
+enum StatusCode {
+  OK = 0;
+  ERROR = 1;
+  NOT_FOUND = 2;
+  UNAUTHORIZED = 3;
+  FORBIDDEN = 4;
+  INVALID_REQUEST = 5;
+  INTERNAL_ERROR = 6;
+  SERVICE_UNAVAILABLE = 7;
+}
+
+// Health check service
+service HealthService {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Health check request
+message HealthCheckRequest {
+  string service = 1;
+}
+
+// Health check response
+message HealthCheckResponse {
+  StatusCode status = 1;
+  string message = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  optional string version = 4;
+}
+
+// Pagination metadata
+message PaginationMeta {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 pages = 4;
+}
+
+// Error details
+message ErrorDetail {
+  string code = 1;
+  string message = 2;
+  optional string field = 3;
+}
