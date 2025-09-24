@@ -13,7 +13,7 @@ A Single Page Application (SPA) built with SvelteKit, Node.js backend, PostgreSQ
 - **DevOps**: Docker containerization, Nginx reverse proxy
 - **Testing**: Jest test suite for backend API
 
-## � Data Flow Architecture
+## Data Flow Architecture
 
 This section illustrates how the SvelteKit SPA interacts with the Node.js REST API and PostgreSQL database, including authentication flow with JWT tokens.
 
