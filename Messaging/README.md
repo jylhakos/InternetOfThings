@@ -12,6 +12,7 @@ The messaging directory contains implementations and examples of various messagi
   - [MQTT](#mqtt)
   - [NATS](#nats)
   - [REST](#rest)
+  - [Socket.IO](#socketio)
   - [TCP](#tcp)
 - [Implementation Languages](#implementation-languages)
 - [Use Cases](#use-cases)
@@ -96,6 +97,131 @@ REST (Representational State Transfer) is an architectural style for designing w
 **Implementation:** Go web service
 **Use Case:** Web APIs, mobile app backends, system integration
 
+### Socket.IO
+
+Socket.IO is a JavaScript library that enables real-time, bidirectional, and event-driven communication between web clients and servers. It provides a higher-level abstraction over WebSockets with automatic fallback mechanisms and enhanced features for modern web applications.
+
+**How Socket.IO Works:**
+
+Socket.IO operates on a client-server architecture where:
+- **Server Side**: Runs on Node.js and manages connection lifecycle, room management, and event broadcasting
+- **Client Side**: Can be a web browser, mobile app, or any JavaScript environment that needs real-time communication
+- **Transport Layer**: Automatically chooses the best transport method (WebSocket, HTTP long-polling, etc.)
+
+**Key Features:**
+- **Real-time bidirectional communication**: Instant data exchange between client and server
+- **Automatic reconnection**: Handles network interruptions gracefully
+- **Room and namespace support**: Organize connections into logical groups
+- **Event-driven architecture**: Custom event handling with JSON data
+- **Transport fallback**: Automatically falls back to HTTP long-polling if WebSockets fail
+- **Built-in acknowledgments**: Confirm message delivery with callbacks
+
+**Security and Encryption:**
+- **HTTPS/WSS Support**: Secure connections over TLS/SSL
+- **Authentication middleware**: Custom authentication before connection establishment
+- **CORS configuration**: Cross-origin request security
+- **Rate limiting**: Protection against spam and abuse
+- **Namespace isolation**: Separate communication channels for different application parts
+
+**Implementation Examples:**
+
+**Server Implementation (Node.js):**
+```javascript
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "https://yourdomain.com",
+    credentials: true
+  }
+});
+
+// Authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (isValidToken(token)) {
+    next();
+  } else {
+    next(new Error('Authentication error'));
+  }
+});
+
+// Connection handling
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  
+  // Join room
+  socket.join('room1');
+  
+  // Handle custom events
+  socket.on('message', (data) => {
+    io.to('room1').emit('broadcast', data);
+  });
+  
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+```
+
+**Client Implementation (JavaScript):**
+```javascript
+const socket = io('https://yourserver.com', {
+  auth: {
+    token: 'your-auth-token'
+  },
+  secure: true,
+  rejectUnauthorized: true
+});
+
+// Connection events
+socket.on('connect', () => {
+  console.log('Connected to server');
+});
+
+// Listen for messages
+socket.on('broadcast', (data) => {
+  console.log('Received:', data);
+});
+
+// Send messages
+socket.emit('message', {
+  text: 'Hello Server!',
+  timestamp: Date.now()
+});
+
+// Handle connection errors
+socket.on('connect_error', (error) => {
+  console.error('Connection failed:', error);
+});
+```
+
+**Security:**
+- Always use HTTPS in production environments
+- Implement proper authentication and authorization
+- Validate and sanitize all incoming data
+- Use rate limiting to prevent abuse
+- Configure CORS properly for cross-origin requests
+- Monitor connection patterns for suspicious activity
+
+**Use Cases:**
+- **Real-time chat applications**: Instant messaging and group chats
+- **Live collaboration tools**: Document editing, whiteboards, code sharing
+- **IoT dashboards**: Live sensor data visualization and device control
+- **Financial applications**: Live trading data and price updates
+- **Social media feeds**: Real-time notifications and live updates
+- **Live streaming**: Chat overlays and viewer interactions
+- **Customer support**: Live chat and help desk systems
+- **Monitoring dashboards**: Real-time system metrics and alerts
+
+**When to Choose Socket.IO?:**
+- Real-time bi-directional communication
+- Interactive web applications
+- Automatic reconnection and fallback mechanisms
+- Event-driven architecture with custom events
+- Organize connections into rooms or namespaces
+- Browser compatibility
+- Building Node.js-based applications
+
 ### TCP
 
 TCP (Transmission Control Protocol) provides reliable, ordered, and error-checked delivery of data between applications. This implementation shows client-server communication at the transport layer.
@@ -124,6 +250,7 @@ This repository demonstrates messaging protocols using:
 - **GraphQL & REST**: API development for web and mobile applications
 - **HTTP**: Understanding web protocol fundamentals
 - **gRPC**: High-performance microservices communication
+- **Socket.IO**: Real-time web applications, chat systems, live collaboration
 
 ### Internet of Things (IoT)
 
@@ -147,6 +274,12 @@ This repository demonstrates messaging protocols using:
 
 ### REST
 - [gRPC vs REST: API Design Guide](https://cloud.google.com/blog/products/api-management/understanding-grpc-openapi-and-rest-and-when-to-use-them)
+
+### Socket.IO
+- [Socket.IO Documentation](https://socket.io/docs/v4/)
+- [Socket.IO Client API](https://socket.io/docs/v4/client-api/)
+- [Socket.IO Server API](https://socket.io/docs/v4/server-api/)
+- [Socket.IO Security Guidelines](https://socket.io/docs/v4/security/)
 
 ### MQTT
 - [Why MQTT?](https://mqtt.org/)
