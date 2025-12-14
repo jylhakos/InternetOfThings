@@ -1,0 +1,52 @@
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Executable binaries
+*.exe
+*.out
+*.app
+*.elf
+*.bin
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Core dumps
+core
+core.*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# GDB files
+.gdb_history
+gdbinit
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.so
+*.so.*
+*.dylib
+*.a
+*.la
+*.lo
+
+# Linker output
+*.map
+*.exp
