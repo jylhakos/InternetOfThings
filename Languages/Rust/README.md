@@ -12,7 +12,7 @@
 - [References](#references)
 
 
-![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Rust/rust.svgs?raw=true)
+![alt text](https://github.com/jylhakos/InternetOfThings/blob/main/Languages/Rust/rust.svg?raw=true)
 
 ## Introduction
 
