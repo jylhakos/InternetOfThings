@@ -1,0 +1,31 @@
+What is Rust?
+
+Rust is programming language similar to C++ but Rust provides memory safety without using garbage collection and it does not allow dangling pointers or null pointers.
+
+Rust was developed by Mozilla with the aim of creating a better tool for developing their browser Mozilla Firefox. 
+
+Rust programming language is also used in browsers like Mozilla Firefox, however mostly Rust is used to develop device drivers.
+
+A link to "Hello, World" at https://doc.rust-lang.org/book/ch01-02-hello-world.html
+
+Rocket is a web framework for Rust developers if you want to use Rust  for web development purposes.
+
+Rocket application e.g. a link at https://rocket.rs/guide/v0.5/getting-started/
+
+Yew is a framework to develop multi-threaded frontend web apps using WebAssembly with Rust programming language.
+ 
+A link to "Our first static page" https://yew.rs/docs/tutorial
+ 
+Actix is a web framework written in Rust inspired by the actor model in concurrent programming.
+
+A link to "Hello, world" at https://actix.rs/docs/getting-started
+
+References
+
+The Rust Programming Language https://doc.rust-lang.org/book/title-page.html
+
+The Rocket Programming Guide https://rocket.rs/guide/v0.5/
+
+Yew https://github.com/yewstack/yew
+
+Actix Web https://actix.rs/

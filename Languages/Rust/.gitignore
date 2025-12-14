@@ -1,0 +1,32 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+*.pdb
+
+# Cargo lock file (optional, uncomment if needed)
+# Cargo.lock
+
+# Executable files
+debug/
+release/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build output
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test and benchmark files
+*.profraw
+*.profdata
