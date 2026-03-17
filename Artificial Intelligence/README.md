@@ -2,6 +2,19 @@
 
 This repository contains resources and implementations for various artificial intelligence technologies and methodologies. The content is organized into areas that cover the spectrum of AI development, from building intelligent agents to evaluating and optimizing AI models.
 
+## Categorization
+
+Tool 	Primary Category	Best For
+CrewAI	Agentic Framework	Multi-agent role collaboration
+AutoGen	Agentic Framework	Code generation & multi-agent conversations
+Agno	Agentic Framework	Rapid development of agents
+LangChain	LLM Orchestration	Custom LLM apps, RAG, DAGs
+LlamaIndex	Data Framework/RAG	Data ingestion & retrieval
+n8n	Low-Code Automation	Visual AI workflows & integrations
+Langfuse	Observability	Debugging/tracing agentic apps
+Claude	Foundation Model	Prompting, reasoning, chat
+MCP	Infrastructure/Protocol	Standardizing tool integration
+
 ## Folder Structure
 
 ### 📁 AGENTS/

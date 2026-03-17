@@ -1,4 +1,14 @@
-# Agents for Artificial Intelligence (AI)
+# Agents
+
+An agent is a combination of a model, tools, and a prompt.
+
+An open source AI agents are artificial intelligence tools whose underlying code and algorithms are publicly available.
+
+Autonomous Agents & Tools
+Auto-GPT: A popular autonomous agent that uses LLMs to perform tasks autonomously, including web browsing and file handling.
+Open Interpreter: An agent that runs code (Python, JS, Shell) locally to control the computer and interact with files.
+SuperAGI: A full-stack agent infrastructure that includes a GUI and toolkits.
+BabyAGI: Focused on task planning, prioritization, and execution loops.
 
 ## Project Structure *Last Updated: August 2025*
 
@@ -308,6 +318,7 @@ Before developing an AI agent, ensure you have the following foundational knowle
 - **CS50's Introduction to AI with Python** (Harvard): https://cs50.harvard.edu/ai/
 - **Deep Learning Specialization** (Coursera): https://www.coursera.org/specializations/deep-learning
 - **LangChain & Vector Databases in Production** (ActiveLoop): https://learn.activeloop.ai/
+- **AI Agents Course** (Hugging Face): https://huggingface.co/learn/agents-course/unit0/introduction
 
 **Video Resources:**
 - **Andrej Karpathy's Neural Networks Course**: https://karpathy.ai/

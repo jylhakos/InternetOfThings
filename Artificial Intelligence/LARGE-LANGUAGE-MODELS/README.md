@@ -1,5 +1,13 @@
 # Large language models
 
+LLM Orchestration and RAG Frameworks
+
+These tools provide the foundational code structures for connecting LLMs to external data and managing workflows. 
+
+LangChain and LangGraph: The standard for building customizable LLM applications and complex stateful, multi-agent flows.
+
+LlamaIndex: Specialized in RAG (Retrieval-Augmented Generation) and connecting data sources to LLMs.
+
 ## Example: LLM application deployed on AWS
 
 To utilize AWS for AI, you can leverage services like Amazon SageMaker for model development and deployment, Amazon Bedrock for accessing and customizing foundation models.
