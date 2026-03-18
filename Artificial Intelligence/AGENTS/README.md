@@ -34,7 +34,7 @@
    - [Online Learning](#online-learning)
    - [Communities](#communities)
 
-## Project Structure *Last Updated: August 2025*
+## Project Structure *Last Updated: March 2026*
 
 ```
 AGENTS/
