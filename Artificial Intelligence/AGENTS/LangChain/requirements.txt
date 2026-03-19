@@ -1,0 +1,31 @@
+# LangChain AI Agent Requirements
+# Python 3.9+ required
+
+# Core LangChain framework
+langchain>=1.2.0,<2.0.0
+langchain-core>=1.2.0,<2.0.0
+
+# OpenAI integration for LangChain
+langchain-openai>=1.1.0,<2.0.0
+
+# Environment variable management
+python-dotenv>=1.2.0
+
+# FastAPI for REST API server
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+
+# HTTP client (for potential API calls in tools)
+httpx>=0.28.0
+requests>=2.32.0
+
+# Optional: Additional LLM providers (uncomment as needed)
+# langchain-anthropic>=0.3.0  # For Claude
+# langchain-google-genai>=2.0.0  # For Gemini
+# langchain-community>=0.3.0  # For community integrations
+
+# Optional: Advanced features (uncomment as needed)
+# langsmith>=0.1.0  # For observability and tracing
+# langgraph>=1.1.0  # For complex stateful workflows
+# duckduckgo-search>=6.0.0  # For web search tool
+# wikipedia>=1.4.0  # For Wikipedia search tool
