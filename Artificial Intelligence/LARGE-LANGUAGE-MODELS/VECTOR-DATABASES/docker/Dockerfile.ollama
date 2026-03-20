@@ -1,0 +1,13 @@
+# Ollama Dockerfile (extends official image)
+FROM ollama/ollama:latest
+
+# Pull default models during build (optional)
+# RUN ollama pull llama2
+# RUN ollama pull mistral
+# RUN ollama pull nomic-embed-text
+
+# Expose Ollama port
+EXPOSE 11434
+
+# Start Ollama server
+CMD ["ollama", "serve"]
