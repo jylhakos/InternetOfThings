@@ -1,0 +1,50 @@
+# LlamaIndex Documentation Sample
+
+## What is LlamaIndex?
+
+LlamaIndex is a data framework for Large Language Model (LLM) applications. It provides tools to ingest, structure, and access private or domain-specific data for use with LLMs. LlamaIndex helps you build context-augmented LLM applications.
+
+## Key Features
+
+1. **Data Connectors**: Ingest data from various sources including APIs, PDFs, databases, and more.
+
+2. **Data Indexes**: Structure your data for efficient retrieval. Supports vector stores, keyword indices, and knowledge graphs.
+
+3. **Query Engines**: Natural language query interface over your data. Combines retrieval with LLM generation for accurate answers.
+
+4. **Agents**: Build autonomous agents that can use tools, reason about tasks, and execute multi-step workflows.
+
+## Use Cases
+
+- **Question-Answering Systems**: Build chatbots that answer questions using your private documentation.
+- **Semantic Search**: Enable natural language search over large document collections.
+- **Data Analysis**: Query structured and unstructured data using natural language.
+- **AI Agents**: Create intelligent agents that can access multiple data sources and tools.
+
+## RAG with LlamaIndex
+
+Retrieval-Augmented Generation (RAG) combines the power of retrieval systems with generative models:
+
+1. **Indexing Phase**: Documents are embedded and stored in a vector database
+2. **Retrieval Phase**: User query is embedded and similar documents are retrieved
+3. **Generation Phase**: LLM generates an answer using the retrieved context
+
+LlamaIndex makes it easy to build production-ready RAG systems with just a few lines of code.
+
+## Getting Started
+
+The basic workflow with LlamaIndex involves:
+1. Load documents using `SimpleDirectoryReader`
+2. Create an index using `VectorStoreIndex`
+3. Query the index using a query engine
+4. Optionally, build an agent that can use multiple tools
+
+## Advanced Capabilities
+
+- **Multi-Modal RAG**: Work with text, images, and structured data
+- **Fine-Tuned Retrieval**: Customize embedding models and retrieval strategies
+- **Streaming**: Stream responses for better user experience
+- **Evaluation**: Measure and improve RAG performance
+- **Production Deployment**: Deploy RAG applications at scale
+
+LlamaIndex is the industry-standard framework for building production-ready RAG applications.
