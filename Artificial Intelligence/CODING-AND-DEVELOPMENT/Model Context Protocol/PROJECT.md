@@ -11,7 +11,7 @@ A complete Python implementation demonstrating how to build AI agents using the 
 -   Simple AI Agent with MCP integration
 -   OpenAI integration example
 -   FastMCP examples for rapid development
--   Comprehensive testing suite
+-   Testing suite
 -   Complete documentation and tutorials
 
 ## Project Structure

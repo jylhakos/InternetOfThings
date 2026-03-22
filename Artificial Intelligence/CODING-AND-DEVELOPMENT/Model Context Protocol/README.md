@@ -455,7 +455,7 @@ Model Context Protocol/
 │                                          # - Production-ready pattern
 │
 ├── 📁 tests/                              # Test suite
-│   └──  test_mcp.py                       # Comprehensive test suite
+│   └──  test_mcp.py                       # Test suite
 │                                          # - Unit tests
 │                                          # - Integration tests
 │                                          # - E2E tests
@@ -1007,7 +1007,7 @@ pytest tests/
 
 ### Testing External MCP Implementations
 
-This project includes a comprehensive test suite ([test_mcp_quickstart.py](tests/test_mcp_quickstart.py)) for validating MCP clients and servers from the [MCP Quickstart Resources repository](https://github.com/modelcontextprotocol/quickstart-resources).
+This project includes a test suite ([test_mcp_quickstart.py](tests/test_mcp_quickstart.py)) for validating MCP clients and servers from the [MCP Quickstart Resources repository](https://github.com/modelcontextprotocol/quickstart-resources).
 
 #### What's Tested for MCP?
 
@@ -1023,7 +1023,7 @@ The test suite validates MCP implementations from the community:
 
 #### Test Cases Covered
 
-The test suite includes comprehensive validation across three main categories:
+The test suite includes validation across three main categories:
 
 **1. Tool Discovery Tests**
 -   Verify `list_tools()` returns all expected tools
