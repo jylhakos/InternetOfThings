@@ -1,0 +1,13 @@
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-v --tb=short"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+asyncio_mode = "auto"
+
+markers = [
+    "asyncio: mark test as async",
+    "integration: mark test as integration test (may require external resources)",
+]

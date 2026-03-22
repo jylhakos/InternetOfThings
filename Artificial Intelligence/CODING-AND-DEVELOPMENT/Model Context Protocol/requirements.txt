@@ -1,0 +1,23 @@
+# MCP and Agent Dependencies
+mcp>=1.0.0
+fastmcp>=0.1.0
+
+# HTTP and Async Support
+httpx>=0.27.0
+uvicorn>=0.31.0
+starlette>=0.27.0
+websockets>=15.0.0
+
+# AI Model APIs
+anthropic>=0.40.0
+openai>=1.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0
+rich>=13.9.0
+pydantic>=2.11.0
+
+# Testing
+pytest>=9.0.0
+pytest-asyncio>=1.3.0
