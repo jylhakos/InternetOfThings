@@ -1,6 +1,45 @@
 # Open Source Tools For Evaluating Large Language Models and AI Agents
 
-This document presents open-source tools and metrics to evaluate Large Language Models (LLMs), AI Agents, MCP Servers, and MCP Clients. 
+This document presents open-source tools and metrics to evaluate Large Language Models (LLMs), AI Agents, MCP Servers, and MCP Clients.
+
+## Table of Contents
+
+- [⚠️ Important: Virtual Environment Requirement](#️-important-virtual-environment-requirement)
+- [AI Agent Evaluation vs. LLM Evaluation](#-ai-agent-evaluation-vs-llm-evaluation)
+  - [Why Agent Evaluation Differs from LLM Evaluation](#why-agent-evaluation-differs-from-llm-evaluation)
+  - [The Challenge: Non-Deterministic Systems](#the-challenge-non-deterministic-systems)
+- [How to Evaluate AI Agents?](#-how-to-evaluate-ai-agents)
+  - [Evaluation Strategies](#evaluation-strategies)
+  - [Metrics to Track for AI Agents](#metrics-to-track-for-ai-agents)
+- [Structure of an Evaluation](#-structure-of-an-evaluation)
+  - [Core Evaluation Terminology](#core-evaluation-terminology)
+  - [Agent Evaluation Grader Types](#agent-evaluation-grader-types)
+- [🔧 How to Test and Measure Agentic AI Performance?](#-how-to-test-and-measure-agentic-ai-performance)
+  - [Testing MCP Servers and MCP Clients](#testing-mcp-servers-and-mcp-clients)
+- [🛠️ Open Source Evaluation Tools for Large Language Models (March - 2026)](#️-open-source-evaluation-tools-for-large-language-models-march---2026)
+- [Agent Evaluation Tools (2026)](#-agent-evaluation-tools-2026)
+  - [Commercial & Open-Source Agent Evaluation Platforms](#commercial--open-source-agent-evaluation-platforms)
+  - [Open-Source Agent Evaluation Frameworks](#open-source-agent-evaluation-frameworks)
+  - [Claude + LangChain Evaluation](#claude--langchain-evaluation)
+  - [Agent Evaluation in 5 Steps](#agent-evaluation-in-5-steps)
+- [What is BERT?](#what-is-bert)
+- [How does the BERT model work for text classification?](#how-does-the-bert-model-work-for-text-classification)
+- [Project](#project)
+- [Setup](#setup)
+- [FastAPI backend server](#fastapi-backend-server)
+- [Docker deployment](#docker-deployment)
+- [LLM Evaluation Metrics](#llm-evaluation-metrics)
+- [Training and Evaluation Metrics](#training-and-evaluation-metrics)
+- [Model Performance Evaluation](#model-performance-evaluation)
+- [LLM Evaluation Tools Integration](#llm-evaluation-tools-integration)
+- [Evaluation Tools](#evaluation-tools)
+- [Optimizers (2026)](#optimizers-2026)
+- [Model Prediction Testing](#model-prediction-testing)
+- [Advanced topics](#advanced-topics)
+- [References](#references)
+- [Summary](#-summary)
+
+---
 
 ## ⚠️ Important: Virtual Environment Requirement
 
@@ -63,7 +102,7 @@ Unlike traditional software, **agents and LLM applications are non-deterministic
 
 **The fundamental challenge:** Figuring out whether your agent actually works reliably in production.
 
-## 📊 How to Evaluate AI Agents
+## How to Evaluate AI Agents?
 
 Evaluating and testing AI agents requires a **multi-layered approach** combining:
 - **Automated metrics** (code-based graders)
@@ -187,7 +226,7 @@ performance_metrics = {
 }
 ```
 
-## 🔬 Structure of an Evaluation
+## Structure of an Evaluation
 
 An **evaluation ("eval")** is a test for an AI system: give an AI an input, then apply grading logic to its output to measure success.
 
@@ -301,7 +340,7 @@ Agent evaluations typically combine **three types of graders**:
 
 Each grader evaluates some portion of either the **transcript** or the **outcome**.
 
-## 🔧 How to Test and Measure Agentic AI Performance
+## How to Test and Measure Agentic AI Performance?
 
 Testing agentic AI requires **defining what evaluation means** in an operational setting and which agent behaviors should be measured.
 
@@ -417,7 +456,7 @@ def test_mcp_client(client, mock_server):
     assert client.handle_error(response.error)
 ```
 
-## 🛠️ Open Source Evaluation Tools for Large Language Models (March - 2026)
+## Open Source Evaluation Tools for Large Language Models (March - 2026)
 
 Large Language Models (LLMs) evaluation has evolved with open-source tools designed specifically for model assessment. This project integrates several evaluation frameworks to provide multi-dimensional analysis of language model performance.
 
