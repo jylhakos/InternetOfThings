@@ -1,6 +1,421 @@
-# Open Source Tools For Evaluating Large Language Models
+# Open Source Tools For Evaluating Large Language Models and AI Agents
 
-This document presents open-source tools and metrics to evaluate Large Language Models models like BERT model.
+This document presents open-source tools and metrics to evaluate Large Language Models (LLMs), AI Agents, MCP Servers, and MCP Clients. 
+
+## ⚠️ Important: Virtual Environment Requirement
+
+**All operations in this TOOLS folder MUST be performed within an active virtual environment.** Before installing libraries, running scripts, or executing tools, always activate the virtual environment:
+
+```bash
+# Activate virtual environment
+source bert_env/bin/activate
+
+# Verify activation (you should see (bert_env) prefix in terminal)
+which python
+```
+
+**Why Virtual Environment is Mandatory:**
+- Isolates project dependencies from system Python
+- Prevents version conflicts between packages
+- Ensures reproducible development environment
+- Required for proper package management and testing
+
+**Never run installation or execution commands without activating the virtual environment first.**
+
+## AI Agent Evaluation vs. LLM Evaluation
+
+### Why Agent Evaluation Differs from LLM Evaluation
+
+**Traditional LLM evaluation** focuses on text quality metrics like coherence, factual accuracy, and response relevance. These metrics assume the model's job ends when it generates text.
+
+**Agent evaluation requires a fundamentally different approach** because agents don't just generate text. They:
+- **Take actions** and invoke tools with specific parameters
+- **Make sequential decisions** that build on previous steps
+- **Must recover** when external APIs fail or return unexpected data
+- **Maintain context** across multi-turn interactions
+- **Control costs and latency** in production environments
+- **Remain resilient** against adversarial inputs
+
+#### Real-World Example
+
+A customer support agent needs to look up order status, process refunds, and update customer records. Traditional LLM metrics tell you **nothing** about whether it:
+- Called the right API endpoints
+- Passed correct customer IDs
+- Handled cases where refund requests exceeded policy limits
+- Recovered from database connection failures
+
+**Agent evaluation must assess:**
+1.   Task completion success
+2.   Tool invocation accuracy
+3.   Reasoning quality across multi-step workflows
+4.   Failure handling and recovery
+5.   Cost and latency performance
+6.   Long-term context maintenance
+
+### The Challenge: Non-Deterministic Systems
+
+Unlike traditional software, **agents and LLM applications are non-deterministic**: the same input can produce different outputs. Traditional LLM metrics, along with single-turn accuracy, do not adequately capture an agent's ability to:
+- Plan effectively
+- Recover from failures
+- Maintain long-term context
+- Control costs and latency
+- Remain resilient against adversarial inputs
+
+**The fundamental challenge:** Figuring out whether your agent actually works reliably in production.
+
+## 📊 How to Evaluate AI Agents
+
+Evaluating and testing AI agents requires a **multi-layered approach** combining:
+- **Automated metrics** (code-based graders)
+- **LLM-as-a-judge** (model-based graders)
+- **Human review** (human graders)
+
+This approach assesses reasoning, tool use, and task success across all dimensions.
+
+### Evaluation Strategies
+
+#### 1. **Component vs. End-to-End Testing**
+Test individual skills (e.g., tool selection, parameter generation) before testing the entire workflow.
+
+```python
+# Component testing
+test_tool_selection()      # Does agent choose right tool?
+test_parameter_generation() # Are parameters correct?
+test_error_recovery()      # Does it handle API failures?
+
+# End-to-end testing
+test_complete_workflow()   # Does entire task succeed?
+```
+
+#### 2. **LLM-as-a-Judge**
+Use a strong LLM (e.g., GPT-4, Claude) to evaluate the output of your agent based on specific rubrics:
+- Checking for hallucinations
+- Verifying proper formatting
+- Assessing reasoning quality
+- Validating adherence to guidelines
+
+```python
+# LLM-as-a-judge example
+evaluator_prompt = """
+Evaluate if this agent response:
+1. Answered the question accurately
+2. Used appropriate data from context
+3. Avoided hallucinations
+4. Followed safety guidelines
+
+Agent response: {response}
+Context: {context}
+"""
+```
+
+#### 3. **Simulation and Datasets**
+Create a dataset of user queries and expected behaviors to run offline, automated tests for regression.
+
+```python
+# Example test dataset
+test_cases = [
+    {
+        "input": "Book a flight from NYC to LAX on Dec 25",
+        "expected_tools": ["search_flights", "book_flight"],
+        "expected_outcome": "flight_booked",
+        "success_criteria": "reservation_exists_in_db"
+    },
+    # ... more test cases
+]
+```
+
+#### 4. **Human-in-the-Loop (HITL)**
+Use expert human review for qualitative aspects:
+- Tone and empathy
+- Safety and ethical considerations
+- Complex judgment calls
+- Edge cases and unusual scenarios
+
+### Metrics to Track for AI Agents
+
+#### 1. **Task Success Rate**
+Percentage of goals successfully completed by the agent.
+
+```python
+task_success_rate = (successful_tasks / total_tasks) * 100
+```
+
+#### 2. **Tool Usage Quality**
+Correctness of tool selection, parameter generation, and function calls.
+
+```python
+metrics = {
+    "tool_selection_accuracy": 0.95,  # Right tool chosen
+    "parameter_correctness": 0.92,     # Correct parameters
+    "api_call_success": 0.88           # Successful execution
+}
+```
+
+#### 3. **Trajectory Evaluation**
+Assessing the reasoning steps and actions the agent took to reach the solution.
+
+```python
+# Trajectory quality metrics
+trajectory_metrics = {
+    "num_steps": 5,                    # Efficiency
+    "reasoning_quality": "high",        # Decision quality
+    "backtracking_count": 0,           # Error recovery
+    "redundant_calls": 0                # Optimization
+}
+```
+
+#### 4. **Faithfulness/Groundedness**
+Ensuring the output is supported by the retrieved context, minimizing hallucinations.
+
+```python
+# Groundedness check
+faithfulness_score = evaluate_claims(
+    claims=agent_response,
+    evidence=retrieved_context
+)
+```
+
+#### 5. **Performance & Cost**
+Tracking latency, token consumption, and cost per task.
+
+```python
+performance_metrics = {
+    "avg_latency_ms": 1250,
+    "tokens_per_task": 2500,
+    "cost_per_task_usd": 0.025,
+    "throughput_tasks_per_min": 48
+}
+```
+
+## 🔬 Structure of an Evaluation
+
+An **evaluation ("eval")** is a test for an AI system: give an AI an input, then apply grading logic to its output to measure success.
+
+### Core Evaluation Terminology
+
+#### **Task** (a.k.a. problem or test case)
+A single test with defined inputs and success criteria.
+
+```python
+task = {
+    "id": "flight_booking_001",
+    "input": "Book a flight from SFO to JFK",
+    "tools": ["search_flights", "book_flight", "update_db"],
+    "success_criteria": "reservation_exists AND confirmation_sent"
+}
+```
+
+#### **Trial**
+Each attempt at a task. Because model outputs vary between runs, we run **multiple trials** to produce more consistent results.
+
+```python
+# Run 5 trials per task for statistical significance
+trials = [run_task(task) for _ in range(5)]
+success_rate = sum(trial.success for trial in trials) / len(trials)
+```
+
+#### **Grader**
+Logic that scores some aspect of the agent's performance. A task can have **multiple graders**, each containing multiple **assertions** (sometimes called checks).
+
+```python
+graders = {
+    "code_based": check_reservation_in_db(),
+    "model_based": llm_evaluates_response_quality(),
+    "human": human_reviews_edge_cases()
+}
+```
+
+#### **Transcript** (also called trace or trajectory)
+The complete record of a trial, including:
+- All outputs
+- Tool calls
+- Reasoning steps
+- Intermediate results
+- Any other interactions
+
+For the Anthropic API, this is the **full messages array** at the end of an eval run - containing all the calls to the API and all of the returned responses during the evaluation.
+
+```python
+transcript = {
+    "messages": [...],              # Full conversation
+    "tool_calls": [...],            # All function invocations
+    "reasoning_steps": [...],        # Agent's thinking
+    "timestamps": [...]              # Timing information
+}
+```
+
+#### **Outcome**
+The **final state in the environment** at the end of the trial. A flight-booking agent might say "Your flight has been booked" at the end of the transcript, but the **outcome** is whether a reservation actually exists in the environment's SQL database.
+
+```python
+# Transcript vs Outcome
+transcript_claim = "Flight booked successfully"
+actual_outcome = database.query("SELECT * FROM reservations WHERE id=123")
+# Outcome verification is critical!
+```
+
+#### **Evaluation Harness**
+The infrastructure that runs evals end-to-end. It provides:
+- Instructions and tools
+- Runs tasks concurrently
+- Records all the steps
+- Grades outputs
+- Aggregates results
+
+```python
+class EvaluationHarness:
+    def run_evaluation(self, tasks, agent, graders):
+        results = []
+        for task in tasks:
+            trials = self.run_trials(task, agent, num_trials=5)
+            scores = self.apply_graders(trials, graders)
+            results.append(self.aggregate_results(scores))
+        return results
+```
+
+#### **Agent Harness** (or scaffold)
+The system that enables a model to act as an agent: it processes inputs, orchestrates tool calls, and returns results. When we evaluate "an agent," we're evaluating **the harness and the model working together**.
+
+```python
+class AgentHarness:
+    def __init__(self, model, tools):
+        self.model = model
+        self.tools = tools
+    
+    def execute_task(self, task_input):
+        while not task_complete:
+            response = self.model.generate(context)
+            if response.requires_tool:
+                result = self.tools.execute(response.tool_call)
+                context.append(result)
+        return final_result
+```
+
+### Agent Evaluation Grader Types
+
+Agent evaluations typically combine **three types of graders**:
+
+1. **Code-based graders**: Automated assertions on outcomes and transcripts
+2. **Model-based graders**: LLM-as-a-judge evaluating quality
+3. **Human graders**: Expert review for nuanced judgment
+
+Each grader evaluates some portion of either the **transcript** or the **outcome**.
+
+## 🔧 How to Test and Measure Agentic AI Performance
+
+Testing agentic AI requires **defining what evaluation means** in an operational setting and which agent behaviors should be measured.
+
+### What to Measure
+
+| Dimension                    | Evaluation Method                                                |        Example Metrics                        |
+|------------------------------|------------------------------------------------------------------|-----------------------------------------------|
+| **Intelligence & Accuracy**  | Automated reasoning tests, LLM judges reviewing reasoning traces | Task success rate, reasoning quality score    |
+| **User Experience**          | Human feedback, surveys, A/B testing                             | User satisfaction (NPS), task completion time |
+| **Performance & Efficiency** | Real-time monitoring                                             | Latency (ms), token costs, throughput         |
+| **Safety & Reliability**     | Adversarial testing, failure injection                           | Error recovery rate, hallucination frequency  |
+| **Cost Optimization**        | Production metrics tracking                                      | Cost per task, token efficiency rate          |
+
+### How to Measure Effectively
+
+#### 1. **Intelligence and Accuracy**
+```python
+# Automated reasoning tests
+def test_reasoning_quality(agent, test_cases):
+    scores = []
+    for case in test_cases:
+        response = agent.execute(case.input)
+        score = evaluate_reasoning_chain(response.trajectory)
+        scores.append(score)
+    return np.mean(scores)
+
+# LLM-as-a-judge
+def llm_judge_evaluation(agent_output, rubric):
+    judge_prompt = f"""
+    Evaluate this agent response against the rubric:
+    {rubric}
+    
+    Agent output: {agent_output}
+    """
+    return llm.evaluate(judge_prompt)
+```
+
+#### 2. **Reference-Free vs Reference-Aware Evaluation**
+
+**Reference-Free** (no gold standard needed):
+- Helpfulness
+- Clarity
+- Relevance
+- Safety
+
+**Reference-Aware** (compared to gold answer):
+- Correctness
+- Completeness
+- Factual accuracy
+
+```python
+# Reference-free
+score = evaluate_helpfulness(response)
+
+# Reference-aware
+score = compare_to_gold_standard(response, reference_answer)
+```
+
+#### 3. **Real-Time Performance Monitoring**
+```python
+class AgentPerformanceMonitor:
+    def track_metrics(self, task_execution):
+        return {
+            "latency_ms": task_execution.duration,
+            "tokens_used": task_execution.token_count,
+            "cost_usd": task_execution.token_count * price_per_token,
+            "api_calls": len(task_execution.tool_calls),
+            "success": task_execution.outcome == "success"
+        }
+```
+
+### Testing MCP Servers and MCP Clients
+
+**Model Context Protocol (MCP)** servers and clients require specialized testing approaches:
+
+#### MCP Server Testing
+```python
+# Test MCP server capabilities
+def test_mcp_server(server):
+    # 1. Test tool registration
+    assert server.list_tools() == expected_tools
+    
+    # 2. Test tool execution
+    result = server.execute_tool("search", {"query": "test"})
+    assert result.success
+    
+    # 3. Test error handling
+    result = server.execute_tool("invalid_tool", {})
+    assert result.error_code == "TOOL_NOT_FOUND"
+    
+    # 4. Test context management
+    context = server.get_context()
+    assert len(context.history) > 0
+```
+
+#### MCP Client Testing
+```python
+# Test MCP client integration
+def test_mcp_client(client, mock_server):
+    # 1. Test server connection
+    assert client.connect(mock_server) == True
+    
+    # 2. Test tool discovery
+    tools = client.discover_tools()
+    assert len(tools) > 0
+    
+    # 3. Test tool invocation
+    response = client.call_tool("search", {"query": "test"})
+    assert response.status == "success"
+    
+    # 4. Test error propagation
+    response = client.call_tool("failing_tool", {})
+    assert client.handle_error(response.error)
+```
 
 ## 🛠️ Open Source Evaluation Tools for Large Language Models (August - 2025)
 
@@ -87,7 +502,7 @@ Large Language Models (LLMs) evaluation has evolved with open-source tools desig
   - Integration with popular RAG frameworks
 - **RAG Metrics**:
   - Context Relevance
-  - Answer Faithfulness  
+  - Answer Faithfulness
   - Answer Relevancy
   - Context Precision/Recall
 - **Use Cases**: RAG system optimization, document Q&A evaluation, knowledge base assessment
@@ -120,14 +535,14 @@ evaluation_pipeline = {
 
 ### **Tool Selection**
 
-| **Use Case** | **Recommended Tool** | **Why** |
-|--------------|---------------------|---------|
-| **Production Testing** | DeepEval | Metrics, production-ready |
-| **Creative Content** | G-Eval | Human-like evaluation via LLM judges |
-| **Multi-lingual** | LLMeBench | Specialized for cross-language evaluation |
-| **RAG Applications** | Ragas | RAG-specific metrics and optimization |
-| **Academic Research** | LM Evaluation Harness | Standardized benchmarks |
-| **LangChain Apps** | LangSmith | Native integration, observability |
+| **Use Case**            | **Recommended Tool**  | **Why**                                       |
+|-------------------------|-----------------------|-----------------------------------------------|
+| **Production Testing**  | DeepEval              | Metrics, production-ready                     |
+| **Creative Content**    | G-Eval                | Human-like evaluation via LLM judges          |
+| **Multi-lingual**       | LLMeBench             | Specialized for cross-language evaluation     |
+| **RAG Applications**    | Ragas                 | RAG-specific metrics and optimization         |
+| **Academic Research**   | LM Evaluation Harness | Standardized benchmarks                       |
+| **LangChain Apps**      | LangSmith             | Native integration, observability             |
 
 ### **Getting Started**
 
@@ -155,6 +570,444 @@ export LANGCHAIN_API_KEY="your-key"
 ⚠️ **LM Evaluation Harness**: Academic benchmark support
 
 These evaluation tools ensure multi-dimensional assessment of LLM performance across different domains and use cases.
+
+##   Agent Evaluation Tools (2025-2026)
+
+Specialized tools for evaluating AI agents, which require testing beyond text generation to assess tool use, multi-step reasoning, and task completion.
+
+### **Commercial & Open-Source Agent Evaluation Platforms**
+
+#### 1. **LangSmith** (by LangChain) 
+- **Best For**: Debugging and visualizing complex traces in agent workflows
+- **Repository**: [langchain-ai/langsmith-sdk](https://github.com/langchain-ai/langsmith-sdk)
+- **Documentation**: [docs.smith.langchain.com](https://docs.smith.langchain.com/evaluation)
+- **Key Features**:
+  - Real-time trace visualization
+  - Agent workflow debugging
+  - Tool call tracking and analysis
+  - Automatic evaluation metrics
+  - Dataset management and versioning
+  - Integration with LangChain ecosystem
+- **Use Cases**: LangChain agent development, complex workflow debugging, production monitoring
+- **Installation**: `pip install langsmith`
+
+#### 2. **Braintrust**
+- **Best For**: Robust human-in-the-loop (HITL) evaluation and automated testing
+- **Website**: [braintrustdata.com](https://www.braintrustdata.com)
+- **Key Features**:
+  - Human rater management
+  - Automated testing pipelines
+  - Comparative evaluations
+  - Production monitoring
+  - Team collaboration tools
+- **Use Cases**: Enterprise agent evaluation, HITL workflows, quality assurance
+
+#### 3. **Maxim AI**
+- **Best For**: End-to-end evaluation, simulation, and regression testing
+- **Website**: [getmaxim.ai](https://www.getmaxim.ai)
+- **Key Features**:
+  - Simulation environments
+  - Regression test automation
+  - Performance benchmarking
+  - Cost tracking
+  - Failure analysis
+- **Use Cases**: Production readiness testing, continuous evaluation, cost optimization
+
+#### 4. **DeepEval** (Open Source)
+- **Best For**: Code-first framework for unit testing LLM apps (pytest-style)
+- **Repository**: [confident-ai/deepeval](https://github.com/confident-ai/deepeval)
+- **Documentation**: [docs.confident-ai.com](https://docs.confident-ai.com)
+- **Key Features**:
+  - Pytest integration
+  - Agent-specific metrics
+  - Tool usage evaluation
+  - Trajectory analysis
+  - Custom metric creation
+- **Agent Metrics**:
+  - Tool correctness
+  - Task success rate
+  - Reasoning quality
+  - Hallucination detection
+- **Installation**: `pip install deepeval`
+- **Example**:
+```python
+import deepeval
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import ToolCorrectnessMetric
+
+@deepeval.pytest_mark.agent
+def test_agent_tool_usage():
+    test_case = LLMTestCase(
+        input="Book a flight from NYC to LA",
+        expected_tools=["search_flights", "book_flight"],
+        actual_output=agent_response
+    )
+    metric = ToolCorrectnessMetric(threshold=0.9)
+    assert metric.measure(test_case)
+```
+
+#### 5. **Ragas** (Open Source)
+- **Best For**: Evaluating retrieval-augmented generation (RAG) components in agents
+- **Repository**: [explodinggradients/ragas](https://github.com/explodinggradients/ragas)
+- **Documentation**: [docs.ragas.io](https://docs.ragas.io/en/stable/)
+- **Key Features**:
+  - RAG-specific metrics
+  - Context relevance evaluation
+  - Answer faithfulness
+  - Retrieval quality assessment
+  - End-to-end RAG pipeline evaluation
+- **Use Cases**: Knowledge-based agents, document Q&A agents, RAG optimization
+- **Installation**: `pip install ragas`
+
+#### 6. **Arize Phoenix** (Open Source)
+- **Best For**: Tracking agent performance, debugging, and observability
+- **Repository**: [Arize-ai/phoenix](https://github.com/Arize-ai/phoenix)
+- **Documentation**: [docs.arize.com/phoenix](https://docs.arize.com/phoenix)
+- **Key Features**:
+  - Open-source observability
+  - Agent trace visualization
+  - Performance tracking
+  - Debugging tools
+  - Embedding analysis
+  - LLM evaluation metrics
+- **Use Cases**: Production monitoring, debugging agent failures, performance optimization
+- **Installation**: `pip install arize-phoenix`
+- **Example**:
+```python
+import phoenix as px
+from phoenix.trace import TraceDataset
+
+# Launch Phoenix UI
+session = px.launch_app()
+
+# Track agent execution
+with px.trace("agent_execution"):
+    result = agent.execute(task)
+```
+
+#### 7. **Comet Opik** (Open Source)
+- **Best For**: LLM evaluation and observability platform
+- **Repository**: [comet-ml/opik](https://github.com/comet-ml/opik)
+- **Documentation**: [comet.com/docs/opik](https://www.comet.com/docs/opik)
+- **Key Features**:
+  - Trace instrumentation
+  - Tool use logging
+  - RAG retrieval tracking
+  - Evaluation metrics
+  - Production monitoring
+- **Use Cases**: Agent instrumentation, trace analysis, metric tracking
+- **Installation**: `pip install opik`
+- **Example**:
+```python
+from opik import track
+
+@track()
+def agent_task(input_text):
+    # Automatically logs to Opik
+    response = agent.execute(input_text)
+    return response
+```
+
+### **Open-Source Agent Evaluation Frameworks**
+
+#### **Arize Phoenix** - Comprehensive Observability
+```python
+# Install and setup
+pip install arize-phoenix
+
+# Usage example
+import phoenix as px
+from phoenix.trace import trace_function
+
+# Start Phoenix UI
+px.launch_app()
+
+@trace_function
+def complex_agent_workflow(query):
+    # Phoenix automatically traces:
+    # - LLM calls
+    # - Tool invocations
+    # - Retrieval operations
+    # - Reasoning steps
+    result = agent.run(query)
+    return result
+```
+
+#### **LangSmith (Community)** - LangChain Integration
+```python
+# Install
+pip install langsmith
+
+# Setup
+import os
+os.environ["LANGCHAIN_API_KEY"] = "your-api-key"
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+
+# Automatic tracing for LangChain agents
+from langchain.agents import create_agent
+agent = create_agent(...)  # Automatically traced
+```
+
+#### **DeepEval** - Pytest-Style Testing
+```python
+# Install
+pip install deepeval
+
+# Create agent tests
+from deepeval import assert_test
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import (
+    AnswerRelevancyMetric,
+    ToolCorrectnessMetric,
+    FaithfulnessMetric
+)
+
+def test_customer_support_agent():
+    test_case = LLMTestCase(
+        input="Cancel my order #12345",
+        expected_output="Order #12345 cancelled",
+        actual_output=agent.run("Cancel my order #12345"),
+        context=["Order #12345 exists", "User is authorized"]
+    )
+    
+    assert_test(test_case, [
+        AnswerRelevancyMetric(threshold=0.8),
+        ToolCorrectnessMetric(threshold=0.9),
+        FaithfulnessMetric(threshold=0.85)
+    ])
+```
+
+#### **Ragas** - Experiments-First Workflow
+```python
+# Install
+pip install ragas
+
+# Create evaluation dataset
+from ragas import evaluate
+from ragas.metrics import (
+    context_relevancy,
+    answer_relevancy,
+    faithfulness
+)
+
+dataset = {
+    "question": ["What is the refund policy?"],
+    "answer": [agent_response],
+    "contexts": [retrieved_docs],
+    "ground_truth": ["Refunds within 30 days"]
+}
+
+# Run evaluation
+results = evaluate(
+    dataset,
+    metrics=[context_relevancy, answer_relevancy, faithfulness]
+)
+```
+
+### **Claude + LangChain Evaluation**
+
+Using Claude (Anthropic) with LangChain for agent evaluation:
+
+```python
+# LLM-as-a-judge with Claude
+from langchain_anthropic import ChatAnthropic
+from langchain.evaluation import load_evaluator
+
+# Initialize Claude as judge
+judge = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+
+# Create evaluator
+evaluator = load_evaluator(
+    "labeled_criteria",
+    criteria="correctness",
+    llm=judge
+)
+
+# Evaluate agent response
+eval_result = evaluator.evaluate_strings(
+    prediction=agent_output,
+    reference=expected_output,
+    input=user_query
+)
+
+print(f"Score: {eval_result['score']}")
+print(f"Reasoning: {eval_result['reasoning']}")
+```
+
+#### Trace-Based Analysis
+```python
+# Analyze agent reasoning chain
+from langchain.callbacks import LangChainTracer
+
+tracer = LangChainTracer()
+agent.run(query, callbacks=[tracer])
+
+# Analyze trace
+for run in tracer.runs:
+    print(f"Action: {run.action}")
+    print(f"Tool: {run.tool}")
+    print(f"Result: {run.result}")
+```
+
+### **Agent Evaluation in 5 Steps** (Microsoft Copilot Studio)
+
+Based on [Microsoft's agent evaluation framework](https://www.microsoft.com/en-us/microsoft-copilot/blog/copilot-studio/how-to-evaluate-ai-agents/):
+
+#### **Step 1: Define Success Criteria**
+Establish what "good" looks like for your agent:
+- Task completion metrics
+- Quality thresholds
+- Performance requirements
+- Safety boundaries
+
+```python
+success_criteria = {
+    "task_success_rate": 0.95,
+    "avg_latency_ms": 2000,
+    "hallucination_rate": 0.02,
+    "user_satisfaction": 4.5  # out of 5
+}
+```
+
+#### **Step 2: Create Test Datasets**
+Build comprehensive test cases covering:
+- Common scenarios
+- Edge cases
+- Failure modes
+- Adversarial inputs
+
+```python
+test_dataset = [
+    {"input": "...", "expected_outcome": "...", "category": "common"},
+    {"input": "...", "expected_outcome": "...", "category": "edge_case"},
+    {"input": "...", "expected_outcome": "...", "category": "adversarial"}
+]
+```
+
+#### **Step 3: Implement Multi-Layered Evaluation**
+Combine automated, LLM-based, and human evaluation:
+
+```python
+def evaluate_agent(test_case):
+    # Layer 1: Automated checks
+    automated_score = check_outcome(test_case)
+    
+    # Layer 2: LLM-as-a-judge
+    llm_score = llm_judge.evaluate(test_case)
+    
+    # Layer 3: Human review (for flagged cases)
+    if automated_score < 0.7 or llm_score < 0.7:
+        human_score = request_human_review(test_case)
+    
+    return aggregate_scores(automated_score, llm_score, human_score)
+```
+
+#### **Step 4: Run Continuous Evaluation**
+Monitor agent performance in production:
+
+```python
+# Production monitoring
+class AgentMonitor:
+    def __init__(self):
+        self.metrics = defaultdict(list)
+    
+    def log_interaction(self, interaction):
+        self.metrics['latency'].append(interaction.duration)
+        self.metrics['success'].append(interaction.success)
+        self.metrics['cost'].append(interaction.token_cost)
+    
+    def get_health_metrics(self):
+        return {
+            "success_rate": np.mean(self.metrics['success']),
+            "avg_latency": np.mean(self.metrics['latency']),
+            "total_cost": np.sum(self.metrics['cost'])
+        }
+```
+
+#### **Step 5: Iterate and Improve**
+Use evaluation insights to improve agent performance:
+- Identify failure patterns
+- Optimize prompts
+- Fine-tune tool selection
+- Update knowledge base
+- Refine error handling
+
+### **Agent Evaluation Best Practices**
+
+1. **Test Incrementally**: Start with component testing, then integration, finally end-to-end
+2. **Multiple Trials**: Run each test multiple times due to non-determinism
+3. **Diverse Metrics**: Combine accuracy, latency, cost, and safety metrics
+4. **Real-World Data**: Test with production-like scenarios
+5. **Continuous Monitoring**: Evaluate in production, not just pre-deployment
+6. **Human Oversight**: Include human review for critical applications
+
+### **LangChain Evaluation Framework**
+
+```python
+# Automated test chains for reasoning quality
+from langchain.evaluation import load_evaluator
+
+# Create reasoning evaluator
+reasoning_evaluator = load_evaluator("criteria", criteria="reasoning")
+
+# Evaluate agent's reasoning
+result = reasoning_evaluator.evaluate_strings(
+    prediction=agent_output,
+    input=user_query,
+    criteria="The response demonstrates clear, logical reasoning"
+)
+```
+
+**Example: LLM-as-a-Judge with Two Modes**
+
+```python
+# Mode 1: Reference-Free (helpfulness, clarity, relevance)
+reference_free = load_evaluator(
+    "criteria",
+    criteria={
+        "helpfulness": "Is the response helpful to the user?",
+        "clarity": "Is the response clear and well-organized?",
+        "relevance": "Does the response address the user's question?"
+    }
+)
+
+score = reference_free.evaluate_strings(
+    prediction=agent_response,
+    input=user_query
+)
+
+# Mode 2: Reference-Aware (correctness vs gold answer)
+reference_aware = load_evaluator(
+    "labeled_criteria",
+    criteria="correctness"
+)
+
+score = reference_aware.evaluate_strings(
+    prediction=agent_response,
+    reference=gold_standard_answer,
+    input=user_query
+)
+```
+
+**Running the Example** (requires Anthropic API key):
+```bash
+# Set API key
+export ANTHROPIC_API_KEY="your-api-key"
+
+# Install dependencies (in virtual environment!)
+source bert_env/bin/activate
+pip install langchain langchain-anthropic
+
+# Run evaluation
+python examples/langchain_claude_eval.py
+```
+
+### **Additional Agent Evaluation Tools**
+
+- **Langfuse**: Open-source tracing and observability - [langfuse.com](https://langfuse.com/)
+- **Arize AI**: ML + LLM observability platform - [arize.com](https://arize.com/)
+- **Weights & Biases**: Experiment tracking for agents - [wandb.ai](https://wandb.ai/)
+- **MLflow**: LLM evaluation framework - [mlflow.org/llm-evaluation](https://mlflow.org/llm-evaluation)
 
 ## What is BERT?
 
@@ -987,12 +1840,12 @@ optimizer = Adamax(model.parameters(), lr=2e-3, weight_decay=0.01)
 ```
 
 ### **Optimizer Comparison Table**
-| Optimizer | Memory Usage | Stability | Performance | Best For |
-|-----------|-------------|-----------|-------------|----------|
-| **AdamW** | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | General BERT fine-tuning |
-| **Adafactor** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | Large models, memory constraints |
-| **RAdam** | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Self-correcting, no warmup needed |
-| **Adamax** | Medium | ⭐⭐⭐ | ⭐⭐⭐ | Sparse gradients, unstable data |
+| Optimizer     | Memory Usage | Stability    | Performance | Best For                          |
+|---------------|--------------|--------------|-------------|-----------------------------------|
+| **AdamW**     | Medium       | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐ | General BERT fine-tuning          |
+| **Adafactor** | High         | ⭐⭐⭐       | ⭐⭐⭐⭐   | Large models, memory constraints  |
+| **RAdam**     | Medium       | ⭐⭐⭐⭐⭐   | ⭐⭐⭐⭐   | Self-correcting, no warmup needed |
+| **Adamax**    | Medium       | ⭐⭐⭐       | ⭐⭐⭐     | Sparse gradients, unstable data   |
 
 ### **Usage Recommendations**
 
@@ -1002,8 +1855,8 @@ from torch.optim import AdamW
 from transformers import get_linear_schedule_with_warmup
 
 optimizer = AdamW(model.parameters(), lr=2e-5, weight_decay=0.01, eps=1e-8)
-scheduler = get_linear_schedule_with_warmup(optimizer, 
-                                          num_warmup_steps=100, 
+scheduler = get_linear_schedule_with_warmup(optimizer,
+                                          num_warmup_steps=100,
                                           num_training_steps=1000)
 ```
 
@@ -1011,9 +1864,9 @@ scheduler = get_linear_schedule_with_warmup(optimizer,
 ```python
 from transformers.optimization import Adafactor
 
-optimizer = Adafactor(model.parameters(), 
+optimizer = Adafactor(model.parameters(),
                       scale_parameter=False,
-                      relative_step=False, 
+                      relative_step=False,
                       warmup_init=False,
                       lr=1e-3)
 ```
@@ -1081,7 +1934,7 @@ This demo showcases all 5 evaluation frameworks and checks your environment setu
 # DeepEval - Production LLM Testing
 python evaluation_examples/deepeval_example.py
 
-# G-Eval - LLM-as-a-Judge Framework  
+# G-Eval - LLM-as-a-Judge Framework
 python evaluation_examples/geval_example.py
 
 # LLMeBench - Multi-lingual Benchmarking
@@ -1229,17 +2082,53 @@ def predict_sentiment(text, model, tokenizer):
 
 ## References
 
+### **AI Agent Evaluation Resources**
+
+#### **Core Agent Evaluation Guides**
+- **Anthropic: Demystifying Evals for AI Agents**: [anthropic.com/engineering/demystifying-evals-for-ai-agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)
+  - Comprehensive guide on agent evaluation strategies and best practices
+- **Microsoft Copilot Studio: How to Evaluate AI Agents**: [microsoft.com/copilot/how-to-evaluate-ai-agents](https://www.microsoft.com/en-us/microsoft-copilot/blog/copilot-studio/how-to-evaluate-ai-agents/)
+  - Agent evaluation in 5 steps: define criteria, create datasets, implement evaluation, monitor, iterate
+- **MLflow LLM Evaluation Guide**: [mlflow.org/llm-evaluation](https://mlflow.org/llm-evaluation)
+  - LLM vs Agent evaluation differences and measurement frameworks
+- **Fast.io: Best Tools for AI Agent Testing**: [fast.io/resources/best-tools-ai-agent-testing](https://fast.io/resources/best-tools-ai-agent-testing/)
+  - Comprehensive comparison of agent testing tools
+
+#### **Agent Evaluation Platforms (2025-2026)**
+- **Braintrust**: Human-in-the-loop evaluation platform - [braintrustdata.com](https://www.braintrustdata.com)
+- **Maxim AI**: End-to-end evaluation and simulation - [getmaxim.ai](https://www.getmaxim.ai)
+- **Langfuse**: Open-source tracing and observability - [langfuse.com](https://langfuse.com/)
+- **Arize AI**: ML + LLM observability platform - [arize.com](https://arize.com/)
+- **Weights & Biases**: Experiment tracking - [wandb.ai](https://wandb.ai/)
+
 ### **Core Documentation**
 - **API Documentation**: [Auto-generated Swagger UI](http://localhost:8000/docs) (when server is running)
 - **Installation Guide**: [evaluation_examples/installation_guide.md](./evaluation_examples/installation_guide.md)
 - **Comprehensive Demo**: [evaluation_examples/comprehensive_demo.py](./evaluation_examples/comprehensive_demo.py)
 - **Integration Tests**: [evaluation_examples/integration_test.py](./evaluation_examples/integration_test.py)
 
+### **Open-Source Agent Evaluation Tools**
+
+#### **1. Arize Phoenix - Agent Observability**
+- **Repository**: [Arize-ai/phoenix](https://github.com/Arize-ai/phoenix)
+- **Documentation**: [docs.arize.com/phoenix](https://docs.arize.com/phoenix)
+- **Website**: [phoenix.arize.com](https://phoenix.arize.com/)
+- **PyPI**: [pip install arize-phoenix](https://pypi.org/project/arize-phoenix/)
+- **Features**: Agent trace visualization, performance tracking, debugging tools
+
+#### **2. Comet Opik - LLM Evaluation Platform**
+- **Repository**: [comet-ml/opik](https://github.com/comet-ml/opik)
+- **Documentation**: [comet.com/docs/opik](https://www.comet.com/docs/opik)
+- **Website**: [comet.com/opik](https://www.comet.com/site/products/opik/)
+- **PyPI**: [pip install opik](https://pypi.org/project/opik/)
+- **Features**: Trace instrumentation, tool use logging, evaluation metrics
+
 ### **LLM Evaluation Tools (2025)**
 
 #### **1. DeepEval - Production LLM Testing**
 - **Repository**: [confident-ai/deepeval](https://github.com/confident-ai/deepeval)
 - **Documentation**: [deepeval.com/docs/metrics-llm-evals](https://deepeval.com/docs/metrics-llm-evals)
+- **Documentation (Confident AI)**: [docs.confident-ai.com](https://docs.confident-ai.com)
 - **PyPI**: [pip install deepeval](https://pypi.org/project/deepeval/)
 - **Example**: [evaluation_examples/deepeval_example.py](./evaluation_examples/deepeval_example.py)
 
@@ -1275,6 +2164,7 @@ def predict_sentiment(text, model, tokenizer):
 
 ### **Traditional Evaluation Metrics**
 - **BERTScore**: [huggingface.co/spaces/evaluate-metric/bertscore](https://huggingface.co/spaces/evaluate-metric/bertscore)
+- **BERTScore Guide**: [spotintelligence.com/bertscore](https://spotintelligence.com/2024/08/20/bertscore/)
 - **ROUGE**: [github.com/google-research/google-research/tree/master/rouge](https://github.com/google-research/google-research/tree/master/rouge)
 - **BLEU**: [github.com/mjpost/sacrebleu](https://github.com/mjpost/sacrebleu)
 - **METEOR**: [aclweb.org/anthology/W05-0909](https://aclweb.org/anthology/W05-0909.pdf)
@@ -1285,6 +2175,16 @@ def predict_sentiment(text, model, tokenizer):
 - **Transformers**: [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 - **Hugging Face**: [huggingface.co](https://huggingface.co/)
 - **PyTorch**: [pytorch.org](https://pytorch.org/)
+
+### **LangChain Resources**
+- **LangChain Documentation**: [python.langchain.com](https://python.langchain.com/docs/get_started/introduction)
+- **LangChain Evaluation**: [python.langchain.com/docs/guides/evaluation](https://python.langchain.com/docs/guides/productionization/evaluation/)
+- **LangChain Anthropic**: [python.langchain.com/docs/integrations/platforms/anthropic](https://python.langchain.com/docs/integrations/platforms/anthropic)
+
+### **Anthropic (Claude) Resources** 
+- **Anthropic API Documentation**: [docs.anthropic.com](https://docs.anthropic.com/)
+- **Claude Models**: [docs.anthropic.com/claude/docs/models-overview](https://docs.anthropic.com/en/docs/about-claude/models)
+- **Tool Use Guide**: [docs.anthropic.com/claude/docs/tool-use](https://docs.anthropic.com/en/docs/build-with-claude/tool-use)
 
 ### **Cloud Deployment**
 - **AWS Lambda**: [docs.aws.amazon.com/lambda](https://docs.aws.amazon.com/lambda/)
@@ -1297,3 +2197,17 @@ def predict_sentiment(text, model, tokenizer):
 - **Text Classification with BERT**: [sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert](https://www.sabrepc.com/blog/Deep-Learning-and-AI/text-classification-with-bert)
 - **Modern Optimizers Guide**: [modern_optimizers_guide.py](./modern_optimizers_guide.py)
 - **LLM Evaluation Best Practices**: [arxiv.org/abs/2307.03109](https://arxiv.org/abs/2307.03109)
+
+---
+
+## Summary
+
+This project provides evaluation tools for:
+-   **Large Language Models (LLMs)**: Traditional metrics and semantic evaluation
+-   **AI Agents**: Multi-layered evaluation with tool usage, reasoning, and task completion metrics
+-   **MCP Servers & Clients**: Protocol testing and integration validation
+-   **Production Deployment**: Docker, FastAPI, monitoring, and observability
+
+**Key Takeaway**: Agent evaluation differs fundamentally from LLM evaluation because agents take actions, use tools, make sequential decisions, and must handle failures - requiring assessment beyond text quality to include task completion, tool correctness, and reasoning quality.
+
+**Remember**: Always activate the virtual environment before running any commands!

@@ -98,6 +98,54 @@ Thumbs.db
 *~
 
 # Model files (optional - uncomment if you don't want to track model weights)
+# *.bin
+# *.pt
+# *.pth
+# *.onnx
+# *.h5
+# *.pkl
+# *.safetensors
+
+# Binary files
+*.pyc
+*.pyo
+*.so
+*.dll
+*.dylib
+*.exe
+*.bin
+*.dat
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled files
+*.o
+*.a
+*.lib
+*.class
+
+# Large model files
+*.ckpt
+*.safetensors
+*.msgpack
+*.ot
+
+# Evaluation results (optional - uncomment to ignore)
+# *_results.json
+# *_evaluation_*.json
+# *_report.txt
+
+# Logs
+*.log
+logs/
+*.out
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
 # *.pth
 # *.bin
 # *.h5
