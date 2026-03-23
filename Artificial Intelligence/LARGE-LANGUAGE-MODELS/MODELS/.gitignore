@@ -1,0 +1,103 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+.ENV
+.env
+env.bak/
+venv.bak/
+
+# PyTorch
+*.pth
+*.pt
+*.bin
+*.onnx
+checkpoints/
+models/
+*.safetensors
+
+# TensorFlow
+*.h5
+*.pb
+*.ckpt
+*.meta
+*.index
+saved_model/
+tensorboard_logs/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data
+*.csv
+*.json
+*.txt
+*.parquet
+data/
+datasets/
+corpus/
+raw_data/
+
+# Logs
+*.log
+logs/
+wandb/
+mlruns/
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Model weights and large files
+*.model
+*.vocab
+*.tokenizer
+pretrained/
+fine_tuned/
+
+# AWS
+.aws/
+.sagemaker/
+
+# Other
+.env.local
+.env.*.local
+.coverage
+htmlcov/
