@@ -1,0 +1,15 @@
+# Google Cloud Functions Requirements
+
+# Functions Framework
+functions-framework>=3.5.0
+
+# Google Cloud SDKs
+google-cloud-aiplatform>=1.40.0
+google-cloud-storage>=2.14.0
+vertexai>=0.0.1
+
+# Flask (used by Functions Framework)
+Flask>=3.0.0
+
+# Utilities
+requests>=2.31.0

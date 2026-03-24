@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Lambda function for LLM inference orchestration
+
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 1024
+    Runtime: python3.11
+    Architectures:
+      - x86_64
+
+Resources:
+  LLMInferenceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handler.lambda_handler
+      Description: LLM inference orchestration function
+      Environment:
+        Variables:
+          SAGEMAKER_ENDPOINT_NAME: !Ref SageMakerEndpointName
+          USE_BEDROCK: !Ref UseBedrock
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sagemaker:InvokeEndpoint
+              Resource: !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/*'
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: '*'
+      Events:
+        InferenceApi:
+          Type: Api
+          Properties:
+            Path: /inference
+            Method: post
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
+
+Parameters:
+  SageMakerEndpointName:
+    Type: String
+    Default: ''
+    Description: Name of the SageMaker endpoint (leave empty to use Bedrock)
+    
+  UseBedrock:
+    Type: String
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Whether to use Amazon Bedrock for inference
+
+Outputs:
+  LLMInferenceApi:
+    Description: API Gateway endpoint URL for LLM inference
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/inference/'
+  LLMInferenceFunction:
+    Description: LLM Inference Lambda Function ARN
+    Value: !GetAtt LLMInferenceFunction.Arn
+  LLMInferenceFunctionIamRole:
+    Description: IAM Role for Lambda function
+    Value: !GetAtt LLMInferenceFunctionRole.Arn

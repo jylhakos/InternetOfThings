@@ -1,0 +1,26 @@
+# Common Python dependencies for LLM deployment projects
+
+# Core ML/AI libraries
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-openai>=0.0.5
+
+# API frameworks
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# Cloud SDKs (optional - install as needed)
+# boto3>=1.34.0              # AWS
+# azure-identity>=1.15.0     # Azure
+# google-cloud-aiplatform>=1.40.0  # GCP
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+requests>=2.31.0
+
+# Development
+pytest>=8.0.0
+black>=24.0.0
+flake8>=7.0.0
+mypy>=1.8.0

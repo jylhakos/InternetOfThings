@@ -1,4 +1,54 @@
-# Node.js dependencies
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+virtualenv/
+.virtualenv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+wheels/
+*.egg
+
+# AWS Lambda
+.aws-sam/
+samconfig.toml
+
+# Azure Functions
+.python_packages/
+.azurefunctions/
+local.settings.json
+.funcignore
+
+# Google Cloud
+.gcloudignore
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Node.js dependencies (if using TypeScript)
 node_modules/
 
 # npm debug logs
@@ -46,8 +96,22 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
+# Machine learning models
+*.h5
+*.pkl
+*.pth
+*.onnx
+*.pb
+*.pt
+models/
+checkpoints/
+
+# Temporary files
+*.tmp
+*.bak
+temp/
+.DS_Store
+
 .env.test
 .env.production
 
