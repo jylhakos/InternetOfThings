@@ -1,0 +1,54 @@
+# LLM Inference Server Dependencies
+# Python 3.8+
+
+# Web Frameworks (choose one or install both for examples)
+# Flask - Simple and beginner-friendly
+Flask==3.0.2
+flask-cors==4.0.0
+
+# FastAPI - Modern async framework (recommended for production)
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+pydantic==2.6.3
+
+# HTTP Client
+requests==2.31.0
+
+# Numerical Computing
+numpy==1.24.3
+
+# Optional: Production-ready inference frameworks
+# Uncomment these when ready to use real models:
+
+# vLLM - High-throughput LLM serving
+# vllm==0.3.3
+
+# Hugging Face Transformers
+# transformers==4.38.1
+# accelerate==0.27.2
+
+# Text Generation Inference
+# text-generation==0.6.1
+
+# Sentence Transformers (for embeddings)
+# sentence-transformers==2.5.1
+
+# Vector Databases
+# chromadb==0.4.22          # Chroma
+# pinecone-client==3.1.0    # Pinecone
+# qdrant-client==1.7.3      # Qdrant
+# weaviate-client==4.4.1    # Weaviate
+
+# Production Deployment
+# gunicorn==21.2.0          # WSGI server
+# uvicorn==0.27.1           # ASGI server
+
+# Monitoring and Observability
+# prometheus-client==0.20.0
+# python-json-logger==2.0.7
+
+# Development Tools
+# pytest==8.0.2
+# black==24.2.0
+# flake8==7.0.0
+# mypy==1.8.0
