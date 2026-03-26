@@ -1,0 +1,126 @@
+name: LLM Agent Evaluation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Verify installation
+      run: |
+        python sources/test_installation.py
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+        LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+        LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
+    
+    - name: Run evaluation tests
+      run: |
+        python sources/run_evaluation.py \
+          --dataset fallback \
+          --num-samples 5 \
+          --output results/ci_evaluation_report.json
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+        LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+        LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
+    
+    - name: Check quality thresholds
+      run: |
+        python sources/check_thresholds.py \
+          --results results/ci_evaluation_report.json \
+          --min-accuracy 0.8 \
+          --verbose
+    
+    - name: Upload evaluation results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: evaluation-results
+        path: results/ci_evaluation_report.json
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const results = JSON.parse(fs.readFileSync('results/ci_evaluation_report.json', 'utf8'));
+          const metrics = results.metrics;
+          
+          const comment = `## LLM Agent Evaluation Results
+          
+          **Overall Performance:**
+          - Total Test Cases: ${metrics.total_cases}
+          - Correct: ${metrics.correct}
+          - Accuracy: ${(metrics.accuracy * 100).toFixed(2)}%
+          
+          **Status:** ${metrics.accuracy >= 0.8 ? '✅ PASSED' : '❌ FAILED'}
+          
+          View detailed traces in [Langfuse Dashboard](${{ secrets.LANGFUSE_HOST }})
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+    
+    - name: Run flake8
+      run: |
+        flake8 sources/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 sources/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Check code formatting with black
+      run: |
+        black --check sources/
+    
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only sources/

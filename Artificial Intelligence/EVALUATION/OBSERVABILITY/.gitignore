@@ -1,0 +1,184 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Results and outputs
+results/
+outputs/
+logs/
+*.log
+evaluation_results/
+traces/
+
+# Models and checkpoints (large binary files)
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.hdf5
+*.pb
+*.onnx
+*.safetensors
+models/
+checkpoints/
+
+# Data files (binary and large datasets)
+*.parquet
+*.arrow
+*.feather
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+*.csv.gz
+*.json.gz
+data/cache/
+data/raw/
+data/processed/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Langfuse local deployment
+langfuse-local/
+postgres-data/
+.langfuse/
+
+# Phoenix artifacts
+.phoenix/
+phoenix-data/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+tmp/
+temp/
+
+# OS files
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Compiled binaries
+*.exe
+*.dll
+*.dylib
+*.bin
+
+# Package files
+*.deb
+*.rpm
+*.msi
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Large media files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.mp3
+*.wav
+*.flac
+
+# Node modules (if using any JS tools)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Secrets and credentials
+secrets.yaml
+credentials.json
+service-account.json
+*.key
+*.pem
+*.crt
+*.cer
+
+# Monitoring and observability artifacts
+spans/
+metrics/
+telemetry/

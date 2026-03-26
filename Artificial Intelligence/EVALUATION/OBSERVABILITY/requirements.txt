@@ -1,0 +1,66 @@
+# Core Observability Platforms
+langfuse>=2.0.0
+arize-phoenix>=4.0.0
+openlit>=1.0.0
+
+# LLM Frameworks
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-core>=0.1.0
+langgraph>=0.0.40
+llama-index>=0.10.0
+
+# Evaluation Frameworks
+trulens-eval>=0.20.0
+deepeval>=0.20.0
+
+# OpenTelemetry
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-instrumentation>=0.41b0
+opentelemetry-exporter-otlp>=1.20.0
+
+# ML Libraries
+torch>=2.0.0
+transformers>=4.35.0
+datasets>=2.14.0
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Hugging Face
+huggingface-hub>=0.19.0
+accelerate>=0.24.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+pydantic>=2.0.0
+aiohttp>=3.9.0
+
+# Data Processing
+jsonlines>=4.0.0
+pyyaml>=6.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Development Tools
+ipython>=8.12.0
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# Optional: Azure SDK (for Azure Foundry)
+# azure-ai-evaluation>=1.0.0
+# azure-monitor-opentelemetry>=1.0.0
+# opencensus-ext-azure>=1.1.0
+# azure-identity>=1.14.0
+
+# Optional: Google Cloud SDK (for GCP)
+# google-cloud-logging>=3.5.0
+# google-cloud-monitoring>=2.15.0
+# google-cloud-trace>=1.11.0
+
+# Optional: Additional Observability Tools
+# helicone>=0.1.0
+# portkey-ai>=0.1.0

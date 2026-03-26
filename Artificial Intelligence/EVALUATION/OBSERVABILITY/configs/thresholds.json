@@ -1,0 +1,10 @@
+{
+  "min_accuracy": 0.8,
+  "min_correct": 4,
+  "max_error_rate": 0.2,
+  "min_accuracy_by_type": {
+    "factual": 0.85,
+    "mathematical": 0.9,
+    "reasoning": 0.75
+  }
+}
