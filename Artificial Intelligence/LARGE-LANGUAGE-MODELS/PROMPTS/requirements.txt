@@ -1,0 +1,14 @@
+# Core LangChain packages
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-core>=0.1.0
+
+# Data validation
+pydantic>=2.0.0
+
+# Ollama integration (for running local LLMs)
+# Note: You also need to install Ollama separately from https://ollama.ai
+# After installing, pull a model: ollama pull llama2
+
+# Optional but recommended packages
+requests>=2.31.0
