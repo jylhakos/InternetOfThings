@@ -1,6 +1,6 @@
-# AI/ML Pipeline
+# AI/Agents/ML Pipeline
 
-This repository contains machine learning pipelines built with different orchestration tools: **Apache Airflow**, **Dagster**, **Kubeflow**, and **MLflow**. Each implementation demonstrates best practices for building, deploying, and managing ML workflows on both local environments and Amazon AWS cloud infrastructure.
+This repository contains machine learning pipelines built with different orchestration tools: **Apache Airflow**, **Dagster**, **Kubeflow**, and **MLflow**. Each implementation demonstrates best practices for building, deploying, and managing AI workflows on both local environments and Amazon AWS cloud infrastructure.
 
 ## 📁 Directory Structure
 
@@ -51,11 +51,11 @@ PIPELINE/
 **Focus**: Workflow orchestration and scheduling for BERT model fine-tuning
 
 - **Use Case**: BERT fine-tuning pipeline with automated scheduling, monitoring, and AWS SageMaker integration
-- **Key Features**: 
+- **Key Features**:
   - DAG-based workflow orchestration
   - Integration with AWS MWAA (Managed Workflows for Apache Airflow)
   - Docker containerization support
-  - Comprehensive error handling and retries
+  - Error handling and retries
   - Model deployment to SageMaker endpoints
 - **Best For**: Complex, time-based scheduling requirements and enterprise-grade workflow management
 - **AWS Integration**: MWAA, SageMaker, S3, IAM, CloudWatch
@@ -69,7 +69,7 @@ PIPELINE/
   - Built-in data quality checks
   - Rich UI for pipeline monitoring
   - Integration with AWS services
-  - Comprehensive testing framework
+  - Testing framework
 - **Best For**: Data-centric workflows requiring strong observability and data lineage
 - **AWS Integration**: ECS, S3, SageMaker, EMR, Lambda
 
@@ -89,7 +89,7 @@ PIPELINE/
 ### 🐟 MLflow
 **Focus**: End-to-end ML lifecycle management with experiment tracking and model registry
 
-- **Use Case**: Fish weight prediction with comprehensive experiment tracking and model management
+- **Use Case**: Fish weight prediction with an experiment tracking and model management
 - **Key Features**:
   - Experiment tracking and metrics logging
   - Model registry and versioning
@@ -200,23 +200,579 @@ Choose the pipeline that best fits your use case and explore the respective fold
 | **Learning Curve** | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
 | **Community Support** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
 
+## 🤖 AI Agents in ML Pipelines
+
+AI agents represent autonomous systems capable of perceiving their environment, making decisions, and taking actions to achieve specific goals. Integrating AI agents into ML pipelines enables intelligent automation, adaptive workflows, and continuous improvement through feedback loops.
+
+### Agent Development Lifecycle
+
+#### 1. Development Stage
+During development, the focus is on rapid iteration, debugging, and establishing a baseline for expected behavior.
+
+**Key Practices:**
+- **Tracing**: Implement tracing using SDKs (LangChain, LlamaIndex, OpenAI Agents SDK) or AI proxies to log every step of the agent's decision process:
+  - User inputs and prompts
+  - Tool calls and function invocations
+  - Retrieved context and knowledge base queries
+  - Model outputs and reasoning chains
+  - Final responses and actions
+  
+- **Operational Metrics Tracking**: Monitor basic metrics to identify inefficiencies early:
+  - Latency per agent request
+  - Token usage and API call volumes
+  - Tool execution times
+  - Memory and compute utilization
+  
+- **Playground Environment**: Use interactive development environments (e.g., Braintrust, Maxim AI) to:
+  - Test prompt variations side-by-side
+  - Compare model outputs against test data
+  - Debug complex, non-deterministic behaviors
+  - Create a "flight recorder" for debugging
+
+**Tools:**
+- **LangGraph** (LangChain): Stateful, multi-agent, cyclic, graph-based workflows
+- **AutoGen** (Microsoft): Specialized agents for multi-agent conversations
+- **CrewAI**: Role-playing, structured agent teams with task coordination
+- **Julep**: Agents with long-term memory and complex planning
+- **Mastra**: TypeScript-first framework with RAG, memory, and tool-calling
+- **Browser Use**: Open-source library for web browser interactions
+
+#### 2. Evaluation Stage
+The evaluation stage ensures agents meet predefined quality and safety standards before deployment.
+
+**Key Practices:**
+- **Automated Evaluation Suites**: Integrate automated evaluations into CI/CD pipelines:
+  - Deterministic checks for objective metrics (e.g., correct JSON output, API response format)
+  - "LLM-as-a-judge" systems for subjective qualities (tone, helpfulness, coherence)
+  
+- **Define Success Criteria**: Establish clear performance thresholds:
+  - **Task Success Rate**: Percentage of successfully completed tasks
+  - **Hallucination Rate**: Factual correctness and grounding in provided context
+  - **Tool Use Accuracy**: Correct tool selection and parameter usage
+  - **Safety Metrics**: Toxicity detection, PII handling, bias assessment
+  - **Cost Efficiency**: Token usage per task, API call optimization
+  
+- **Human-in-the-Loop (HITL)**: Use human reviewers for:
+  - Nuanced edge cases requiring judgment
+  - Calibrating automated evaluators
+  - Capturing human feedback into test datasets
+  
+- **Red Teaming**: Proactively simulate adversarial attacks:
+  - Prompt injection attempts
+  - Jailbreak scenarios
+  - Data exfiltration risks
+  - Potential misuse patterns
+
+**Tools:**
+- **Ragas**: Specialized evaluation for RAG-based systems
+- **Arize Phoenix**: Open-source tracing and evaluation for LLM applications
+- **Promptfoo**: Testing and evaluating prompts locally
+- **Langfuse**: Tracking, debugging, and analytics for agentic pipelines
+
+#### 3. Deployment Stage
+Once in production, monitoring shifts to real-world performance, reliability, and identifying new edge cases.
+
+**Key Practices:**
+- **Continuous Monitoring and Alerting**: Track live traffic with real-time dashboards:
+  - Performance degradation detection
+  - Cost spike alerts
+  - Error rate monitoring
+  - SLA compliance tracking
+  
+- **Progressive Rollouts**: Deploy new agent versions gradually:
+  - **Canary Releases**: Route small percentage of traffic to new version
+  - **Shadow Mode**: Run new agent alongside old, compare outputs without impacting users
+  - **A/B Testing**: Compare agent variants on production traffic
+  
+- **User Feedback Collection**: Implement explicit feedback mechanisms:
+  - Thumbs up/down buttons
+  - Rating scales
+  - Free-form feedback forms
+  - Session replay and analysis
+  
+- **Feedback Loop**: Systematically use production data to improve:
+  - Enrich offline test datasets with failure cases
+  - Identify unaddressed edge cases
+  - Inform next development iteration
+  - Create continuous improvement cycle
+
+**Tools:**
+- **Braintrust**: Evaluation-driven development with CI/CD and production monitoring
+- **Fiddler**: Enterprise governance and compliance features
+- **Langfuse**: Open-source tracing, prompt management, cost tracking
+- **Galileo**: Real-time, low-cost safety checks and failure detection
+- **Arize**: ML observability platform for production monitoring
+
+### Deployment Options
+
+#### Local Deployment
+**Docker Compose**:
+```yaml
+services:
+  agent-orchestrator:
+    image: langgraph/langgraph-api
+    environment:
+      - TRACKING_URI=http://mlflow:5000
+    ports:
+      - "8080:8080"
+  
+  mlflow:
+    image: ghcr.io/mlflow/mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-artifacts:/mlflow
+```
+
+**Kubernetes (Minikube/Kind)**:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-agent
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: agent
+        image: my-agent:latest
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://mlflow-service:5000"
+```
+
+#### Cloud Deployment (AWS)
+
+**Airflow + Agents**:
+- Use AWS MWAA to orchestrate agent execution workflows
+- Deploy agents as containerized tasks on ECS/Fargate
+- Track agent performance with MLflow on SageMaker
+- Store agent artifacts in S3
+
+**Kubeflow + Agents**:
+- Deploy Kubeflow on Amazon EKS
+- Run agent pipelines as Kubeflow components
+- Use KServe for serving agent endpoints
+- Integrate with SageMaker for model hosting
+
+**MLflow + Agents**:
+- Deploy MLflow tracking server on EC2 or ECS
+- Use MLflow GenAI capabilities for agent tracking
+- Register agent models in MLflow Model Registry
+- Deploy agents via SageMaker endpoints
+
+### How to Monitor AI Agent Pipeline Progress?
+
+Monitoring AI agent pipeline progress requires an observability strategy that captures data throughout the agent's lifecycle and a robust evaluation framework to assess performance, quality, and cost.
+
+#### Development Stage Monitoring
+**Tracing and Debugging:**
+```python
+# Example: LangChain with MLflow tracing
+import mlflow
+from langchain.callbacks import MlflowCallbackHandler
+
+mlflow.set_tracking_uri("http://mlflow-server:5000")
+mlflow_handler = MlflowCallbackHandler()
+
+# Your agent code with automatic tracing
+agent.run("Task description", callbacks=[mlflow_handler])
+```
+
+**Key Metrics to Track:**
+- Prompt tokens, completion tokens, total tokens
+- Latency per agent step
+- Tool call counts and execution times
+- Cache hit rates
+- Error rates by type
+
+#### Evaluation Stage Monitoring
+**CI/CD Integration:**
+```python
+# Example: Automated evaluation in CI/CD
+from ragas import evaluate
+from ragas.metrics import faithfulness, answer_relevancy
+
+# Run evaluation suite
+results = evaluate(
+    dataset=test_dataset,
+    metrics=[faithfulness, answer_relevancy],
+    llm=evaluation_llm
+)
+
+# Fail pipeline if below threshold
+assert results["faithfulness"] > 0.8
+```
+
+**Metrics Dashboard:**
+- Task success rate trends
+- Hallucination rate over test sets
+- Tool accuracy by tool type
+- Safety violations count
+- Cost per evaluation run
+
+#### Production Stage Monitoring
+**Real-Time Observability:**
+```python
+# Example: Production monitoring with Langfuse
+from langfuse import Langfuse
+
+langfuse = Langfuse(
+    public_key="pk-...",
+    secret_key="sk-..."
+)
+
+# Trace production requests
+with langfuse.trace(name="agent_request") as trace:
+    response = agent.run(user_input)
+    trace.update(
+        output=response,
+        metadata={"user_id": user_id}
+    )
+```
+
+**Production Metrics:**
+- Request volume and latency (p50, p95, p99)
+- Error rate and error types
+- Cost per request (tokens, API calls)
+- User satisfaction scores
+- SLA compliance (uptime, response time)
+
+**Alerting Configuration:**
+- Error rate > 5% in 5-minute window
+- Latency > 10 seconds for p95
+- Cost spike > 2x baseline
+- Hallucination rate increase detected
+
+### Integration: AI Agents with Pipeline Tools
+
+#### Airflow + AI Agents
+
+**Architecture:**
+- Airflow DAGs orchestrate agent execution workflows
+- Agents run as containerized tasks
+- MLflow tracks agent experiments
+- Results stored in S3
+
+**Implementation:**
+```python
+# airflow/dags/agent_pipeline_dag.py
+from airflow import DAG
+from airflow.providers.docker.operators.docker import DockerOperator
+from airflow.operators.python import PythonOperator
+from datetime import datetime
+import mlflow
+
+default_args = {
+    'owner': 'mlops-team',
+    'depends_on_past': False,
+    'start_date': datetime(2026, 1, 1),
+    'retries': 2,
+}
+
+dag = DAG(
+    'ai_agent_pipeline',
+    default_args=default_args,
+    schedule_interval='@daily',
+    catchup=False
+)
+
+# Task 1: Run AI agent
+run_agent = DockerOperator(
+    task_id='run_ai_agent',
+    image='my-agent:latest',
+    environment={
+        'MLFLOW_TRACKING_URI': 'http://mlflow:5000',
+        'AGENT_CONFIG': '/config/agent_config.json'
+    },
+    dag=dag
+)
+
+# Task 2: Evaluate agent performance
+def evaluate_agent(**context):
+    mlflow.set_tracking_uri('http://mlflow:5000')
+    run_id = context['ti'].xcom_pull(task_ids='run_ai_agent')
+    # Evaluation logic here
+    pass
+
+evaluate = PythonOperator(
+    task_id='evaluate_agent',
+    python_callable=evaluate_agent,
+    dag=dag
+)
+
+run_agent >> evaluate
+```
+
+**AWS Deployment:**
+1. Deploy MWAA with VPC access to MLflow
+2. Configure ECS tasks for containerized agents
+3. Set up S3 for agent artifacts and logs
+4. Use CloudWatch for monitoring and alerting
+
+#### Kubeflow + AI Agents
+
+**Architecture:**
+- Kubeflow Pipelines define agent workflows
+- Components run as Kubernetes pods
+- MLflow tracks experiments via sidecar
+- KServe deploys agent endpoints
+
+**Implementation:**
+```python
+# kubeflow/pipeline/agent_pipeline.py
+from kfp import dsl
+from kfp.components import create_component_from_func
+
+@create_component_from_func
+def train_agent(config_path: str, mlflow_uri: str) -> str:
+    import mlflow
+    from my_agent import AgentTrainer
+    
+    mlflow.set_tracking_uri(mlflow_uri)
+    
+    with mlflow.start_run() as run:
+        trainer = AgentTrainer(config_path)
+        model = trainer.train()
+        
+        mlflow.log_params(trainer.config)
+        mlflow.log_metrics(trainer.metrics)
+        mlflow.log_model(model, "agent_model")
+        
+        return run.info.run_id
+
+@create_component_from_func
+def deploy_agent(run_id: str, mlflow_uri: str):
+    import mlflow
+    mlflow.set_tracking_uri(mlflow_uri)
+    
+    # Register model
+    model_uri = f"runs:/{run_id}/agent_model"
+    mlflow.register_model(model_uri, "production_agent")
+
+@dsl.pipeline(
+    name='AI Agent Pipeline',
+    description='Train, evaluate, and deploy AI agent'
+)
+def agent_pipeline(config_path: str, mlflow_uri: str):
+    train_task = train_agent(config_path, mlflow_uri)
+    deploy_task = deploy_agent(train_task.output, mlflow_uri)
+
+if __name__ == '__main__':
+    import kfp
+    kfp.compiler.Compiler().compile(agent_pipeline, 'agent_pipeline.yaml')
+```
+
+**AWS Deployment:**
+1. Install Kubeflow on Amazon EKS
+2. Deploy MLflow tracking server as Kubernetes service
+3. Configure EFS for shared storage
+4. Use Application Load Balancer for external access
+5. Integrate with SageMaker for model hosting
+
+#### MLflow + AI Agents
+
+**Architecture:**
+- MLflow tracks agent experiments and versions
+- MLflow GenAI API logs LLM interactions
+- Model Registry stores agent artifacts
+- Deployment via MLflow or SageMaker
+
+**Implementation:**
+```python
+# src/agent_with_mlflow.py
+import mlflow
+from mlflow.models import infer_signature
+from langchain.agents import AgentExecutor
+from langchain_openai import ChatOpenAI
+from langchain.agents import create_openai_functions_agent
+
+# Enable MLflow autologging for LangChain
+mlflow.langchain.autolog()
+
+mlflow.set_tracking_uri("http://mlflow-server:5000")
+mlflow.set_experiment("ai-agent-development")
+
+with mlflow.start_run(run_name="agent_v1") as run:
+    # Configure agent
+    llm = ChatOpenAI(model="gpt-4", temperature=0)
+    tools = [search_tool, calculator_tool, database_tool]
+    
+    agent = create_openai_functions_agent(llm, tools, prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
+    
+    # Log configuration
+    mlflow.log_params({
+        "model": "gpt-4",
+        "temperature": 0,
+        "num_tools": len(tools),
+        "max_iterations": 10
+    })
+    
+    # Test agent
+    test_cases = load_test_cases()
+    results = []
+    
+    for test in test_cases:
+        response = agent_executor.invoke({"input": test["query"]})
+        results.append(response)
+        
+        # Log individual test metrics
+        mlflow.log_metrics({
+            f"test_{test['id']}_success": int(response["success"]),
+            f"test_{test['id']}_latency": response["latency"]
+        })
+    
+    # Log aggregated metrics
+    mlflow.log_metrics({
+        "success_rate": sum(r["success"] for r in results) / len(results),
+        "avg_latency": sum(r["latency"] for r in results) / len(results),
+        "total_cost": sum(r["cost"] for r in results)
+    })
+    
+    # Log model
+    signature = infer_signature(test_cases[0]["query"], results[0])
+    mlflow.langchain.log_model(
+        agent_executor,
+        "agent_model",
+        signature=signature,
+        registered_model_name="customer_support_agent"
+    )
+    
+    print(f"Agent logged to MLflow run: {run.info.run_id}")
+```
+
+**AWS Deployment:**
+1. Deploy MLflow on EC2/ECS with RDS backend
+2. Configure S3 for artifact storage
+3. Use MLflow GenAI features for LLM tracking
+4. Deploy to SageMaker endpoints from Model Registry
+
+**MLflow GenAI Capabilities:**
+- Automatic logging of LLM calls
+- Prompt template versioning
+- Token usage tracking
+- Retrieval context logging
+- Agent trajectory visualization
+
+### Integration Steps Summary
+
+**1. Set up Infrastructure:**
+```bash
+# Deploy Kubernetes cluster
+eksctl create cluster --name ml-pipeline-cluster
+
+# Install Kubeflow
+kustomize build kubeflow/manifests | kubectl apply -f -
+
+# Deploy MLflow
+kubectl apply -f mlflow-deployment.yaml
+
+# Install Airflow (AWS MWAA alternative)
+helm install airflow apache-airflow/airflow
+```
+
+**2. Configure MLflow Tracking:**
+```python
+# All pipeline components point to central MLflow server
+import os
+os.environ['MLFLOW_TRACKING_URI'] = 'http://mlflow-service:5000'
+```
+
+**3. Create Agent Pipeline:**
+- Define workflow in Airflow DAG / Kubeflow Pipeline
+- Implement agent training/evaluation components
+- Use MLflow for experiment tracking
+- Log all metrics and artifacts
+
+**4. Deploy and Monitor:**
+- Progressive rollout with canary deployments
+- Set up monitoring dashboards (Grafana + Prometheus)
+- Configure alerting rules
+- Collect user feedback
+
+### Tool Selection Guide
+
+**Choose LangGraph or AutoGen when:**
+- Complex, multi-step reasoning required
+- Multiple agents need to collaborate
+- Cyclic workflows and state management needed
+
+**Choose CrewAI when:**
+- Role-based agent teams
+- Structured task delegation
+- Simpler, more opinionated setup preferred
+
+**Choose Mastra when:**
+- TypeScript/JavaScript environment
+- RAG and memory are core requirements
+- Web-based deployments
+
+**For Evaluation:**
+- **Ragas**: RAG-heavy agent systems
+- **Arize Phoenix**: General LLM application tracing
+- **Promptfoo**: Local prompt testing and optimization
+- **Langfuse**: Production observability and analytics
+
+**For Integration:**
+- **Airflow**: Complex scheduling, enterprise workflows
+- **Kubeflow**: Kubernetes-native, high scalability
+- **MLflow**: Experiment tracking, model lifecycle management
+
 ## References
 
-### Documentation
+### Documentation - Pipeline Orchestration
 - [Apache Airflow](https://airflow.apache.org/) - Official Airflow documentation
 - [Dagster](https://dagster.io/) - Official Dagster documentation  
 - [Kubeflow](https://kubeflow.org/) - Official Kubeflow documentation
 - [MLflow](https://mlflow.org/) - Official MLflow documentation
+- [MLflow GenAI](https://mlflow.org/docs/latest/genai/) - MLflow for Generative AI and LLM tracking
 - [Ray](https://ray.io/) - Official Ray documentation
+
+### Documentation - AI Agent Frameworks
+- [LangGraph](https://langchain-ai.github.io/langgraph/) - Build stateful, multi-agent applications
+- [LangChain](https://python.langchain.com/) - Framework for developing LLM applications
+- [AutoGen](https://microsoft.github.io/autogen/) - Microsoft's multi-agent conversation framework
+- [CrewAI](https://docs.crewai.com/) - Framework for orchestrating role-playing AI agents
+- [Julep](https://github.com/julep-ai/julep) - Platform for creating AI agents with memory
+- [Mastra](https://mastra.ai/) - TypeScript framework for building AI agents
+- [Browser Use](https://github.com/browser-use/browser-use) - Library for browser-controlling agents
+
+### Documentation - Agent Evaluation & Observability
+- [Ragas](https://docs.ragas.io/) - Evaluation framework for RAG systems
+- [Arize Phoenix](https://docs.arize.com/phoenix/) - Open-source LLM observability
+- [Promptfoo](https://promptfoo.dev/) - Test and evaluate LLM prompts
+- [Langfuse](https://langfuse.com/docs/) - Open-source LLM engineering platform
+- [Braintrust](https://braintrustdata.com/) - Evaluation and observability for AI
+- [Fiddler](https://www.fiddler.ai/) - Enterprise AI observability platform
+- [Galileo](https://www.rungalileo.io/) - Real-time LLM safety and quality monitoring
 
 ### Amazon AWS Services
 - [Amazon SageMaker](https://aws.amazon.com/sagemaker/) - Fully managed ML service
+- [Amazon Bedrock](https://aws.amazon.com/bedrock/) - Managed foundation models service
 - [AWS MWAA](https://aws.amazon.com/managed-workflows-for-apache-airflow/) - Managed Airflow
 - [Amazon EKS](https://aws.amazon.com/eks/) - Managed Kubernetes service
 - [AWS Lambda](https://aws.amazon.com/lambda/) - Serverless compute service
+- [Amazon ECS](https://aws.amazon.com/ecs/) - Container orchestration service
+- [Amazon S3](https://aws.amazon.com/s3/) - Object storage service
+- [Amazon RDS](https://aws.amazon.com/rds/) - Managed relational database service
 
-### Blog Posts & Tutorials
+### Blog Posts & Tutorials - ML Pipelines
 - [Scaling AI and Machine Learning Workloads with Ray on AWS](https://aws.amazon.com/blogs/opensource/scaling-ai-and-machine-learning-workloads-with-ray-on-aws/)
 - [LLM experimentation at scale using Amazon SageMaker Pipelines and MLflow](https://aws.amazon.com/blogs/machine-learning/llm-experimentation-at-scale-using-amazon-sagemaker-pipelines-and-mlflow/)
 - [Building ML Pipelines with Kubeflow on Amazon EKS](https://aws.amazon.com/blogs/opensource/kubeflow-amazon-eks/)
 - [Orchestrating Analytics Jobs on Amazon EMR with Apache Airflow](https://aws.amazon.com/blogs/big-data/orchestrating-analytics-jobs-on-amazon-emr-with-apache-airflow/)
+
+### Blog Posts & Tutorials - AI Agents
+- [Building Production-Ready AI Agents](https://www.anthropic.com/index/building-production-ready-ai-agents) - Anthropic's guide to agent development
+- [Evaluating and Monitoring AI Agents](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-monitor-ai-agents) - Microsoft Azure documentation
+- [Best Practices for LLM Observability](https://medium.com/@langfuse/best-practices-for-llm-observability) - LLM monitoring strategies
+- [AI Agent Architecture Patterns](https://aws.amazon.com/blogs/machine-learning/ai-agent-architecture-patterns/) - AWS ML blog on agent design
+
+### Additional Resources
+- [Airflow AI SDK](https://airflow.apache.org/docs/apache-airflow/stable/ai-sdk.html) - AI agent integration with Airflow
+- [KServe](https://kserve.github.io/website/) - Kubernetes model serving
+- [Hugging Face](https://huggingface.co/) - Model hub and deployment platform
+- [OpenAI Agents SDK](https://platform.openai.com/docs/agents) - OpenAI's agent development kit
+- [INS Forge](https://github.com/intentional-ai/ins-forge) - Open-source semantic layer for agents
