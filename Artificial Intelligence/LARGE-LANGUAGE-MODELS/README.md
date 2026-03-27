@@ -1,14 +1,58 @@
-# Large language models
+# Large Language Models
 
-LLM Orchestration and RAG Frameworks
+## Overview
 
-These tools provide the foundational code structures for connecting LLMs to external data and managing workflows. 
+Large Language Models (LLMs) are advanced artificial intelligence systems built on transformer architectures that process and generate human-like text. In the context of AI, LLMs represent a breakthrough in natural language understanding and generation, enabling applications such as conversational AI, content generation, code assistance, question answering, and complex reasoning tasks. This repository provides resources for deploying, orchestrating, and integrating LLMs into production applications, covering everything from model inference to retrieval-augmented generation (RAG) systems.
 
-LangChain and LangGraph: The standard for building customizable LLM applications and complex stateful, multi-agent flows.
+## Folder Structure
 
-LlamaIndex: Specialized in RAG (Retrieval-Augmented Generation) and connecting data sources to LLMs.
+```
+📁 LARGE-LANGUAGE-MODELS/
+├── 📄 README.md
+├── 📁 DEPLOYMENT/
+├── 📁 INFERENCE/
+├── 📁 MODELS/
+├── 📁 ORCHESTRATION/
+├── 📁 PROMPTS/
+├── 📁 RAG/
+└── 📁 VECTOR-DATABASES/
+```
 
-## Example: LLM application deployed on AWS
+## Folder Descriptions
+
+### 📁 DEPLOYMENT
+Contains deployment configurations and infrastructure code for deploying LLM applications across various platforms and frameworks. Includes:
+- **LangChain**: AWS CDK infrastructure for deploying LangChain-based applications with Docker support
+- **LangGraph**: Multi-agent workflow deployment with frontend and backend integration
+- **Python**: FastAPI-based LLM server deployment with client examples
+- **Serverless**: Serverless architecture implementations for LLM services
+- **Spring Boot**: Java-based LLM application deployment with Docker and Terraform configurations
+
+### 📁 INFERENCE
+Provides inference server implementations and examples for running LLM models. Includes FastAPI and standard Python server implementations with client examples, RAG integration, and vector database connectivity.
+
+### 📁 MODELS
+Documentation and resources for specific LLM models, including Claude and Llama 4, covering model characteristics, usage guidelines, and best practices.
+
+### 📁 ORCHESTRATION
+Framework implementations for orchestrating LLM workflows and multi-agent systems:
+- **LangChain**: Complete LangChain setup with Docker, Open WebUI integration, deployment scripts, and testing examples
+- **LangGraph**: Graph-based workflow orchestration for complex multi-step LLM applications
+
+### 📁 PROMPTS
+Prompt engineering resources including templates, examples, and best practices for designing effective prompts to optimize LLM outputs.
+
+### 📁 RAG
+Retrieval-Augmented Generation (RAG) pipeline implementations combining LLMs with external knowledge bases:
+- Vector database integration
+- Document processing and chunking
+- LlamaIndex framework examples
+- Agent implementations with tool usage
+
+### 📁 VECTOR-DATABASES
+Vector database setup, configuration, and usage examples for storing and retrieving embeddings used in semantic search and RAG applications.
+
+## Example: Large Language Models deployed on AWS
 
 To utilize AWS for AI, you can leverage services like Amazon SageMaker for model development and deployment, Amazon Bedrock for accessing and customizing foundation models.
 
@@ -18,9 +62,9 @@ Client (React) → API Gateway → Lambda/ECS → Vector DB (OpenSearch/Pinecone
 
 Amazon S3
 
-Store your documents in an S3 bucket. 
+Store your documents in an S3 bucket.
 
-S3 bucket provides scalable and durable storage for your knowledge base. 
+S3 bucket provides scalable and durable storage for your knowledge base.
 
 Amazon SageMaker
 
