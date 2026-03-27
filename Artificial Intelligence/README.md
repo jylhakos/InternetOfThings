@@ -11,7 +11,7 @@ This repository contains resources and implementations for various artificial in
 | **CrewAI** | Autonomous Agent Framework | Multi-agent role collaboration | Role-based orchestration, team dynamics |
 | **AutoGen** | Autonomous Agent Framework | Code generation & multi-agent conversations | Conversation-driven, autonomous coding |
 | **Agno** | Autonomous Agent Framework | Rapid agentic development | Speed-focused, memory management |
-| **LangChain** | LLM Orchestration | Custom LLM apps, RAG, DAGs | Chains, agents, comprehensive tooling |
+| **LangChain** | LLM Orchestration | Custom LLM apps, RAG, DAGs | Chains, agents, tooling |
 | **LangGraph** | LLM Orchestration | Stateful multi-actor applications | Graph-based, state management |
 | **LlamaIndex** | Data Framework/RAG | Data ingestion & retrieval | Advanced indexing, RAG specialization |
 | **Haystack** | AI Orchestration | Search pipelines & RAG | Pipeline-based, modular components |
@@ -43,7 +43,7 @@ This repository contains resources and implementations for various artificial in
 Contains implementations and examples of AI agents using different frameworks and development approaches. AI agents are autonomous software entities that combine large language models with tools, memory, and reasoning capabilities to perform complex tasks.
 
 **Sub-folders:**
-- **LangChain/**: Framework for developing applications powered by language models with comprehensive tooling for RAG, chains, and custom LLM applications
+- **LangChain/**: Framework for developing applications powered by language models with tooling for RAG, chains, and custom LLM applications
 - **No Framework/**: Pure implementation examples without external agent frameworks, demonstrating core agent concepts and custom implementations
 
 **Key Capabilities:**
@@ -54,6 +54,42 @@ Contains implementations and examples of AI agents using different frameworks an
 - Code generation, research synthesis, and business process automation
 
 See [AGENTS/README.md](AGENTS/README.md) for detailed documentation on agent development, frameworks comparison, and implementation guides.
+
+### 📁 AI-AND-EDGE-COMPUTING/
+**AI Agents and Machine Learning on Edge Computing Devices**
+
+Practical implementations of AI agents and machine learning models running on edge computing devices with real-time processing capabilities. Edge computing brings AI inference closer to data sources, enabling low-latency decision-making without relying on cloud connectivity.
+
+**Key Concepts:**
+- **Edge AI**: Running AI models directly on or near IoT devices and edge hardware
+- **Low-Latency Processing**: Real-time inference and decision-making at the edge
+- **Autonomous Edge Agents**: Localized AI agents for independent operation with minimal cloud dependency
+- **Model Optimization**: Compressed and quantized models (TensorFlow Lite, ONNX) for resource-constrained devices
+
+**Components:**
+- **Edge Agent** (`edge_agent.py`): Autonomous agent for edge device orchestration and decision-making
+- **Image Classifier** (`image_classifier.py`): Computer vision inference on edge devices
+- **Model Converter** (`model_converter.py`): Tools for converting and optimizing models for edge deployment
+- **Sensor Agent** (`sensor_agent.py`): IoT sensor data processing and analysis
+- **Examples**: Real-time object detection and simple inference demonstrations
+
+**Advantages of Edge AI:**
+- Ultra-low latency for time-critical applications
+- Enhanced data privacy and security (data processed locally)
+- Reduced bandwidth costs and cloud dependency
+- Continued operation during network outages
+- Scalability across distributed edge devices
+
+**Use Cases:**
+- Industrial IoT and predictive maintenance
+- Smart cameras with real-time object detection
+- Autonomous vehicles and robotics
+- Healthcare monitoring devices
+- Smart home automation systems
+
+**Typical Models:** Lightweight architectures like Llama-3-8B, Whisper, MobileNet, EfficientNet, and specialized computer vision models optimized for edge hardware.
+
+See [AI-AND-EDGE-COMPUTING/README.md](AI-AND-EDGE-COMPUTING/README.md) for setup instructions, examples, and edge deployment best practices.
 
 ### 📁 AUTONOMOUS-AGENT-FRAMEWORKS/
 **Specialized Frameworks for Building Autonomous AI Agents**
@@ -78,7 +114,7 @@ See [AUTONOMOUS-AGENT-FRAMEWORKS/README.md](AUTONOMOUS-AGENT-FRAMEWORKS/README.m
 Tools, frameworks, and technical guides designed to accelerate software development through AI agents. These resources focus on boosting productivity and implementing efficient software development workflows.
 
 **Sub-folders:**
-- **Agent Development Kit/**: Comprehensive tools and utilities for building custom AI coding agents
+- **Agent Development Kit/**: Tools and utilities for building custom AI coding agents
 - **Agent2Agent/**: Inter-agent communication protocols and patterns
 - **Compose for Agents/**: Docker-based composition tools for AI agent development
 - **GitHub Copilot/**: Resources and guides for GitHub's AI pair programmer
@@ -102,7 +138,7 @@ See [CODING-AND-DEVELOPMENT/README.md](CODING-AND-DEVELOPMENT/README.md) for imp
 ### 📁 EVALUATION/
 **AI Model Assessment, Validation, and Benchmarking**
 
-Comprehensive tools and methodologies for evaluating artificial intelligence models, with emphasis on Large Language Models (LLMs), time-series forecasting, and systematic performance assessment.
+Tools and methodologies for evaluating artificial intelligence models, with emphasis on Large Language Models (LLMs), time-series forecasting, and systematic performance assessment.
 
 **Sub-folders:**
 - **BENCHMARKING/**: LLM benchmarking tools and frameworks
@@ -175,7 +211,7 @@ Infrastructure and tools for managing end-to-end AI/ML workflows, from data inge
   - AWS MWAA (Managed Workflows for Apache Airflow) integration
   - Docker containerization support
   - SageMaker model deployment automation
-  - Comprehensive error handling and retries
+  - Error handling and retries
   - Best for: Complex time-based scheduling and enterprise workflow management
 
 - **Dagster/**: Modern data orchestrator for machine learning operations
@@ -184,7 +220,7 @@ Infrastructure and tools for managing end-to-end AI/ML workflows, from data inge
   - Rich UI for pipeline monitoring and observability
   - BERT training pipeline implementation
   - Integration with AWS ECS, S3, SageMaker, EMR
-  - Comprehensive testing framework
+  - Testing framework
   - Best for: Data-centric workflows requiring strong observability
 
 - **Kubeflow/**: Kubernetes-native platform for ML workflows
@@ -225,7 +261,7 @@ See [PIPELINE/README.md](PIPELINE/README.md) for detailed implementation guides 
 ### 📁 LARGE-LANGUAGE-MODELS/
 **LLM Infrastructure, Orchestration, and Deployment**
 
-Comprehensive resources for working with large language models, including orchestration frameworks, RAG implementations, model serving, and vector database integrations.
+Resources for working with large language models, including orchestration frameworks, RAG implementations, model serving, and vector database integrations.
 
 **Sub-folders:**
 - **MODELS/**: Model configurations, implementations, and setup guides for various LLMs
@@ -269,7 +305,7 @@ See [LARGE-LANGUAGE-MODELS/README.md](LARGE-LANGUAGE-MODELS/README.md) for deplo
 ### 📁 MACHINE-LEARNING/
 **Machine Learning Algorithms, Neural Networks, and Deep Learning**
 
-Comprehensive collection of machine learning implementations covering various neural network architectures, learning paradigms, and deep learning techniques.
+A collection of machine learning implementations covering various neural network architectures, learning paradigms, and deep learning techniques.
 
 **Sub-folders:**
 - **CNN/** (Convolutional Neural Networks): Image processing and computer vision
@@ -492,6 +528,51 @@ Large Language Models are transformer-based neural networks trained on vast amou
 - RAG Pipeline: Query → Embedding → Vector Search → Context Retrieval → LLM Generation
 - Multi-agent orchestration with specialized LLMs for different tasks
 
+### AI and Edge Computing
+AI on Edge Computing refers to running artificial intelligence models and agents directly on edge devices or near data sources, rather than relying on centralized cloud servers. This paradigm shift enables real-time, autonomous decision-making with minimal latency and enhanced privacy.
+
+**Core Principles:**
+- **Local Processing**: AI inference runs on or near IoT devices, sensors, and edge hardware
+- **Autonomous Operation**: Edge agents make independent decisions without constant cloud connectivity
+- **Model Optimization**: Models are compressed, quantized, and converted to lightweight formats (TensorFlow Lite, ONNX, OpenVINO)
+- **Resource Constraints**: Optimized for devices with limited compute, memory, and power
+
+**Typical Workflow:**
+1. **Model Training**: Train large-scale models in the cloud using extensive datasets
+2. **Model Optimization**: Compress and quantize models for edge deployment (INT8, FP16)
+3. **Edge Deployment**: Deploy optimized models to edge devices and gateways
+4. **Local Inference**: Real-time prediction and decision-making at the edge
+5. **Selective Synchronization**: Send aggregated insights to cloud for retraining and analytics
+
+**Advantages:**
+- **Ultra-Low Latency**: Real-time processing for time-critical applications (milliseconds vs. seconds)
+- **Privacy & Security**: Sensitive data processed locally without cloud transmission
+- **Bandwidth Efficiency**: Reduced data transfer costs and network congestion
+- **Offline Capability**: Continued operation during network outages
+- **Scalability**: Distributed processing across thousands of edge devices
+
+**Edge AI vs. Cloud AI:**
+- **Edge**: Low latency, privacy-first, offline capable, resource-constrained, localized models
+- **Cloud**: High computational power, centralized training, unlimited resources, connectivity required
+
+**Use Cases:**
+- **Industrial IoT**: Predictive maintenance, quality control, anomaly detection on factory floors
+- **Smart Devices**: Real-time object detection in security cameras and drones
+- **Autonomous Systems**: Self-driving vehicles, robotics with split-second decision-making
+- **Healthcare**: Patient monitoring devices, medical imaging analysis at point-of-care
+- **Smart Cities**: Traffic management, environmental monitoring, public safety systems
+
+**Typical Models:**
+- Lightweight LLMs: Llama-3-8B, Phi-3-mini, Mistral-7B
+- Computer Vision: MobileNet, EfficientNet, YOLO (tiny variants)
+- Speech: Whisper-tiny, lightweight ASR models
+- Specialized: Custom models optimized for specific edge hardware (Coral TPU, NVIDIA Jetson, Intel NCS)
+
+**Deployment Strategies:**
+- Edge-only: Complete processing on device (maximum privacy, highest latency constraints)
+- Edge-Cloud Hybrid: Edge for real-time decisions, cloud for complex analysis and retraining
+- Federated Learning: Train global models from distributed edge data without centralization
+
 ### Feature Learning
 Feature Learning is the process of automatically discovering representations or features from raw data that are useful for machine learning tasks. This approach reduces the need for manual feature engineering by allowing models to learn meaningful patterns directly from data:
 - **Representation Learning**: Learning abstract representations that capture underlying data structure
@@ -527,7 +608,7 @@ Transformer architecture revolutionized natural language processing by using sel
 ## References
 
 ### Core AI/ML Resources
-- **Amazon SageMaker**: https://aws.amazon.com/sagemaker/ - Comprehensive ML platform for building, training, and deploying models
+- **Amazon SageMaker**: https://aws.amazon.com/sagemaker/ - ML platform for building, training, and deploying models
 - **Hugging Face**: https://huggingface.co/ - Hub for pre-trained models, datasets, and ML tools
 - **PyTorch**: https://pytorch.org/ - Deep learning framework with dynamic computation graphs
 - **Transfer Learning for Computer Vision Tutorial**: https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
