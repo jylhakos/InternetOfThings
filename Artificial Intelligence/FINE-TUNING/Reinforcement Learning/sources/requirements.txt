@@ -1,0 +1,91 @@
+# Core Dependencies for RLHF Training
+# =====================================
+
+# PyTorch - Deep learning framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Transformers - Pre-trained models and tokenizers
+transformers>=4.36.0
+
+# Datasets - Data loading and processing
+datasets>=2.14.0
+
+# Accelerate - Distributed training and mixed precision
+accelerate>=0.24.0
+
+# PEFT - Parameter-Efficient Fine-Tuning (LoRA, QLoRA, etc.)
+peft>=0.7.0
+
+# BitsAndBytes - 8-bit and 4-bit quantization
+bitsandbytes>=0.41.0
+
+# TRL - Transformer Reinforcement Learning
+trl>=0.7.4
+
+# Additional Utilities
+# ====================
+
+# Scientific computing
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Data manipulation
+pandas>=2.0.0
+
+# Plotting and visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Jupyter notebook support (optional)
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Weights & Biases for experiment tracking (optional)
+wandb>=0.15.0
+
+# TensorBoard for logging
+tensorboard>=2.13.0
+
+# Evaluation metrics
+evaluate>=0.4.0
+rouge-score>=0.1.2
+sacrebleu>=2.3.1
+
+# API and deployment (optional)
+# ==============================
+
+# FastAPI for model serving
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
+# Gradio for web demos
+gradio>=3.50.0
+
+# Environment management
+# =======================
+
+# Python dotenv for environment variables
+python-dotenv>=1.0.0
+
+# Notes:
+# ------
+# 1. For CUDA support, install PyTorch with CUDA:
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+#
+# 2. For ROCm (AMD GPUs):
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm5.6
+#
+# 3. For CPU only (not recommended for training):
+#    pip install torch torchvision
+#
+# 4. Some packages might require specific versions depending on your CUDA version
+#
+# 5. Install all requirements:
+#    pip install -r requirements.txt
+#
+# 6. For development, also consider:
+#    pip install black flake8 pytest mypy
