@@ -1,0 +1,61 @@
+{
+    // Python Interpreter Configuration
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+    "python.useEnvironmentsExtension": true,
+    
+    // Terminal Configuration
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "terminal.integrated.inheritEnv": true,
+    
+    // Python Environments Extension
+    "python-envs.terminal.autoActivationType": "shellStartup",
+    "python-envs.workspaceSearchPaths": [
+        "./**/.venv",
+        "./venv",
+        "./env"
+    ],
+    
+    // Testing Configuration
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    
+    // Linting and Formatting
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "black",
+    
+    // Editor Configuration
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    
+    // Files to exclude from explorer
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true,
+        "**/venv": false,
+        "**/.venv": false
+    },
+    
+    // Search exclusions
+    "search.exclude": {
+        "**/venv": true,
+        "**/.venv": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
+    
+    // GitHub Copilot Settings
+    "github.copilot.enable": {
+        "*": true,
+        "python": true,
+        "markdown": true
+    }
+}
