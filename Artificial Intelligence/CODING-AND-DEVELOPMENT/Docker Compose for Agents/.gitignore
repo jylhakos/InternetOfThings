@@ -60,15 +60,14 @@ coverage.xml
 *.env
 
 # IDEs
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
-
-# Docker
-.dockerignore
 
 # Secrets
 secret.*

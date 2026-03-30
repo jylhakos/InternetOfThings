@@ -1,4 +1,4 @@
-# Compose for Agents
+# Docker Compose for AI Agents
 
 A tutorial for software developers to set up and utilize Docker Compose for AI agents with Python virtual environments in VS Code.
 
