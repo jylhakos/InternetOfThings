@@ -1,0 +1,61 @@
+services:
+  database:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U user -d database]
+      interval: 1s
+      timeout: 3s
+      retries: 10
+
+  importer:
+    build:
+      target: importer
+    environment:
+      SQLITE_FILE: /app/Chinook.db
+      DATABASE_URL: postgres://user:password@database:5432/database
+    volumes:
+      - ./Chinook.db:/app/Chinook.db
+    restart: on-failure
+    depends_on:
+      database:
+        condition: service_healthy
+
+  agent:
+    build:
+      target: agent
+    environment:
+      - MCP_SERVER_URL=http://mcp-gateway:8811/sse
+      - DATABASE_DIALECT=PostgreSQL
+      - QUESTION=Who was the best-selling sales agent in 2010?
+      - MODEL_NAME=llama3.2
+      - OPENAI_API_BASE_URL=http://model-runner:8080/v1
+    depends_on:
+      importer:
+        condition: service_completed_successfully
+      mcp-gateway:
+        condition: service_started
+
+  mcp-gateway:
+    build:
+      context: https://github.com/docker/mcp-gateway.git#main
+    environment:
+      - DATABASE_URL=postgres://user:password@database:5432/database
+    depends_on:
+      database:
+        condition: service_healthy
+
+  model-runner:
+    image: docker/model-runner:latest
+    environment:
+      - MODEL=llama3.2
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

@@ -1,0 +1,20 @@
+[project]
+name = "sql-agent"
+version = "0.1.0"
+description = "SQL Agent with LangGraph and Docker Compose"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=0.3.14",
+    "langchain-mcp-adapters>=0.1.3",
+    "langgraph>=0.2.62",
+    "mcp>=1.3.2",
+    "psycopg2-binary>=2.9.10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []

@@ -1,0 +1,20 @@
+services:
+  agent:
+    environment:
+      - OPENAI_API_KEY_FILE=/run/secrets/openai-api-key
+      - OPENAI_API_BASE_URL=https://api.openai.com/v1
+      - MODEL_NAME=gpt-4o
+    secrets:
+      - openai-api-key
+    depends_on:
+      mcp-gateway:
+        condition: service_started
+
+  # Remove model-runner service when using OpenAI
+  model-runner:
+    deploy:
+      replicas: 0
+
+secrets:
+  openai-api-key:
+    file: ./secret.openai-api-key
