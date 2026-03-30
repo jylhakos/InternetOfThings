@@ -1,0 +1,26 @@
+# Python Requirements for OpenClaw Development/Integration
+# Use this if you're developing Python-based plugins or integrations
+
+# Core dependencies (if needed for custom scripts)
+requests>=2.31.0
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Optional: For advanced features
+# aiohttp>=3.9.0  # Async HTTP client
+# fastapi>=0.109.0  # If building custom API endpoints
+# uvicorn>=0.27.0  # ASGI server
+# pydantic>=2.5.0  # Data validation
+
+# Optional: For monitoring and logging
+# prometheus-client>=0.19.0
+# structlog>=24.1.0
+
+# Optional: For testing
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# pytest-cov>=4.1.0
+
+# Security scanning
+# bandit>=1.7.5
+# safety>=2.3.5

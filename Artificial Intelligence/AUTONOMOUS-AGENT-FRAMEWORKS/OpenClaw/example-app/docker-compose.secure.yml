@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  openclaw:
+    image: openclaw/openclaw:latest
+    # If building from source:
+    # build:
+    #   context: ./openclaw
+    #   dockerfile: Dockerfile
+    container_name: openclaw_secure
+    hostname: openclaw
+    
+    # Security: Run as non-root user
+    user: "${RUN_AS_UID:-1000}:${RUN_AS_GID:-1000}"
+    
+    # Security: Read-only root filesystem
+    read_only: true
+    
+    # Security: Drop all capabilities
+    cap_drop:
+      - ALL
+    # Only add back specific capabilities if absolutely needed
+    # cap_add:
+    #   - NET_BIND_SERVICE  # If binding to ports < 1024
+    
+    # Security: Prevent privilege escalation
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:unconfined  # May need adjustment based on OpenClaw requirements
+    
+    # Security: Bind to localhost only
+    ports:
+      - "${GATEWAY_HOST:-127.0.0.1}:${GATEWAY_PORT:-18789}:18789"
+    
+    # Environment variables from .env file
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GATEWAY_PORT=${GATEWAY_PORT:-18789}
+      - GATEWAY_HOST=0.0.0.0  # Inside container, bind to all interfaces
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=production
+    
+    # Alternative: Use env_file
+    # env_file:
+    #   - .env
+    
+    # Security: Mount only necessary directories
+    volumes:
+      # Workspace for agent operations (read-write, limited)
+      - ./workspace:/app/workspace:rw
+      
+      # Config directory (read-only)
+      - ./config:/app/config:ro
+      
+      # Logs directory (write-only would be ideal, but rw is practical)
+      - ./logs:/app/logs:rw
+      
+      # Temporary directory for runtime writes (required with read_only: true)
+      - /tmp/openclaw:/tmp:rw
+      
+      # Optional: Local cache
+      - openclaw_cache:/app/.cache:rw
+    
+    # Network configuration
+    networks:
+      - openclaw_network
+    
+    # Resource limits to prevent DoS
+    deploy:
+      resources:
+        limits:
+          cpus: '${MAX_CPUS:-2.0}'
+          memory: ${MAX_MEMORY:-4G}
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=openclaw"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18789/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Additional security options
+    tmpfs:
+      - /run:rw,noexec,nosuid,size=64m
+      - /app/tmp:rw,noexec,nosuid,size=128m
+
+# Networks
+networks:
+  openclaw_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+    # Optional: Restrict to internal only (no internet access)
+    # internal: true
+
+# Named volumes
+volumes:
+  openclaw_cache:
+    driver: local
+
+# Optional: Add monitoring with Prometheus
+#   prometheus:
+#     image: prom/prometheus:latest
+#     container_name: prometheus
+#     user: "65534:65534"  # nobody
+#     read_only: true
+#     ports:
+#       - "127.0.0.1:9090:9090"
+#     volumes:
+#       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#       - prometheus_data:/prometheus:rw
+#     networks:
+#       - openclaw_network
+#     restart: unless-stopped
+#
+# volumes:
+#   prometheus_data:
+#     driver: local

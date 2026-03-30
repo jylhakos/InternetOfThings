@@ -1,0 +1,129 @@
+# OpenClaw Configuration
+# This file contains safe configuration options for OpenClaw
+# DO NOT store secrets here - use .env instead
+
+gateway:
+  port: 18789
+  host: "0.0.0.0"  # Inside container
+  cors:
+    enabled: false  # Disable if not needed
+    origins: []
+  
+agent:
+  name: "OpenClaw-Secure"
+  description: "Securely configured OpenClaw agent"
+  max_loops: 10  # Prevent infinite loops
+  timeout: 300   # 5 minute timeout per task
+  
+  # Safety constraints
+  constraints:
+    max_file_size: 10485760  # 10MB
+    allowed_commands:  # Whitelist of allowed commands
+      - "ls"
+      - "cat"
+      - "grep"
+      - "find"
+      - "echo"
+      # Add more as needed, but carefully
+    forbidden_patterns:  # Block dangerous patterns
+      - "rm -rf"
+      - "sudo"
+      - "chmod 777"
+      - "> /dev/"
+    require_confirmation:  # Require confirmation for these
+      - "rm"
+      - "mv"
+      - "cp"
+      - "git push"
+  
+  # Resource limits
+  resources:
+    max_memory: "2G"
+    max_cpu: 1.5
+    max_processes: 10
+
+logging:
+  level: "info"  # debug, info, warn, error
+  format: "json"
+  file: "/app/logs/openclaw.log"
+  rotation:
+    max_size: "100MB"
+    max_files: 5
+  
+  # Security logging
+  security_events: true
+  audit_trail: true
+  redact_secrets: true  # Remove API keys from logs
+
+memory:
+  type: "local"  # local, redis, postgres
+  path: "/app/workspace/.openclaw/memory"
+  retention_days: 30
+  
+plugins:
+  # Enable only needed plugins
+  enabled:
+    - "filesystem"
+    - "web_search"
+    - "code_execution"  # Be careful with this
+  
+  disabled:
+    - "shell_unlimited"  # Dangerous
+    - "system_admin"     # Dangerous
+  
+  # Plugin-specific settings
+  filesystem:
+    root: "/app/workspace"  # Chroot to this directory
+    read_only_paths:
+      - "/app/config"
+    forbidden_paths:
+      - "/etc"
+      - "/root"
+      - "/home"
+  
+  code_execution:
+    languages:
+      - "python"
+      - "javascript"
+    timeout: 30
+    memory_limit: "512M"
+    sandboxed: true
+  
+security:
+  # Authentication (if built-in auth is available)
+  auth:
+    enabled: false  # Use Nginx basic auth instead
+    type: "token"
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+  
+  # Input validation
+  validation:
+    max_input_length: 10000
+    sanitize_inputs: true
+    reject_code_injection: true
+  
+  # Output filtering
+  output:
+    max_length: 50000
+    filter_sensitive: true
+    patterns_to_redact:
+      - "api[_-]?key"
+      - "password"
+      - "secret"
+      - "token"
+
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  health_check_path: "/health"
+  
+notifications:
+  # Optional: Configure alerts
+  email:
+    enabled: false
+  slack:
+    enabled: false
