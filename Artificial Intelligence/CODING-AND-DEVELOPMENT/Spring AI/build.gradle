@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.0'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+ext {
+    springAiVersion = '1.0.0'
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    
+    // Spring AI Core
+    implementation 'org.springframework.ai:spring-ai-core'
+    
+    // Ollama Chat Model
+    implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
+    
+    // Vector Store - Qdrant
+    implementation 'org.springframework.ai:spring-ai-qdrant-store-spring-boot-starter'
+    
+    // Alternative: Chroma Vector Store (uncomment to use instead of Qdrant)
+    // implementation 'org.springframework.ai:spring-ai-chroma-store-spring-boot-starter'
+    
+    // RAG Support
+    implementation 'org.springframework.ai:spring-ai-rag'
+    implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
+    
+    // PDF Reader for document ingestion
+    implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
+    
+    // Document transformers
+    implementation 'org.springframework.ai:spring-ai-transformers'
+    
+    // Lombok (optional, for cleaner code)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.ai:spring-ai-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

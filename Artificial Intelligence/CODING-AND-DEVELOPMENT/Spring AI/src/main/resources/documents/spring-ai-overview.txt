@@ -1,0 +1,82 @@
+# Spring AI Documentation Sample
+
+## What is Spring AI?
+
+Spring AI is an application framework for AI engineering that applies Spring ecosystem design principles to the AI domain. It provides a unified API for interacting with various AI models and services.
+
+## Key Features
+
+### 1. Portable AI Model Integration
+Spring AI supports multiple AI model providers including:
+- OpenAI (GPT-4, GPT-3.5)
+- Anthropic Claude
+- Google Gemini
+- Ollama (Local models)
+- Azure OpenAI
+- Amazon Bedrock
+
+### 2. Vector Database Support
+Spring AI integrates with popular vector databases:
+- Qdrant
+- Chroma
+- Pinecone
+- PostgreSQL with pgvector
+- Milvus
+- Weaviate
+
+### 3. Retrieval Augmented Generation (RAG)
+RAG enhances AI responses by:
+1. Retrieving relevant documents from a knowledge base
+2. Augmenting the user's question with retrieved context
+3. Generating accurate responses based on the context
+
+### 4. ChatClient API
+A fluent API for interacting with AI models:
+```java
+ChatClient chatClient = ChatClient.builder(chatModel).build();
+String response = chatClient.prompt()
+    .user("Tell me about Spring AI")
+    .call()
+    .content();
+```
+
+### 5. Function/Tool Calling
+Allow AI models to call external functions and APIs:
+- Get real-time data
+- Perform calculations
+- Access external services
+- Execute custom business logic
+
+## Document Ingestion Pipeline
+
+The ETL (Extract, Transform, Load) pipeline in Spring AI:
+
+1. **Extract**: Read documents (PDF, TXT, etc.)
+2. **Transform**: Split documents into chunks
+3. **Load**: Generate embeddings and store in vector database
+
+## Advisors API
+
+Advisors encapsulate common AI patterns:
+- QuestionAnswerAdvisor: RAG implementation
+- VectorStoreChatMemoryAdvisor: Conversation memory
+- RetrievalAugmentationAdvisor: Advanced RAG flows
+
+## Use Cases
+
+Spring AI is perfect for:
+- Chat with your documentation
+- Question-answering systems
+- Semantic search
+- Content generation
+- Code assistance
+- Customer support chatbots
+
+## Getting Started
+
+1. Use Spring Initializr (start.spring.io)
+2. Add Spring AI dependencies
+3. Configure your AI model and vector store
+4. Start building AI-powered applications
+
+Spring AI makes it easy to integrate AI capabilities into your Spring Boot applications with minimal configuration and maximum flexibility.
