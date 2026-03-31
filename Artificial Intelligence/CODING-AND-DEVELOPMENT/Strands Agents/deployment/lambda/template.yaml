@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Strands Agent deployed on AWS Lambda
+
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 1024
+    Runtime: python3.11
+
+Resources:
+  StrandsAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: strands-agent-lambda
+      CodeUri: ./
+      Handler: lambda_handler.lambda_handler
+      Environment:
+        Variables:
+          AWS_REGION: !Ref AWS::Region
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+              - bedrock:InvokeModelWithResponseStream
+            Resource: '*'
+      Events:
+        AgentApi:
+          Type: Api
+          Properties:
+            Path: /agent
+            Method: post
+            RestApiId: !Ref AgentApi
+  
+  AgentApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'POST, GET, OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'"
+
+Outputs:
+  AgentApiUrl:
+    Description: "API Gateway endpoint URL for Strands Agent"
+    Value: !Sub "https://${AgentApi}.execute-api.${AWS::Region}.amazonaws.com/prod/agent"
+  
+  StrandsAgentFunctionArn:
+    Description: "Strands Agent Lambda Function ARN"
+    Value: !GetAtt StrandsAgentFunction.Arn
