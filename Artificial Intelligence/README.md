@@ -119,14 +119,13 @@ Tools, frameworks, and technical guides designed to accelerate software developm
 **Sub-folders:**
 - **Agent Development Kit/**: Tools and utilities for building custom AI coding agents
 - **Agent2Agent/**: Inter-agent communication protocols and patterns
-- **Compose for Agents/**: Docker-based composition tools for AI agent development
+- **Docker Compose for Agents/**: Docker-based composition tools for AI agent development
 - **GitHub Copilot/**: Resources and guides for GitHub's AI pair programmer
-- **Microsoft Copilot/**: Microsoft's AI coding assistant integration and best practices
+- **Integrated Development Environment/**: Python environment configuration and GitHub Copilot setup tutorials
 - **Langflow/**: Visual framework for building AI workflows and agent pipelines
 - **Langfuse/**: Observability and debugging tools for LLM applications and agentic systems
+- **Microsoft Copilot/**: Microsoft's AI coding assistant integration and best practices
 - **Model Context Protocol/**: Standardized protocol for tool integration and context management
-- **Spring AI/**: Spring framework integration for building AI-powered applications
-- **Strands Agents/**: Specialized agent development framework
 - **n8n/**: Low-code automation platform for visual AI workflows and integrations
 
 **Key Focus Areas:**
