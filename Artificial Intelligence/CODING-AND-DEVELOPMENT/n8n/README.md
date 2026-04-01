@@ -884,67 +884,67 @@ The complete interaction flow in the "Chat with Local LLMs using n8n and Ollama"
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. User sends message in n8n chat interface                │
+│ 1. User sends message in n8n chat interface                 │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 2. Chat Trigger Node captures input                        │
+│ 2. Chat Trigger Node captures input                         │
 │    - Message text                                           │
 │    - Session context                                        │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 3. LLM Chain Node processes request                        │
-│    - Retrieves conversation history                        │
-│    - Formats prompt with context                           │
+│ 3. LLM Chain Node processes request                         │
+│    - Retrieves conversation history                         │
+│    - Formats prompt with context                            │
 │    - Prepares for LLM                                       │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. Ollama Chat Model Node sends HTTP request               │
-│    POST http://localhost:11434/api/generate                │
+│ 4. Ollama Chat Model Node sends HTTP request                │
+│    POST http://localhost:11434/api/generate                 │
 │    {                                                        │
 │      "model": "llama2",                                     │
-│      "prompt": "User message with context",                │
+│      "prompt": "User message with context",                 │
 │      "stream": false                                        │
 │    }                                                        │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 5. Ollama Server processes request                         │
-│    - Loads model into memory (if not cached)               │
-│    - Tokenizes input prompt                                │
-│    - Runs inference through transformer                    │
-│    - Generates tokens sequentially                         │
+│ 5. Ollama Server processes request                          │
+│    - Loads model into memory (if not cached)                │
+│    - Tokenizes input prompt                                 │
+│    - Runs inference through transformer                     │
+│    - Generates tokens sequentially                          │
 │    - Formats response                                       │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 6. Ollama returns JSON response                            │
+│ 6. Ollama returns JSON response                             │
 │    {                                                        │
 │      "model": "llama2",                                     │
 │      "response": "Generated text...",                       │
 │      "done": true,                                          │
-│      "context": [token_ids],                               │
-│      "eval_duration": 1500000000                           │
+│      "context": [token_ids],                                │
+│      "eval_duration": 1500000000                            │
 │    }                                                        │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 7. LLM Chain processes response                            │
-│    - Updates conversation context                          │
-│    - Formats for display                                   │
+│ 7. LLM Chain processes response                             │
+│    - Updates conversation context                           │
+│    - Formats for display                                    │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 8. Response displayed in chat interface                    │
+│ 8. Response displayed in chat interface                     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
