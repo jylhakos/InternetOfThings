@@ -13,6 +13,23 @@ This project explains how to build an AI-powered chat workflow using n8n and Oll
   - [Virtual Environment Setup](#virtual-environment-setup)
   - [Installing n8n](#installing-n8n)
   - [Installing Ollama](#installing-ollama)
+- [Deployment Recommendations: Native vs Docker](#deployment-recommendations-native-vs-docker)
+  - [Recommended Choice](#recommended-choice)
+  - [GPU Configuration Comparison](#gpu-configuration-comparison)
+  - [Security Considerations](#security-considerations)
+  - [Performance Comparison](#performance-comparison)
+  - [Recommendation Summary](#recommendation-summary)
+- [Understanding Ollama and n8n Integration](#understanding-ollama-and-n8n-integration)
+  - [What is Ollama?](#what-is-ollama)
+  - [How Ollama Works](#how-ollama-works)
+  - [How Ollama Integrates with n8n](#how-ollama-integrates-with-n8n)
+  - [Available Open Source Models](#available-open-source-models)
+  - [Deploying and Using Models with Ollama](#deploying-and-using-models-with-ollama)
+  - [Model Selection Guidelines](#model-selection-guidelines)
+  - [Workflow Integration Details](#workflow-integration-details)
+  - [Testing Different Models in the Workflow](#testing-different-models-in-the-workflow)
+  - [Advanced Ollama Configuration](#advanced-ollama-configuration)
+  - [Ollama Workflow Interaction Summary](#ollama-workflow-interaction-summary)
 - [Running the Application](#running-the-application)
   - [Local Development](#local-development)
   - [Docker Deployment](#docker-deployment)
@@ -154,7 +171,13 @@ docker run -it --rm \
 
 ### Installing Ollama
 
-#### On Linux:
+Ollama can be installed in two ways: directly on your host system (recommended for better performance) or in a Docker container (better isolation).
+
+#### Option 1: Local Installation (Recommended)
+
+Installing Ollama directly on your host provides better performance and less complex configuration.
+
+**On Linux:**
 
 ```bash
 # Download and install Ollama
@@ -162,9 +185,12 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 # Start Ollama service
 ollama serve
+
+# Verify installation
+curl http://localhost:11434/api/version
 ```
 
-#### On macOS:
+**On macOS:**
 
 ```bash
 # Download from https://ollama.com/download
@@ -173,9 +199,90 @@ brew install ollama
 
 # Start Ollama
 ollama serve
+
+# Verify installation
+curl http://localhost:11434/api/version
+```
+
+**On Windows:**
+
+```powershell
+# Download installer from https://ollama.com/download
+# Run the installer
+# Ollama will start automatically as a service
+
+# Verify installation
+curl http://localhost:11434/api/version
+```
+
+#### Option 2: Docker Installation
+
+Running Ollama in Docker provides better isolation but may have slightly reduced performance.
+
+**Using Docker Run:**
+
+```bash
+# Pull Ollama image
+docker pull ollama/ollama
+
+# Run Ollama container
+docker run -d \
+  --name ollama \
+  -p 11434:11434 \
+  -v ollama_data:/root/.ollama \
+  ollama/ollama
+
+# Verify Ollama is running
+curl http://localhost:11434/api/version
+```
+
+**With GPU Support (NVIDIA):**
+
+```bash
+# Install NVIDIA Container Toolkit first
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+
+# Run with GPU support
+docker run -d \
+  --gpus=all \
+  --name ollama \
+  -p 11434:11434 \
+  -v ollama_data:/root/.ollama \
+  ollama/ollama
+```
+
+**Using Docker Compose:**
+
+Add Ollama service to your docker-compose.yml:
+
+```yaml
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - n8n-network
+    # For GPU support (uncomment if you have NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_data:
 ```
 
 #### Pull a Model
+
+**For Local Installation:**
 
 ```bash
 # Pull Llama2 model (default)
@@ -185,9 +292,24 @@ ollama pull llama2
 ollama pull llama2:13b
 ollama pull llama2:70b
 ollama pull codellama
+ollama pull mistral
+```
+
+**For Docker Installation:**
+
+```bash
+# Execute pull command inside the container
+docker exec -it ollama ollama pull llama2
+
+# Or pull other models
+docker exec -it ollama ollama pull llama2:13b
+docker exec -it ollama ollama pull mistral
+docker exec -it ollama ollama pull codellama
 ```
 
 #### Verify Ollama Installation
+
+**For Local Installation:**
 
 ```bash
 # Check if Ollama is running
@@ -196,6 +318,643 @@ curl http://localhost:11434/api/version
 # List installed models
 ollama list
 ```
+
+**For Docker Installation:**
+
+```bash
+# Check if Ollama container is running
+docker ps | grep ollama
+
+# Verify Ollama API
+curl http://localhost:11434/api/version
+
+# List installed models
+docker exec -it ollama ollama list
+```
+
+## Deployment Recommendations: Native vs Docker
+
+### Recommended Choice
+
+**Native/Local Installation (Recommended for most users):**
+
+Best for:
+- Development and testing environments
+- Maximum performance requirements
+- Direct GPU access without additional layers
+- Simplified troubleshooting and debugging
+- Users familiar with their operating system
+
+**Docker Installation (Recommended for production):**
+
+Best for:
+- Production deployments requiring isolation
+- Multi-tenant environments
+- Consistent deployment across different systems
+- Easy rollback and version management
+- Teams using containerized infrastructure
+
+### GPU Configuration Comparison
+
+#### Native Installation with GPU
+
+**Linux (NVIDIA GPUs):**
+
+```bash
+# Install NVIDIA drivers
+sudo ubuntu-drivers autoinstall
+
+# Verify NVIDIA driver installation
+nvidia-smi
+
+# Ollama automatically detects and uses available GPUs
+ollama run llama2
+
+# Monitor GPU usage
+watch -n 1 nvidia-smi
+```
+
+**Advantages:**
+- Direct GPU access with minimal overhead
+- Better performance (5-15% faster than Docker)
+- Simpler driver management
+- Lower latency for inference requests
+- No containerization overhead
+
+**Configuration:**
+- No additional configuration required
+- Ollama automatically detects CUDA-compatible GPUs
+- Supports multiple GPUs (automatically load-balanced)
+
+#### Docker Installation with GPU
+
+**Linux (NVIDIA Docker):**
+
+```bash
+# Install NVIDIA Container Toolkit
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+
+# Run Ollama with GPU support
+docker run -d \
+  --gpus=all \
+  --name ollama \
+  -p 11434:11434 \
+  -v ollama_data:/root/.ollama \
+  ollama/ollama
+
+# Verify GPU is accessible inside container
+docker exec -it ollama nvidia-smi
+```
+
+**Docker Compose with GPU:**
+
+```yaml
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+```
+
+**Advantages:**
+- Process isolation and resource limits
+- Easy to update and rollback versions
+- Consistent environment across deployments
+- Better for multi-GPU resource allocation
+
+**Considerations:**
+- Requires NVIDIA Container Toolkit installation
+- Slightly reduced performance (5-15% overhead)
+- Additional layer of complexity in troubleshooting
+
+### Security Considerations
+
+#### Native Linux Installation
+
+**Security Aspects:**
+
+1. **Process Isolation:**
+   - Ollama runs as a system service (typically under ollama user)
+   - Limited isolation from host system
+   - Shares kernel and system resources with other processes
+
+2. **Network Exposure:**
+   - Default: binds to localhost:11434 (local access only)
+   - Can be configured to bind to 0.0.0.0 (all interfaces)
+   - Recommendation: Use firewall rules to restrict access
+
+   ```bash
+   # Check Ollama binding
+   sudo netstat -tulpn | grep 11434
+   
+   # Configure firewall (ufw example)
+   sudo ufw allow from 192.168.1.0/24 to any port 11434
+   sudo ufw deny 11434
+   ```
+
+3. **File System Access:**
+   - Full access to system files (within user permissions)
+   - Models stored in ~/.ollama or /usr/share/ollama
+   - Potential risk if service account is compromised
+
+4. **Updates and Patching:**
+   - Manual update process required
+   - User responsible for security patches
+   - System-wide dependencies may conflict
+
+**Security Recommendations:**
+- Run Ollama service under dedicated user account (non-root)
+- Use firewall rules to restrict network access
+- Keep system and Ollama updated regularly
+- Monitor system logs for unusual activity
+- Consider AppArmor or SELinux profiles for additional sandboxing
+
+#### Docker Installation
+
+**Security Aspects:**
+
+1. **Process Isolation:**
+   - Container provides namespace isolation
+   - Separate process tree from host
+   - Limited access to host resources by default
+   - Uses Linux cgroups for resource constraints
+
+2. **Network Isolation:**
+   - Runs in isolated network namespace
+   - Port mapping required for external access
+   - Can use Docker networks for service-to-service communication
+   
+   ```bash
+   # Restrict to localhost only
+   docker run -d \
+     --name ollama \
+     -p 127.0.0.1:11434:11434 \
+     -v ollama_data:/root/.ollama \
+     ollama/ollama
+   ```
+
+3. **File System Isolation:**
+   - Models stored in Docker volumes (isolated from host)
+   - Read-only root filesystem possible
+   - Limited host file system access
+   
+   ```yaml
+   # Docker Compose with read-only root
+   services:
+     ollama:
+       image: ollama/ollama:latest
+       read_only: true
+       volumes:
+         - ollama_data:/root/.ollama
+         - /tmp
+   ```
+
+4. **Resource Limits:**
+   - CPU and memory limits enforceable
+   - Prevents resource exhaustion attacks
+   
+   ```yaml
+   services:
+     ollama:
+       deploy:
+         resources:
+           limits:
+             cpus: '4'
+             memory: 8G
+           reservations:
+             cpus: '2'
+             memory: 4G
+   ```
+
+5. **Updates and Patching:**
+   - Simple image update process
+   - Immutable infrastructure approach
+   - Easier rollback if issues occur
+
+**Security Recommendations:**
+- Use official Ollama Docker images only
+- Run containers as non-root user when possible
+- Enable Docker content trust (DCT) for image verification
+- Use Docker secrets for sensitive configuration
+- Implement network policies to restrict inter-container communication
+- Regularly scan images for vulnerabilities
+- Enable Docker logging and monitoring
+- Use read-only root filesystem where applicable
+
+### Security Comparison Summary
+
+| Aspect | Native Linux | Docker |
+|--------|-------------|---------|
+| Process Isolation | Limited (user-based) | Strong (namespace) |
+| Network Isolation | Firewall-dependent | Built-in network isolation |
+| File System Security | Host filesystem access | Volume-based isolation |
+| Resource Control | OS-level limits | cgroups enforcement |
+| Attack Surface | Larger (system-wide) | Smaller (containerized) |
+| Update Process | Manual, system-wide | Image-based, isolated |
+| Audit Trail | System logs | Container + system logs |
+| Compliance | Standard Linux auditing | Container-specific tools |
+
+### Performance Comparison
+
+| Metric | Native Linux | Docker |
+|--------|-------------|---------|
+| Inference Speed | Baseline (100%) | 85-95% of native |
+| GPU Performance | Optimal | 90-95% of native |
+| Memory Overhead | Minimal | +100-500MB |
+| Startup Time | ~2-5 seconds | ~5-10 seconds |
+| Model Loading | Direct disk access | Volume mapping overhead |
+
+### Recommendation Summary
+
+**Use Native Installation when:**
+- Running on development machines
+- Maximum performance is critical
+- You need direct system access for debugging
+- Working with resource-constrained environments
+- Single-user or trusted environments
+
+**Use Docker Installation when:**
+- Deploying to production environments
+- Security and isolation are priorities
+- Managing multiple Ollama instances
+- Requiring consistent deployment across teams
+- Using container orchestration (Kubernetes, Docker Swarm)
+- Need easy version management and rollback
+- Implementing resource quotas and limits
+
+**Hybrid Approach:**
+Many teams use native installation for development and Docker for production, balancing performance during development with security and manageability in production.
+
+## Understanding Ollama and n8n Integration
+
+### What is Ollama?
+
+Ollama is a lightweight, open-source runtime that enables you to run Large Language Models (LLMs) locally on your own hardware. It provides a simple interface for downloading, managing, and running various open-source language models without requiring cloud services or external APIs.
+
+**Key Features:**
+- **Local Execution**: All model inference happens on your machine (Docker)
+- **Model Management**: Easy download, update, and version control of models
+- **REST API**: Simple HTTP API for model interaction
+- **Optimized Performance**: CPU and GPU acceleration support
+- **Memory Efficient**: Smart model loading and caching
+- **Cross-Platform**: Runs on Linux, macOS, and Windows
+
+### How Ollama Works
+
+Ollama operates as a local server that manages and executes LLM models:
+
+1. **Model Storage**: Models are downloaded and stored in a local directory (typically `~/.ollama/models`)
+2. **Server Process**: Runs as a background service on port 11434
+3. **API Interface**: Exposes REST endpoints for model inference
+4. **Runtime Optimization**: Automatically optimizes models for your hardware (CPU/GPU)
+5. **Memory Management**: Loads models into RAM on-demand and caches them for performance
+
+**Architecture Flow:**
+```
+Client Request → Ollama API (Port 11434) → Model Manager → 
+Inference Engine (CPU/GPU) → Token Generation → Response Stream
+```
+
+### How Ollama Integrates with n8n
+
+The integration between Ollama and n8n happens through the **Ollama Chat Model Node**, which is part of n8n's LangChain integration:
+
+1. **Node Connection**: The Ollama Chat Model node connects to the Ollama API via HTTP
+2. **Request Transmission**: n8n sends user prompts to `http://localhost:11434/api/generate` or `/api/chat`
+3. **Model Execution**: Ollama processes the request using the selected model
+4. **Response Streaming**: Ollama streams tokens back to n8n in real-time
+5. **Chain Integration**: The LLM Chain node manages context and formats responses
+
+**Communication Protocol:**
+```
+n8n Workflow → LangChain LLM Chain → Ollama Chat Model Node →
+HTTP POST to Ollama API → Model Inference → JSON Response →
+Response Processing → Chat Interface Display
+```
+
+**API Request Example:**
+```json
+POST http://localhost:11434/api/generate
+{
+  "model": "llama2",
+  "prompt": "What is n8n?",
+  "stream": false
+}
+```
+
+**API Response Example:**
+```json
+{
+  "model": "llama2",
+  "response": "n8n is a workflow automation platform...",
+  "done": true,
+  "total_duration": 5000000000,
+  "load_duration": 500000000
+}
+```
+
+### Available Open Source Models
+
+Ollama supports a wide range of open-source LLMs. Here are the most popular models for local deployment:
+
+#### General Purpose Models
+
+| Model | Parameters | Size | RAM Required | Use Case |
+|-------|------------|------|--------------|----------|
+| **Llama 2** | 7B | 3.8GB | 8GB | General chat, Q&A |
+| **Llama 2** | 13B | 7.3GB | 16GB | Better reasoning, longer context |
+| **Llama 2** | 70B | 39GB | 64GB | Production-quality responses |
+| **Llama 3** | 8B | 4.7GB | 8GB | Improved performance over Llama 2 |
+| **Llama 3** | 70B | 40GB | 64GB | State-of-the-art open source |
+| **Mistral** | 7B | 4.1GB | 8GB | Fast inference, good quality |
+| **Mixtral** | 8x7B | 26GB | 32GB | Mixture of experts, high quality |
+| **Phi-3** | 3.8B | 2.3GB | 4GB | Small, efficient, Microsoft model |
+
+#### Code-Specialized Models
+
+| Model | Parameters | Size | RAM Required | Use Case |
+|-------|------------|------|--------------|----------|
+| **CodeLlama** | 7B | 3.8GB | 8GB | Code generation, debugging |
+| **CodeLlama** | 13B | 7.3GB | 16GB | Advanced code tasks |
+| **CodeLlama** | 34B | 19GB | 32GB | Complex code generation |
+| **DeepSeek Coder** | 6.7B | 3.8GB | 8GB | Code completion, explanation |
+| **StarCoder** | 15B | 8.4GB | 16GB | Code generation across languages |
+
+#### Specialized Models
+
+| Model | Parameters | Size | Description |
+|-------|------------|------|-------------|
+| **Vicuna** | 7B/13B | 3.8GB/7.3GB | Fine-tuned for conversation |
+| **Orca 2** | 7B/13B | 3.8GB/7.3GB | Reasoning and logic tasks |
+| **Neural Chat** | 7B | 4.1GB | Optimized for dialogue |
+| **Dolphin** | 7B/13B | 3.8GB/7.3GB | Uncensored, versatile |
+| **Solar** | 10.7B | 6.1GB | Korean-English bilingual |
+
+### Deploying and Using Models with Ollama
+
+#### Pulling Models
+
+```bash
+# General purpose models
+ollama pull llama2           # Default 7B version
+ollama pull llama2:13b       # 13B version
+ollama pull llama2:70b       # 70B version
+ollama pull llama3           # Latest Llama 3
+ollama pull mistral          # Mistral 7B
+ollama pull mixtral          # Mixtral 8x7B
+ollama pull phi3             # Microsoft Phi-3
+
+# Code models
+ollama pull codellama        # Code-focused Llama
+ollama pull deepseek-coder   # DeepSeek Coder
+ollama pull starcoder        # StarCoder
+
+# Specialized models
+ollama pull vicuna           # Conversation-optimized
+ollama pull orca2            # Reasoning tasks
+ollama pull neural-chat      # Dialogue model
+```
+
+#### Listing Available Models
+
+```bash
+# List all models in Ollama library
+ollama list
+
+# Search for specific models
+ollama search llama
+```
+
+#### Running Models
+
+```bash
+# Interactive chat mode
+ollama run llama2
+
+# Specify a different model
+ollama run mistral
+
+# Run with custom parameters
+ollama run llama2 --temperature 0.8 --top-p 0.9
+```
+
+#### Removing Models
+
+```bash
+# Remove a model to free up space
+ollama rm llama2:70b
+
+# Remove specific version
+ollama rm codellama:13b
+```
+
+### Model Selection Guidelines
+
+Choose the right model based on your requirements:
+
+**For Learning and Experimentation:**
+- **Llama 2 (7B)**: Best starting point, good balance of speed and quality
+- **Phi-3 (3.8B)**: Fastest, lowest resource requirements
+- **Mistral (7B)**: Excellent performance for the size
+
+**For Code-Related Tasks:**
+- **CodeLlama (7B/13B)**: Specialized for programming tasks
+- **DeepSeek Coder**: Strong code understanding
+- **StarCoder**: Multi-language support
+
+**For Production Use:**
+- **Llama 3 (70B)**: Best open-source quality
+- **Mixtral (8x7B)**: Great quality with better efficiency
+- **Llama 2 (70B)**: Proven, stable performance
+
+**For Resource-Constrained Environments:**
+- **Phi-3**: Minimal RAM usage
+- **Llama 2 (7B)**: Good quality on 8GB RAM
+- **Mistral (7B)**: Efficient inference
+
+### Workflow Integration Details
+
+When you configure the n8n workflow to use Ollama:
+
+1. **Model Configuration**: Select the model in the Ollama Chat Model node
+2. **Connection Setup**: Point to `http://localhost:11434` (or `host.docker.internal:11434` for Docker)
+3. **Parameter Tuning**: Adjust temperature, top_k, top_p for response characteristics
+4. **Context Management**: The LLM Chain handles conversation history
+5. **Response Handling**: Streaming responses for real-time chat experience
+
+**Example Configuration in n8n:**
+
+```
+Ollama Chat Model Node Settings:
+├── Base URL: http://localhost:11434
+├── Model: llama2 (or any installed model)
+├── Temperature: 0.7 (randomness: 0=deterministic, 1=creative)
+├── Top K: 40 (consider top 40 tokens)
+├── Top P: 0.9 (nucleus sampling threshold)
+├── Max Tokens: 2048 (maximum response length)
+└── Context Window: 4096 (conversation history size)
+```
+
+### Testing Different Models in the Workflow
+
+You can easily switch between models to compare performance:
+
+1. **Pull Multiple Models:**
+   ```bash
+   ollama pull llama2
+   ollama pull mistral
+   ollama pull codellama
+   ollama pull phi3
+   ```
+
+2. **Configure in n8n:**
+   - Open the Ollama Chat Model node
+   - Select different models from the dropdown
+   - Test with the same prompts to compare
+
+3. **Performance Comparison:**
+   ```bash
+   # Test response time for different models
+   time ollama run llama2 "Explain n8n in one sentence"
+   time ollama run mistral "Explain n8n in one sentence"
+   time ollama run phi3 "Explain n8n in one sentence"
+   ```
+
+### Advanced Ollama Configuration
+
+#### Custom Model Parameters
+
+```bash
+# Create a custom model with specific parameters
+ollama create mymodel -f Modelfile
+
+# Example Modelfile:
+# FROM llama2
+# PARAMETER temperature 0.8
+# PARAMETER top_k 40
+# PARAMETER top_p 0.9
+# SYSTEM You are a helpful coding assistant specialized in automation.
+```
+
+#### Multi-Model Workflows
+
+You can create workflows that use different models for different tasks:
+
+```
+User Query →
+├── Code Questions → CodeLlama (7B)
+├── General Chat → Llama 2 (7B)
+├── Complex Analysis → Mixtral (8x7B)
+└── Quick Answers → Phi-3 (3.8B)
+```
+
+#### GPU Acceleration
+
+If you have an NVIDIA GPU:
+
+```bash
+# Check GPU availability
+nvidia-smi
+
+# Ollama automatically uses GPU if available
+# Verify GPU usage during inference
+watch -n 1 nvidia-smi
+```
+
+### Ollama Workflow Interaction Summary
+
+The complete interaction flow in the "Chat with Local LLMs using n8n and Ollama" workflow:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 1. User sends message in n8n chat interface                │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. Chat Trigger Node captures input                        │
+│    - Message text                                           │
+│    - Session context                                        │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. LLM Chain Node processes request                        │
+│    - Retrieves conversation history                        │
+│    - Formats prompt with context                           │
+│    - Prepares for LLM                                       │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. Ollama Chat Model Node sends HTTP request               │
+│    POST http://localhost:11434/api/generate                │
+│    {                                                        │
+│      "model": "llama2",                                     │
+│      "prompt": "User message with context",                │
+│      "stream": false                                        │
+│    }                                                        │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 5. Ollama Server processes request                         │
+│    - Loads model into memory (if not cached)               │
+│    - Tokenizes input prompt                                │
+│    - Runs inference through transformer                    │
+│    - Generates tokens sequentially                         │
+│    - Formats response                                       │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 6. Ollama returns JSON response                            │
+│    {                                                        │
+│      "model": "llama2",                                     │
+│      "response": "Generated text...",                       │
+│      "done": true,                                          │
+│      "context": [token_ids],                               │
+│      "eval_duration": 1500000000                           │
+│    }                                                        │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 7. LLM Chain processes response                            │
+│    - Updates conversation context                          │
+│    - Formats for display                                   │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 8. Response displayed in chat interface                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key Integration Points:**
+
+1. **HTTP Communication**: n8n communicates with Ollama via REST API
+2. **Model Selection**: Configured in the Ollama Chat Model node
+3. **Context Persistence**: LLM Chain manages conversation history
+4. **Local Processing**: All inference happens locally, no external API calls
+5. **Real-time Streaming**: Supports streaming responses for immediate feedback
 
 ## Running the Application
 
@@ -277,12 +1036,27 @@ services:
       - ./workflows:/home/node/.n8n/workflows
     networks:
       - n8n-network
-    # Enable access to host network for Ollama connection
+    # Enable access to host network if Ollama runs on host
+    # Comment this out if using Ollama in Docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # Optional: Ollama service (uncomment to run Ollama in Docker)
+  # If you uncomment this, update n8n Ollama node Base URL to: http://ollama:11434
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   networks:
+  #     - n8n-network
+
 volumes:
   n8n_data:
+  # ollama_data:  # Uncomment if using Ollama in Docker
 
 networks:
   n8n-network:
@@ -307,7 +1081,38 @@ docker-compose down -v
 
 #### Docker Network Configuration for Ollama
 
-If running n8n in Docker and Ollama on the host:
+The network configuration depends on how you deployed both n8n and Ollama:
+
+**Scenario 1: Both n8n and Ollama in Docker (Same Network)**
+
+If both services are in the same Docker network (recommended):
+
+```yaml
+# In docker-compose.yml
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    networks:
+      - n8n-network
+    # ...
+  
+  ollama:
+    image: ollama/ollama
+    networks:
+      - n8n-network
+    # ...
+
+networks:
+  n8n-network:
+    driver: bridge
+```
+
+In n8n Ollama Chat Model node:
+- **Base URL**: `http://ollama:11434`
+
+**Scenario 2: n8n in Docker, Ollama on Host**
+
+If n8n runs in Docker but Ollama is on the host:
 
 ```bash
 # Option 1: Use host network mode
@@ -317,10 +1122,46 @@ docker run -it --rm \
   -v n8n_data:/home/node/.n8n \
   docker.n8n.io/n8nio/n8n
 
-# Option 2: Access Ollama via host.docker.internal
-# In Ollama Chat Model node, use:
-# Base URL: http://host.docker.internal:11434
+# Option 2: Access via host.docker.internal (recommended)
+# Add to docker-compose.yml:
+services:
+  n8n:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 ```
+
+In n8n Ollama Chat Model node:
+- **Base URL**: `http://host.docker.internal:11434`
+
+**Scenario 3: Both n8n and Ollama on Host (Local Development)**
+
+If both services run directly on your machine:
+
+```bash
+# Terminal 1: Start Ollama
+ollama serve
+
+# Terminal 2: Start n8n
+n8n
+```
+
+In n8n Ollama Chat Model node:
+- **Base URL**: `http://localhost:11434`
+
+**Scenario 4: n8n on Host, Ollama in Docker**
+
+If n8n runs on the host but Ollama is in Docker:
+
+```bash
+# Run Ollama with port mapping
+docker run -d \
+  --name ollama \
+  -p 11434:11434 \
+  ollama/ollama
+```
+
+In n8n Ollama Chat Model node:
+- **Base URL**: `http://localhost:11434`
 
 ## Workflow Components
 
@@ -852,3 +1693,5 @@ chmod 644 workflows/chat_with_local_llms_ollama.json
 ---
 
 **License**: This project follows n8n's license model. See [n8n License](https://github.com/n8n-io/n8n/blob/master/LICENSE.md) for details.
+
+**Last Updated**: April 1, 2026
