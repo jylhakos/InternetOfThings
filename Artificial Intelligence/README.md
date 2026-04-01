@@ -25,6 +25,7 @@ This repository contains resources and implementations for various artificial in
 | **MLflow** | ML Lifecycle | Experiment tracking & model registry | Research-oriented, versioning |
 | **Semantic Kernel** | Agent Development | Microsoft AI service integration | SDK for agent-driven apps |
 | **Spring AI** | Framework Integration | Java/Spring AI applications | Enterprise Java integration |
+| **Strands Agents** | Agent Development | AWS production-ready AI agents | Model-first approach, MCP support |
 
 ### Category Descriptions
 
@@ -45,6 +46,8 @@ Contains implementations and examples of AI agents using different frameworks an
 **Sub-folders:**
 - **LangChain/**: Framework for developing applications powered by language models with tooling for RAG, chains, and custom LLM applications
 - **No Framework/**: Pure implementation examples without external agent frameworks, demonstrating core agent concepts and custom implementations
+- **Spring AI/**: Java/Spring framework integration for building AI-powered enterprise applications with LLM orchestration
+- **Strands Agents/**: AWS open-source SDK for building production-ready autonomous agents with model-first approach, MCP server integration, and multi-agent orchestration capabilities
 
 **Key Capabilities:**
 - Autonomous task decomposition and multi-step problem solving

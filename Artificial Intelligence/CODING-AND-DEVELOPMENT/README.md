@@ -16,8 +16,6 @@ A collection of tools, frameworks, and platforms for building AI-powered coding 
   - [📁 Microsoft Copilot](#-microsoft-copilot)
   - [📁 Model Context Protocol](#-model-context-protocol)
   - [📁 n8n](#-n8n)
-  - [📁 Spring AI](#-spring-ai)
-  - [📁 Strands Agents](#-strands-agents)
 - [GitHub Copilot vs Microsoft Copilot](#github-copilot-vs-microsoft-copilot)
 - [Key AI Coding Agents](#key-ai-coding-agents)
 - [Resources and References](#resources-and-references)
@@ -190,27 +188,6 @@ Low-code AI automation platform for building AI-driven workflows through a visua
 - Business system integration
 
 **Use Cases:** Workflow automation, AI integration, business process automation
-
----
-
-### 📁 Spring AI
-
-Application framework for AI engineering built on the Spring framework, bringing AI capabilities to Java/Spring applications.
-
-**Key Features:**
-- Spring ecosystem integration
-- Java-based AI development
-- Enterprise-grade AI applications
-
-**Technologies:** Java, Spring Framework
-
----
-
-### 📁 Strands Agents
-
-Agent framework and toolkit for building AI agents with Python API documentation.
-
-**Technologies:** Python
 
 ---
 

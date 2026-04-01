@@ -45,7 +45,9 @@ AGENTS/
 ├── LangGraph/
 ├── LlamaIndex/
 ├── No Framework/
-└── Semantic Kernel/
+├── Semantic Kernel/
+├── Spring AI/
+└── Strands Agents/
 ```
 
 ## What are AI Agents?
