@@ -15,12 +15,13 @@ Large Language Models (LLMs) are advanced artificial intelligence systems built 
 ├── 📁 ORCHESTRATION/
 ├── 📁 PROMPTS/
 ├── 📁 RAG/
+├── 📁 SECURITY/
 └── 📁 VECTOR-DATABASES/
 ```
 
 ## Folder Descriptions
 
-### 📁 DEPLOYMENT
+### DEPLOYMENT
 Contains deployment configurations and infrastructure code for deploying LLM applications across various platforms and frameworks. Includes:
 - **LangChain**: AWS CDK infrastructure for deploying LangChain-based applications with Docker support
 - **LangGraph**: Multi-agent workflow deployment with frontend and backend integration
@@ -28,28 +29,62 @@ Contains deployment configurations and infrastructure code for deploying LLM app
 - **Serverless**: Serverless architecture implementations for LLM services
 - **Spring Boot**: Java-based LLM application deployment with Docker and Terraform configurations
 
-### 📁 INFERENCE
+### INFERENCE
 Provides inference server implementations and examples for running LLM models. Includes FastAPI and standard Python server implementations with client examples, RAG integration, and vector database connectivity.
 
-### 📁 MODELS
+### MODELS
 Documentation and resources for specific LLM models, including Claude and Llama 4, covering model characteristics, usage guidelines, and best practices.
 
-### 📁 ORCHESTRATION
+### ORCHESTRATION
 Framework implementations for orchestrating LLM workflows and multi-agent systems:
 - **LangChain**: Complete LangChain setup with Docker, Open WebUI integration, deployment scripts, and testing examples
 - **LangGraph**: Graph-based workflow orchestration for complex multi-step LLM applications
 
-### 📁 PROMPTS
+### PROMPTS
 Prompt engineering resources including templates, examples, and best practices for designing effective prompts to optimize LLM outputs.
 
-### 📁 RAG
+### RAG
 Retrieval-Augmented Generation (RAG) pipeline implementations combining LLMs with external knowledge bases:
 - Vector database integration
 - Document processing and chunking
 - LlamaIndex framework examples
 - Agent implementations with tool usage
 
-### 📁 VECTOR-DATABASES
+### SECURITY
+Common security resources focused on protecting LLM applications from prompt injection attacks and other vulnerabilities. This folder provides in-depth coverage of:
+
+#### Prompt Injection Attacks
+- **Direct Prompt Injection**: Malicious instructions sent directly to override system prompts
+- **Indirect Prompt Injection**: Hidden instructions in external data sources (web pages, documents, emails)
+- **Jailbreaking Techniques**: Methods to bypass LLM safety guardrails and ethical constraints
+- **Attack Vectors**: Code injection, multimodal attacks, payload splitting, persona switching, multilingual obfuscation
+
+#### Detection Methods
+- **TaskTracker**: Activation-based detection analyzing LLM internal states (activations) during inference to identify task drift caused by injection attempts. Achieves ROC AUC greater than 0.99 across multiple models
+- **Automated Monitors**: Pattern detection for known injection techniques and anomaly detection for unusual behavior
+- **Logging and Alerting**: Real-time monitoring of interactions to identify suspicious prompts and track security events
+- **Red Teaming**: Continuous adversarial testing using simulated attacks to validate system resilience
+
+#### Prevention Strategies
+- **Design-Time Mitigations**: System prompt engineering, instruction hierarchy, spotlighting with delimiters, least privilege access control, and parameterization
+- **Runtime Mitigations**: Input validation and moderation, output validation, data loss prevention (DLP), and human-in-the-loop oversight for sensitive operations
+
+#### Open-Source Security Tools
+- **Augustus**: LLM vulnerability scanner
+- **promptmap2**: Automated injection scanner
+- **Promptfoo**: Red team testing framework
+- **Garak**: NVIDIA LLM security scanner
+
+#### Implementation Resources
+- Docker deployment configurations
+- Python-based demonstration modules
+- PyTest test suites for validation
+- Setup scripts for Ollama with open-source models (Llama, Mistral, Phi, Gemma, Qwen)
+- Security testing techniques including fuzzing, obfuscation testing, and few-shot attacks
+
+The SECURITY folder emphasizes practical demonstrations using local LLM deployments with Ollama, enabling hands-on testing and validation of security measures without dependency on external API services.
+
+### VECTOR-DATABASES
 Vector database setup, configuration, and usage examples for storing and retrieving embeddings used in semantic search and RAG applications.
 
 ## Example: Large Language Models deployed on AWS
@@ -116,7 +151,7 @@ Store the generated embeddings in your chosen vector database, along with metada
 
 4. Building the RAG workflow
 
-User Input 
+User Input
 
 The client sends a question to your API endpoint.
 

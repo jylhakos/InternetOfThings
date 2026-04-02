@@ -26,15 +26,20 @@ This repository contains resources and implementations for various artificial in
 | **Semantic Kernel** | Agent Development | Microsoft AI service integration | SDK for agent-driven apps |
 | **Spring AI** | Framework Integration | Java/Spring AI applications | Enterprise Java integration |
 | **Strands Agents** | Agent Development | AWS production-ready AI agents | Model-first approach, MCP support |
+| **Augustus** | Security Testing | LLM vulnerability scanning | Automated security assessment |
+| **Promptmap2** | Security Testing | Prompt injection detection | Injection attack scanning |
+| **Promptfoo** | Security Testing | Red team testing for LLMs | Security validation framework |
+| **Garak** | Security Testing | NVIDIA LLM vulnerability scanner | Security testing |
 
 ### Category Descriptions
 
-**Autonomous Agent Frameworks**: Specialized for building agents that reason, plan, and collaborate autonomously  
-**LLM Orchestration**: Frameworks for connecting LLMs to data and managing complex workflows  
-**Data Framework/RAG**: Focus on retrieval-augmented generation and data integration  
-**Observability**: Tools for monitoring, debugging, and tracing AI applications  
-**Pipeline Orchestration**: End-to-end ML workflow management and automation  
+**Autonomous Agent Frameworks**: Specialized for building agents that reason, plan, and collaborate autonomously
+**LLM Orchestration**: Frameworks for connecting LLMs to data and managing complex workflows
+**Data Framework/RAG**: Focus on retrieval-augmented generation and data integration
+**Observability**: Tools for monitoring, debugging, and tracing AI applications
+**Pipeline Orchestration**: End-to-end ML workflow management and automation
 **Infrastructure/Protocol**: Standardization and protocol layers for AI systems
+**Security Testing**: Tools for vulnerability assessment, prompt injection detection, and LLM security validation
 
 ## Folder Structure
 
@@ -155,6 +160,19 @@ Tools and methodologies for evaluating artificial intelligence models, with emph
   - Model optimization and tuning utilities
   - GPU/CUDA setup and troubleshooting guides
   - Training and evaluation datasets
+
+- **OBSERVABILITY/**: Monitoring and observability tools for AI applications
+  - LLM application monitoring and debugging
+  - Performance tracking and tracing
+  - Agentic system observability
+  - Metrics collection and visualization
+  
+- **SECURITY/**: Security evaluation and vulnerability assessment
+  - Prompt injection attack testing and detection
+  - LLM security vulnerability scanning
+  - Adversarial input testing
+  - Jailbreaking attempt evaluation
+  - Security best practices and mitigation strategies
   
 - **TOOLS/**: Production-ready evaluation frameworks and utilities
   - REST API for evaluation services
@@ -169,6 +187,7 @@ Tools and methodologies for evaluating artificial intelligence models, with emph
 - Robustness testing under edge cases and adversarial inputs
 - Bias assessment and fairness evaluation
 - Safety evaluation for harmful content detection
+- Security vulnerability assessment and prompt injection testing
 - Human evaluation integration for subjective quality assessment
 
 See [EVALUATION/README.md](EVALUATION/README.md) for detailed setup guides and evaluation methodologies.
@@ -266,11 +285,30 @@ See [PIPELINE/README.md](PIPELINE/README.md) for detailed implementation guides 
 Resources for working with large language models, including orchestration frameworks, RAG implementations, model serving, and vector database integrations.
 
 **Sub-folders:**
+- **DEPLOYMENT/**: Production deployment strategies and infrastructure for LLMs
+  - Cloud deployment patterns and containerization
+  - Scalability and load balancing configurations
+  - Cost optimization and resource management
+  
+- **INFERENCE/**: Model inference optimization and serving strategies
+  - Inference acceleration techniques
+  - Batch processing and request optimization
+  - Hardware utilization and performance tuning
+
 - **MODELS/**: Model configurations, implementations, and setup guides for various LLMs
+  - Pre-trained model integration and configuration
+  - Model selection and comparison guides
+  - Fine-tuning and customization approaches
+
 - **ORCHESTRATION/**: LLM workflow management and orchestration frameworks
   - LangChain and LangGraph for customizable LLM applications and complex stateful flows
   - LlamaIndex specialized in RAG and data source connections
   - Multi-agent flow coordination and tool orchestration
+  
+- **PROMPTS/**: Prompt engineering and optimization techniques
+  - Prompt templates and patterns
+  - Few-shot learning strategies
+  - Chain-of-thought prompting
   
 - **RAG/** (Retrieval-Augmented Generation): RAG implementations and patterns
   - Document processing and chunking strategies
@@ -278,11 +316,16 @@ Resources for working with large language models, including orchestration framew
   - Semantic search and context retrieval
   - Prompt engineering with retrieved context
   
-- **SERVING/**: Deployment and serving infrastructure for LLMs
-  - API endpoints and model serving architectures
-  - Integration with Ollama, vLLM, and other serving engines
-  - Scalability and performance optimization
-  - Local and cloud deployment patterns
+- **SECURITY/**: LLM security, vulnerability assessment, and attack prevention
+  - **Prompt Injection Protection**: Defense against direct and indirect prompt injection attacks
+  - **Jailbreaking Prevention**: Safeguards against model alignment bypasses
+  - **Data Exfiltration Defense**: Preventing unauthorized data extraction
+  - **Security Testing Tools**: Augustus, Promptmap2, Promptfoo, Garak for vulnerability scanning
+  - **Detection Methods**: TaskTracker activation-based detection, behavioral monitoring
+  - **Best Practices**: Input validation, output filtering, system prompt isolation
+  - **AI Agent Security**: Tool restriction, authorization policies, audit logging
+  - **Ollama Security**: Local model deployment and exposure risk mitigation
+  - **Fine-Tuning Security**: Training-level attack prevention and model hardening
   
 - **VECTOR-DATABASES/**: Vector database implementations and integrations
   - Pinecone, Milvus, OpenSearch Service
