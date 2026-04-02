@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  prompt-injection-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prompt-injection-demo
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    command: tail -f /dev/null
+
+volumes:
+  ollama-data:
