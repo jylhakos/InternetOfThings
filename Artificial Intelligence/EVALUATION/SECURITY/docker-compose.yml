@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  llm-security-eval:
+    build: .
+    container_name: llm-security-eval
+    volumes:
+      - .:/workspace
+      - ./data:/workspace/data
+      - ./logs:/workspace/logs
+    environment:
+      - PYTHONPATH=/workspace
+      - OLLAMA_HOST=http://ollama:11434
+    networks:
+      - llm-network
+    depends_on:
+      - ollama
+    command: /bin/bash
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - llm-network
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
+
+networks:
+  llm-network:
+    driver: bridge

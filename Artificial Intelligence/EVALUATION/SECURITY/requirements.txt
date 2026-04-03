@@ -1,0 +1,40 @@
+# LLM Security Evaluation Framework
+# Python Dependencies
+
+# Core Dependencies
+requests>=2.31.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.1
+
+# LLM and AI Libraries
+langchain>=0.1.0
+langchain-community>=0.0.10
+ollama>=0.1.0
+
+# Testing and Security
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-timeout>=2.2.0
+
+# Security Testing Tools
+deepchecks>=0.17.0
+promptfoo>=0.1.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Logging and Monitoring
+structlog>=23.1.0
+
+# RAG and Vector Database
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# API and Web
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# Utilities
+tqdm>=4.66.0
+colorama>=0.4.6

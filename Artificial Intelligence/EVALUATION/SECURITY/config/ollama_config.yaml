@@ -1,0 +1,57 @@
+# Ollama Configuration
+# Configuration for local Ollama server
+
+server:
+  host: localhost
+  port: 11434
+  base_url: http://localhost:11434
+
+# Security settings
+security:
+  # Enable network isolation (bind to localhost only)
+  bind_local: true
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    max_requests_per_minute: 60
+    max_requests_per_hour: 1000
+  
+  # Input validation
+  input_validation:
+    max_input_length: 4096
+    check_injection_patterns: true
+  
+  # Output filtering
+  output_filtering:
+    redact_pii: true
+    block_code_injection: true
+
+# Model settings
+models:
+  default: llama3.2
+  
+  available:
+    - name: llama3.2
+      parameters:
+        temperature: 0.7
+        top_p: 0.9
+        max_tokens: 2048
+    
+    - name: mistral
+      parameters:
+        temperature: 0.5
+        top_p: 0.95
+        max_tokens: 1024
+
+# Monitoring
+monitoring:
+  enabled: true
+  log_requests: true
+  log_responses: true
+  log_file: logs/ollama_requests.log
+  
+  # Alert thresholds
+  alerts:
+    high_request_rate: 100
+    unusual_pattern_threshold: 0.8
