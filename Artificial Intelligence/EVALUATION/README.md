@@ -426,11 +426,8 @@ Leverages industry-standard open-source frameworks (DeepEval, RAGAS, LangChain, 
 ### Multi-Domain Support
 Covers LLM evaluation, time-series forecasting, agent monitoring, and security testing in a unified ecosystem.
 
-### Educational Resources
-Includes Jupyter notebooks, interactive tutorials, and detailed documentation for learning and experimentation.
-
 ---
 
-**Last Updated**: April 2026  
-**Maintained by**: IoT & AI Evaluation Team
+**Last Updated**: April 2026
+
 
