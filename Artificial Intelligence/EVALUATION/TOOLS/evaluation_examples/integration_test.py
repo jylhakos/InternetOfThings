@@ -66,7 +66,7 @@ class EvaluationFrameworkTester:
             'evaluation_examples/llmebench_example.py',
             'evaluation_examples/langsmith_example.py',
             'evaluation_examples/ragas_example.py',
-            'evaluation_examples/comprehensive_demo.py',
+            'evaluation_examples/evaluation_demo.py',
             'README.md'
         ]
         
@@ -104,7 +104,7 @@ class EvaluationFrameworkTester:
             'evaluation_examples/llmebench_example.py', 
             'evaluation_examples/langsmith_example.py',
             'evaluation_examples/ragas_example.py',
-            'evaluation_examples/comprehensive_demo.py'
+            'evaluation_examples/evaluation_demo.py'
         ]
         
         syntax_errors = []

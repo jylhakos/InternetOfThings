@@ -404,7 +404,7 @@ python evaluation_examples/ragas_example.py
 
 ### Run Comprehensive Evaluation
 ```bash
-python evaluation_examples/comprehensive_demo.py
+python evaluation_examples/evaluation_demo.py
 ```
 
 ## 📚 Documentation Links

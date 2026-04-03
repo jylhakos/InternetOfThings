@@ -1101,7 +1101,7 @@ EVALUATION/TOOLS/
 │   ├── test_environment.py  # Environment verification script
 │   └── test_evaluation_setup.py # Evaluation tools test
 ├── evaluation_examples/      # 🆕 LLM Evaluation Framework
-│   ├── comprehensive_demo.py # Master demo showcasing all 5 frameworks
+│   ├── evaluation_demo.py   # Master demo showcasing all 5 frameworks
 │   ├── integration_test.py  # Integration testing suite
 │   ├── installation_guide.md # Installation instructions
 │   ├── deepeval_example.py  # DeepEval production testing example
@@ -1961,7 +1961,7 @@ CUDA_VISIBLE_DEVICES=0 python src/bert_evaluation.py
 #### Demo (Recommended)
 ```bash
 # Run complete evaluation framework demonstration
-python evaluation_examples/comprehensive_demo.py
+python evaluation_examples/evaluation_demo.py
 
 # Or run integration test to verify setup
 python evaluation_examples/integration_test.py
@@ -2143,7 +2143,7 @@ def predict_sentiment(text, model, tokenizer):
 ### **Core Documentation**
 - **API Documentation**: [Auto-generated Swagger UI](http://localhost:8000/docs) (when server is running)
 - **Installation Guide**: [evaluation_examples/installation_guide.md](./evaluation_examples/installation_guide.md)
-- **Comprehensive Demo**: [evaluation_examples/comprehensive_demo.py](./evaluation_examples/comprehensive_demo.py)
+- **Evaluation Demo**: [evaluation_examples/evaluation_demo.py](./evaluation_examples/evaluation_demo.py)
 - **Integration Tests**: [evaluation_examples/integration_test.py](./evaluation_examples/integration_test.py)
 
 ### **Open-Source Agent Evaluation Tools**
