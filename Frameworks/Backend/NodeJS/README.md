@@ -1,6 +1,6 @@
-# Full-Stack Development by Node.js
+# Full-Stack Software Development by Node.js
 
-An overview of software development using Node.js, Express.js, Next.js, and Vite for building scalable web applications with server-side rendering and LLM integration capabilities.
+An overview of software development using Node.js, Express.js, Next.js, MCP and Vite for building scalable web applications with server-side rendering and LLM integration capabilities.
 
 ## Table of Contents
 
@@ -11,6 +11,15 @@ An overview of software development using Node.js, Express.js, Next.js, and Vite
 - [Vite Frontend Tooling](#vite-frontend-tooling)
 - [Full-Stack Integration](#full-stack-integration)
 - [LLM Integration with Node.js](#llm-integration-with-nodejs)
+- [Model Context Protocol (MCP)](#model-context-protocol-mcp)
+  - [What is MCP?](#what-is-mcp)
+  - [MCP Architecture](#mcp-architecture)
+  - [TypeScript SDK](#typescript-sdk)
+  - [Add MCP Server to Your Web App](#add-mcp-server-to-your-web-app)
+  - [MCP Transport Protocols](#mcp-transport-protocols)
+  - [Deploy to Azure Functions](#deploy-to-azure-functions)
+  - [Deploy to Azure Container Apps](#deploy-to-azure-container-apps)
+  - [Security Considerations for MCP](#security-considerations-for-mcp)
 - [Project Structure](#project-structure)
 - [Deployment](#deployment)
 - [References](#references)
@@ -51,7 +60,7 @@ server.listen(3000, () => {
 
 ## Next.js and Server-Side Rendering
 
-**Next.js** is a React framework for building full-stack web applications that leverages Node.js for its server-side features. It provides a comprehensive solution for modern web development with built-in optimizations and performance enhancements.
+**Next.js** is a React framework for building full-stack web applications that leverages Node.js for its server-side features. It provides a solution for modern web development with built-in optimizations and performance enhancements.
 
 ### Server-Side Rendering (SSR)
 
@@ -397,33 +406,388 @@ export default async function handler(req, res) {
 
 ### Model Context Protocol (MCP) Integration
 
-The Model Context Protocol facilitates integration between LLMs and external tools:
+The Model Context Protocol provides a standardized way to connect LLMs to external tools and data sources. See the dedicated [Model Context Protocol (MCP)](#model-context-protocol-mcp) section for full documentation.
 
-```javascript
-// MCP server example
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+## Model Context Protocol (MCP)
 
-const server = new Server(
-  { name: 'example-server', version: '0.1.0' },
-  { capabilities: { tools: {} } }
+**Model Context Protocol (MCP)** is an open-source standard for connecting AI applications to external systems. Using MCP, AI applications like Claude or ChatGPT can connect to data sources (local files, databases), tools (search engines, calculators), and workflows — enabling them to access key information and perform tasks on behalf of users.
+
+Think of MCP like a USB-C port for AI applications. Just as USB-C provides a standardized way to connect electronic devices, MCP provides a standardized way to connect AI applications to external systems.
+
+### What is MCP?
+
+MCP defines a client-server architecture where:
+
+- **MCP Host** — An AI application (e.g., Claude, GitHub Copilot, ChatGPT) that initiates connections to MCP servers.
+- **MCP Server** — A lightweight program that exposes capabilities (tools, resources, prompts) to the host through the standard protocol.
+- **MCP Client** — The protocol layer inside the host that maintains a 1:1 connection with an MCP server.
+
+MCP matters because it:
+
+- **Reduces development complexity** when building or integrating AI applications.
+- **Provides a broad ecosystem** of data sources, tools, and apps that enhance AI agent capabilities.
+- **Is model-agnostic** — works with any LLM that supports the protocol, including models from Anthropic, OpenAI, and others.
+- **Has broad ecosystem support** — backed by Claude, ChatGPT, Visual Studio Code, Cursor, and many other tools.
+
+### MCP Architecture
+
+```
+┌──────────────────────────────────────────────────┐
+│                   MCP Host                        │
+│  (Claude / GitHub Copilot / Custom AI Agent)      │
+│  ┌─────────────┐    ┌─────────────┐              │
+│  │ MCP Client  │    │ MCP Client  │  ...         │
+│  └──────┬──────┘    └──────┬──────┘              │
+└─────────┼─────────────────┼────────────────────┘
+          │  MCP Protocol   │  MCP Protocol
+          ▼                 ▼
+  ┌──────────────┐  ┌──────────────┐
+  │  MCP Server  │  │  MCP Server  │
+  │  (Node.js /  │  │  (Node.js /  │
+  │   Express)   │  │   Azure Fn.) │
+  └──────┬───────┘  └──────┬───────┘
+         │                 │
+  ┌──────▼───────┐  ┌──────▼───────┐
+  │  Data Source │  │  External    │
+  │  / Tools     │  │  APIs        │
+  └──────────────┘  └──────────────┘
+```
+
+MCP servers expose three types of capabilities:
+
+| Capability | Description | Example |
+|---|---|---|
+| **Tools** | Functions the LLM can invoke | `get_weather`, `query_database` |
+| **Resources** | Data the LLM can read | Files, database records, API responses |
+| **Prompts** | Reusable prompt templates | Guided workflows, structured interactions |
+
+### TypeScript SDK
+
+The official [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) provides everything needed to build MCP servers and clients in Node.js:
+
+```bash
+npm install @modelcontextprotocol/sdk
+```
+
+Key classes provided by the SDK:
+
+- `McpServer` — High-level server class with `tool()`, `resource()`, and `prompt()` registration methods.
+- `StreamableHTTPServerTransport` — Transport layer for HTTP-based MCP servers (recommended for remote servers).
+- `StdioServerTransport` — Transport layer for local process-based MCP servers.
+
+### Add MCP Server to Your Web App
+
+The most common pattern is integrating an MCP server into an Express.js application. This exposes your backend capabilities as MCP tools that any MCP-compatible AI agent can discover and call.
+
+#### Installation
+
+```bash
+npm install @modelcontextprotocol/sdk express zod
+npm install -D typescript @types/node @types/express tsx
+```
+
+#### Basic MCP Server with Express
+
+```typescript
+import express from 'express';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { createExpressHandler } from "@modelcontextprotocol/express";
+import { z } from "zod";
+
+const app = express();
+const mcpServer = new McpServer({
+  name: "MyExpressMCPServer",
+  version: "1.0.0"
+});
+
+// Register a tool (e.g., a calculator or data fetcher)
+mcpServer.tool("echo", 
+  { message: z.string() }, 
+  async ({ message }) => ({
+    content: [{ type: "text", text: `You said: ${message}` }]
+  })
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    {
-      name: 'get_weather',
-      description: 'Get current weather for a location',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          location: { type: 'string' }
-        }
-      }
-    }
-  ]
-}));
+// Add the MCP handler to your Express app
+app.use("/api/mcp", createExpressHandler(mcpServer));
+
+app.listen(3000, () => console.log("MCP Server running on http://localhost:3000/api/mcp"));
 ```
+
+#### Full MCP Server with StreamableHTTP Transport
+
+For production use, the `StreamableHTTPServerTransport` is recommended. It runs in stateless mode (one transport instance per request) and supports HTTP Streaming — the standard for remote MCP servers:
+
+```typescript
+import express, { Request, Response } from "express";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { z } from "zod";
+
+const app = express();
+app.use(express.json());
+
+const mcpServer = new McpServer({
+    name: "TasksMCP",
+    version: "1.0.0",
+});
+
+// Register tools using Zod schemas for input validation
+mcpServer.tool(
+    "list_tasks",
+    "List all tasks with their ID, title, and completion status.",
+    {},
+    async () => ({
+        content: [{ type: "text", text: JSON.stringify(await getTasks()) }],
+    })
+);
+
+mcpServer.tool(
+    "create_task",
+    "Create a new task with the given title and description.",
+    {
+        title: z.string().describe("A short title for the task"),
+        description: z.string().describe("A detailed description of the task"),
+    },
+    async ({ title, description }) => {
+        const task = await createTask(title, description);
+        return {
+            content: [{ type: "text", text: JSON.stringify(task) }],
+        };
+    }
+);
+
+// Health endpoint (required for cloud deployments)
+app.get("/health", (_req: Request, res: Response) => {
+    res.json({ status: "healthy" });
+});
+
+// Mount the MCP streamable HTTP transport
+const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+
+app.post("/mcp", async (req: Request, res: Response) => {
+    await transport.handleRequest(req, res, req.body);
+});
+app.get("/mcp", async (req: Request, res: Response) => {
+    await transport.handleRequest(req, res);
+});
+app.delete("/mcp", async (req: Request, res: Response) => {
+    await transport.handleRequest(req, res);
+});
+
+// Connect transport to MCP server
+await mcpServer.connect(transport);
+
+const PORT = parseInt(process.env.PORT || "3000", 10);
+app.listen(PORT, () => {
+    console.log(`MCP server running on http://localhost:${PORT}/mcp`);
+});
+```
+
+#### Registering the MCP Server with GitHub Copilot
+
+Once your server is running, connect it to GitHub Copilot by adding a `.vscode/mcp.json` to your project:
+
+```json
+{
+  "servers": {
+    "my-mcp-server": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+Open Copilot Chat in Agent mode — your tools will be automatically discovered and available for use.
+
+### MCP Transport Protocols
+
+MCP supports multiple transport mechanisms depending on deployment context:
+
+| Transport | Use Case | Notes |
+|---|---|---|
+| **Streamable HTTP** | Remote servers (recommended) | Stateless, scalable, works with Azure Functions and Container Apps |
+| **SSE (Server-Sent Events)** | Legacy remote servers | Requires persistent connections, limited scalability |
+| **Stdio** | Local process servers | Used by Claude Desktop and local tooling |
+
+The **Streamable HTTP** transport is the recommended choice for Node.js web applications — it is stateless, supports horizontal scaling, and is compatible with all major AI clients.
+
+### Deploy to Azure Functions
+
+Azure Functions is a serverless platform that lets you host an MCP server without managing infrastructure. It automatically scales and you pay only for actual execution time.
+
+**Why Azure Functions for MCP servers?**
+
+- Zero infrastructure management — no servers to maintain.
+- Automatic scaling from zero to hundreds of instances.
+- Cost-effective — generous free grant (1 million requests/month).
+- Built-in monitoring via Application Insights.
+- Global distribution across Azure regions.
+
+#### Step 1: Add `host.json` Configuration
+
+Create a `host.json` file at the root of your Node.js MCP project:
+
+```json
+{
+  "version": "2.0",
+  "configurationProfile": "mcp-custom-handler",
+  "customHandler": {
+    "description": {
+      "defaultExecutablePath": "node",
+      "arguments": ["dist/server.js"]
+    },
+    "http": {
+      "DefaultAuthorizationLevel": "anonymous"
+    },
+    "port": "3000"
+  }
+}
+```
+
+The `customHandler` section configures the Azure Functions runtime to run your Node.js MCP server as a custom handler, allowing any HTTP server framework (Express, Fastify, etc.) to work without modification.
+
+#### Step 2: Deploy with Azure Developer CLI
+
+```bash
+# Login to Azure
+azd auth login
+
+# Provision resources and deploy (one command)
+azd up
+```
+
+The Azure Developer CLI (`azd`) deploys your MCP server to a production-ready Azure Functions environment. For more details, see the [official guide](https://developer.microsoft.com/blog/host-your-node-js-mcp-server-on-azure-functions-in-3-simple-steps).
+
+### Deploy to Azure Container Apps
+
+For MCP servers that need persistent connections or have specific runtime requirements, Azure Container Apps provides a fully managed container hosting environment.
+
+#### Project Setup
+
+```bash
+# Create and initialize project
+mkdir tasks-mcp-server && cd tasks-mcp-server
+npm init -y
+
+# Install dependencies
+npm install @modelcontextprotocol/sdk express zod
+npm install -D typescript @types/node @types/express tsx
+```
+
+`tsconfig.json` targeting ES2022 with Node16 module resolution:
+
+```json
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "Node16",
+        "moduleResolution": "Node16",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "strict": true,
+        "esModuleInterop": true
+    },
+    "include": ["src/**/*"]
+}
+```
+
+#### Dockerfile for Container Apps
+
+```dockerfile
+FROM node:20-slim AS build
+WORKDIR /app
+COPY package*.json .
+RUN npm ci
+COPY tsconfig.json .
+COPY src/ src/
+RUN npm run build
+
+FROM node:20-slim
+WORKDIR /app
+COPY package*.json .
+RUN npm ci --omit=dev
+COPY --from=build /app/dist ./dist
+ENV PORT=8080
+EXPOSE 8080
+CMD ["node", "dist/index.js"]
+```
+
+#### Deploy via Azure CLI
+
+```bash
+# Set variables
+RESOURCE_GROUP="mcp-tutorial-rg"
+LOCATION="eastus"
+ENVIRONMENT_NAME="mcp-env"
+APP_NAME="tasks-mcp-server-node"
+
+# Create resource group and Container Apps environment
+az group create --name $RESOURCE_GROUP --location $LOCATION
+az containerapp env create \
+    --name $ENVIRONMENT_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --location $LOCATION
+
+# Deploy the container app (builds image in the cloud)
+az containerapp up \
+    --name $APP_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --environment $ENVIRONMENT_NAME \
+    --source . \
+    --ingress external \
+    --target-port 8080
+
+# Configure CORS
+az containerapp ingress cors enable \
+    --name $APP_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --allowed-origins "*" \
+    --allowed-methods "GET,POST,DELETE,OPTIONS" \
+    --allowed-headers "*"
+
+# Keep at least one instance running to avoid cold-start delays
+az containerapp update \
+    --name $APP_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --min-replicas 1
+```
+
+For a full step-by-step walkthrough, see the [Azure Container Apps tutorial](https://learn.microsoft.com/en-us/azure/container-apps/tutorial-mcp-server-nodejs).
+
+#### Connect Deployed Server to GitHub Copilot
+
+```json
+{
+    "servers": {
+        "tasks-mcp-server": {
+            "type": "http",
+            "url": "https://<your-app-fqdn>/mcp"
+        }
+    }
+}
+```
+
+#### Testing Locally with MCP Inspector
+
+```bash
+npx -y @modelcontextprotocol/inspector
+```
+
+Open the URL in your browser, set the transport type to Streamable HTTP, enter `http://localhost:3000/mcp`, and click Connect. The Tools tab lists all registered tools.
+
+### Security Considerations for MCP
+
+Before deploying an MCP server to production:
+
+- **Authentication** — Secure your server with Microsoft Entra ID or an equivalent identity provider.
+- **Input validation** — Zod schemas provide type safety; add business-rule validation for tool parameters.
+- **HTTPS** — Azure Container Apps enforces HTTPS by default with automatic TLS certificates.
+- **Least privilege** — Expose only the tools your use case requires. Avoid tools that perform destructive operations without confirmation.
+- **CORS** — Restrict allowed origins to trusted domains in production (replace wildcard `*`).
+- **Prompt injection** — When an LLM calls your MCP server, be aware of [prompt injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) attacks in tool inputs.
+- **Logging** — Log MCP tool invocations for auditing. Use Azure Monitor and Log Analytics in cloud deployments.
 
 ## Project Structure
 
@@ -431,7 +795,7 @@ The NodeJS directory contains several examples.
 
 ```
 NodeJS/
-├── README.md                 # This comprehensive guide
+├── README.md                 # This document
 ├── MCP/                      # Model Context Protocol implementation
 │   ├── src/
 │   │   ├── server/          # MCP server with Ollama integration
@@ -498,7 +862,7 @@ Vercel specializes in frontend development and deployment, particularly for Next
 | Feature | Vercel | AWS |
 |---------|---------|-----|
 | **Specialization** | Frontend/Next.js | Full cloud services |
-| **Complexity** | Simple deployment | Comprehensive but complex |
+| **Complexity** | Simple deployment | Complex |
 | **Cost** | Free tier generous | Pay-as-you-go |
 | **Scalability** | Automatic | Manual configuration |
 | **Best For** | JAMstack apps | Enterprise applications |
@@ -570,8 +934,14 @@ CMD ["npm", "start"]
 - [Hugging Face Transformers.js for Node.js](https://huggingface.co/docs/transformers.js/en/tutorials/node) - Server-side ML inference
 - [LlamaNode Library](https://llama-node.vercel.app/) - Node.js library for large language models
 
+### Model Context Protocol (MCP)
+- [MCP Introduction](https://modelcontextprotocol.io/docs/getting-started/intro) - What is the Model Context Protocol
+- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) - Official TypeScript SDK for building MCP servers and clients
+- [Host Node.js MCP Server on Azure Functions](https://developer.microsoft.com/blog/host-your-node-js-mcp-server-on-azure-functions-in-3-simple-steps) - Serverless MCP hosting guide
+- [Deploy Node.js MCP Server to Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/tutorial-mcp-server-nodejs) - Container-based MCP hosting tutorial
+- [Integrate App Service as MCP Server for GitHub Copilot](https://learn.microsoft.com/en-us/azure/app-service/tutorial-ai-model-context-protocol-server-node) - App Service MCP integration
+
 ### Advanced Topics
-- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) - Standard for AI tool integration
 - [AWS vs Vercel Comparison](https://vercel.com/docs/concepts/infrastructure) - Platform selection guide
 - [JAMstack Architecture](https://jamstack.org/) - Modern web development architecture
 
