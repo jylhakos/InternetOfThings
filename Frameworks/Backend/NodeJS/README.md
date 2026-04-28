@@ -11,6 +11,16 @@ An overview of software development using Node.js, Express.js, Next.js, MCP and 
 - [Vite Frontend Tooling](#vite-frontend-tooling)
 - [Full-Stack Integration](#full-stack-integration)
 - [LLM Integration with Node.js](#llm-integration-with-nodejs)
+- [LLMs Interaction with MCP and Express](#llms-interaction-with-mcp-and-express)
+  - [Core Components](#core-components)
+  - [MCP Server: Exposing Tools to the LLM](#mcp-server-exposing-tools-to-the-llm)
+  - [MCP Client: Express Integration](#mcp-client-express-integration)
+  - [Transport Modes: stdio and SSE](#transport-modes-stdio-and-sse)
+  - [Defining MCP Tools with Zod](#defining-mcp-tools-with-zod)
+  - [Running MCP Alongside Express](#running-mcp-alongside-express)
+  - [LLM Reasoning Workflow](#llm-reasoning-workflow)
+  - [Configure MCP Environment in VS Code](#configure-mcp-environment-in-vs-code)
+  - [Connecting LLMs to Your MCP Server](#connecting-llms-to-your-mcp-server)
 - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
   - [What is MCP?](#what-is-mcp)
   - [MCP Architecture](#mcp-architecture)
@@ -408,6 +418,458 @@ export default async function handler(req, res) {
 
 The Model Context Protocol provides a standardized way to connect LLMs to external tools and data sources. See the dedicated [Model Context Protocol (MCP)](#model-context-protocol-mcp) section for full documentation.
 
+## LLMs Interaction with MCP and Express
+
+Integrating Node.js Express with the Model Context Protocol (MCP) and Large Language Models (LLMs) allows models like GPT or Claude to interact directly with your application's internal tools and data. The LLM selects tools provided by the MCP server — such as database queries, API calls, or custom functions — based on user intent, returning actionable results through an Express endpoint.
+
+You can build your own MCP server in Node.js/TypeScript to expose your Express routes as tools or resources that an LLM can discover and execute. The LLM sends a request to the MCP server, which then makes an internal function call or a local HTTP request to your Express routes to retrieve data.
+
+### Core Components
+
+Three components work together to connect an LLM to your Express backend:
+
+| Component | Role |
+|---|---|
+| **Express.js** | Acts as your backend API where business logic, database queries, and data processing live |
+| **MCP Server** | A wrapper using `@modelcontextprotocol/sdk` that defines and exposes tools (functions) to the LLM |
+| **LLM (AI Client)** | An AI assistant (like GPT or Claude) that connects to your MCP server to fetch context or trigger actions |
+
+```
+┌─────────────────────────────────────────────────┐
+│                   User Input                    │
+└──────────────────────┬──────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────┐
+│         Express Client (REST Endpoint)          │
+│  - Receives user prompt                         │
+│  - Fetches available MCP tools                  │
+│  - Sends prompt + tools to the LLM              │
+│  - Interprets tool_call responses               │
+│  - Executes tools on the MCP server             │
+└──────────────┬───────────────────┬──────────────┘
+               │                   │
+               ▼                   ▼
+┌──────────────────────┐  ┌──────────────────────┐
+│   LLM (GPT/Claude)   │  │     MCP Server       │
+│                      │  │     (Node.js)        │
+│  - Evaluates user    │  │  - Exposes tools     │
+│    intent            │  │  - Defines Zod       │
+│  - Selects tools     │  │    schemas           │
+│  - Parses outputs    │  │  - Calls Express     │
+│  - Returns response  │  │    routes internally │
+└──────────────────────┘  └──────────────────────┘
+```
+
+### MCP Server: Exposing Tools to the LLM
+
+The MCP Server acts as a mediator between the LLM and your application. It exposes **tools** (functions) that the LLM can invoke, with input schemas validated using [Zod](https://github.com/colinhacks/zod) so the LLM knows exactly what parameters to send.
+
+In a dedicated file (e.g., `mcp-server.ts`), define tools that correspond to your Express endpoints or internal business logic:
+
+```typescript
+// mcp-server.ts
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+
+export const mcpServer = new McpServer({
+  name: "ExpressAppMCPServer",
+  version: "1.0.0",
+});
+
+// Tool: query the database via an internal function
+mcpServer.tool(
+  "get_product",
+  "Retrieve a product by its ID from the database.",
+  { productId: z.string().describe("The unique identifier of the product") },
+  async ({ productId }) => {
+    const product = await getProductFromDB(productId);
+    return {
+      content: [{ type: "text", text: JSON.stringify(product) }],
+    };
+  }
+);
+
+// Tool: call an external API
+mcpServer.tool(
+  "get_weather",
+  "Fetch current weather for a given city.",
+  { city: z.string().describe("The city name") },
+  async ({ city }) => {
+    const weather = await fetchWeatherAPI(city);
+    return {
+      content: [{ type: "text", text: JSON.stringify(weather) }],
+    };
+  }
+);
+```
+
+### MCP Client: Express Integration
+
+The Express side acts as the **MCP client**. It receives user input, sends it to the LLM along with the list of available MCP tools, interprets any `tool_call` responses from the LLM, executes those tools on the MCP server, and returns the final answer to the user.
+
+```typescript
+// routes/chat.ts
+import express from "express";
+import OpenAI from "openai";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
+const router = express.Router();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Connect MCP client to the MCP server
+const mcpClient = new Client({ name: "express-client", version: "1.0.0" });
+const transport = new StreamableHTTPClientTransport(
+  new URL("http://localhost:3001/mcp")
+);
+await mcpClient.connect(transport);
+
+router.post("/chat", async (req, res) => {
+  const { message } = req.body;
+
+  // Step 1: Fetch the list of available MCP tools
+  const { tools } = await mcpClient.listTools();
+  const openAITools = tools.map((tool) => ({
+    type: "function" as const,
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.inputSchema,
+    },
+  }));
+
+  // Step 2: Send user message and tools to the LLM
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { role: "user", content: message },
+  ];
+  let response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    tools: openAITools,
+    tool_choice: "auto",
+  });
+
+  let choice = response.choices[0];
+
+  // Step 3: Handle tool calls until the LLM produces a final answer
+  while (choice.finish_reason === "tool_calls") {
+    const toolCall = choice.message.tool_calls![0];
+    const toolArgs = JSON.parse(toolCall.function.arguments);
+
+    // Step 4: Execute the tool on the MCP server
+    const toolResult = await mcpClient.callTool({
+      name: toolCall.function.name,
+      arguments: toolArgs,
+    });
+
+    // Step 5: Feed the tool result back to the LLM
+    messages.push(choice.message);
+    messages.push({
+      role: "tool",
+      tool_call_id: toolCall.id,
+      content: JSON.stringify(toolResult.content),
+    });
+
+    response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+      tools: openAITools,
+      tool_choice: "auto",
+    });
+    choice = response.choices[0];
+  }
+
+  res.json({ reply: choice.message.content });
+});
+
+export default router;
+```
+
+### Transport Modes: stdio and SSE
+
+MCP supports two primary transport modes for connecting the client to the server. Choose the mode that matches your deployment environment:
+
+| Transport | Best For | Notes |
+|---|---|---|
+| **Standard I/O (stdio)** | Local development, desktop AI agents | Parent process communicates via stdin/stdout |
+| **Streaming HTTP / SSE** | Production web services | Mount on an Express route; supports remote LLMs |
+
+#### Standard I/O (stdio)
+
+Best for **local development** and **desktop AI agents** such as Cursor or Claude Desktop. The AI client starts your Node.js process and communicates through standard input/output:
+
+```typescript
+// server.ts — stdio transport
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { mcpServer } from "./mcp-server.js";
+
+const transport = new StdioServerTransport();
+await mcpServer.connect(transport);
+// No HTTP port needed — the parent process communicates via stdin/stdout
+```
+
+Configure Claude Desktop by editing its config file:
+
+```json
+{
+  "mcpServers": {
+    "my-express-app": {
+      "command": "node",
+      "args": ["/path/to/your/server.js"]
+    }
+  }
+}
+```
+
+#### Streaming HTTP / Server-Sent Events (SSE)
+
+Ideal for **production web services**. Mount the MCP handler directly onto an Express route so remote LLMs can call your tools via HTTP. Use `@modelcontextprotocol/sdk/server/streamableHttp.js` (recommended) or `@modelcontextprotocol/sdk/server/sse.js` for legacy SSE clients:
+
+```typescript
+// server.ts — Streaming HTTP transport (recommended for production)
+import express from "express";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { mcpServer } from "./mcp-server.js";
+
+const app = express();
+app.use(express.json());
+
+const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+
+// Mount the /mcp endpoint
+app.post("/mcp", async (req, res) => { await transport.handleRequest(req, res, req.body); });
+app.get("/mcp",  async (req, res) => { await transport.handleRequest(req, res); });
+app.delete("/mcp", async (req, res) => { await transport.handleRequest(req, res); });
+
+await mcpServer.connect(transport);
+app.listen(3001, () => console.log("MCP Server on http://localhost:3001/mcp"));
+```
+
+### Defining MCP Tools with Zod
+
+Zod schemas give the LLM precise knowledge of what inputs each tool expects. Define schemas in the MCP server so the model never sends malformed parameters:
+
+```typescript
+import { z } from "zod";
+
+// Simple string input
+mcpServer.tool(
+  "search_products",
+  "Search the product catalog by keyword.",
+  { query: z.string().min(1).describe("The search keyword") },
+  async ({ query }) => { /* ... */ }
+);
+
+// Complex object with nested array
+mcpServer.tool(
+  "create_order",
+  "Create a new order for a customer.",
+  {
+    customerId: z.string().uuid().describe("Customer UUID"),
+    items: z
+      .array(
+        z.object({
+          productId: z.string(),
+          quantity: z.number().int().positive(),
+        })
+      )
+      .describe("List of order line items"),
+    shippingAddress: z.string().describe("Full shipping address"),
+  },
+  async ({ customerId, items, shippingAddress }) => { /* ... */ }
+);
+```
+
+### Running MCP Alongside Express
+
+You can run your MCP server on a **separate port** alongside your main Express API, or **combine both on a single Express instance** using separate route prefixes.
+
+#### Separate Ports
+
+```typescript
+// index.ts — start both servers independently
+import { expressApp } from "./api-server.js";    // Main Express API (port 3000)
+import { mcpExpressApp } from "./mcp-server.js"; // MCP endpoint    (port 3001)
+
+expressApp.listen(3000, () => console.log("Express API on :3000"));
+mcpExpressApp.listen(3001, () => console.log("MCP Server on :3001"));
+```
+
+#### Combined Single Server
+
+```typescript
+// server.ts — single Express app for both API and MCP
+import express from "express";
+import { apiRouter } from "./routes/api.js";
+import { mcpServer } from "./mcp-server.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+
+const app = express();
+app.use(express.json());
+
+// Regular Express API routes
+app.use("/api", apiRouter);
+
+// MCP protocol endpoint
+const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+app.post("/mcp",   (req, res) => transport.handleRequest(req, res, req.body));
+app.get("/mcp",    (req, res) => transport.handleRequest(req, res));
+app.delete("/mcp", (req, res) => transport.handleRequest(req, res));
+
+await mcpServer.connect(transport);
+app.listen(3000, () => console.log("Combined server on :3000"));
+```
+
+The MCP server tools can internally call your Express routes or shared service functions, keeping business logic in one place while exposing it to the LLM through the protocol.
+
+### LLM Reasoning Workflow
+
+The following sequence describes how the LLM evaluates user intent, selects a tool, and produces a final response:
+
+```
+User: "What is the weather in Paris?"
+         │
+         ▼
+┌──────────────────────────────┐
+│  Express /chat endpoint      │
+│  1. Receives user prompt     │
+│  2. Fetches tool list        │
+│     from MCP server          │
+└──────────────┬───────────────┘
+               │ prompt + tool definitions
+               ▼
+┌──────────────────────────────┐
+│     LLM (GPT / Claude)       │
+│  3. Evaluates user intent    │
+│  4. Decides to call          │
+│     get_weather("Paris")     │
+└──────────────┬───────────────┘
+               │ tool_call: get_weather
+               ▼
+┌──────────────────────────────┐
+│      MCP Server              │
+│  5. Executes get_weather     │
+│  6. Returns JSON result      │
+└──────────────┬───────────────┘
+               │ tool result
+               ▼
+┌──────────────────────────────┐
+│     LLM (GPT / Claude)       │
+│  7. Parses tool output       │
+│  8. Generates final          │
+│     structured response      │
+└──────────────┬───────────────┘
+               │
+               ▼
+  "The weather in Paris is 18°C and partly cloudy."
+```
+
+Key reasoning steps:
+
+1. The LLM receives the user prompt and the list of available MCP tools.
+2. If the LLM decides to use `get_weather`, it sends a `tool_call` request back to the Express client.
+3. The Express client executes the `get_weather` tool on the MCP server and passes the output back to the LLM.
+4. The LLM uses the tool output to generate a final, structured response.
+
+### Configure MCP Environment in VS Code
+
+Add your MCP server to VS Code so that GitHub Copilot and other MCP-compatible extensions can discover and use your Express tools. Create a `.vscode/mcp.json` file in your project root:
+
+```json
+{
+  "servers": {
+    "express-mcp": {
+      "type": "http",
+      "url": "http://localhost:3001/mcp"
+    }
+  }
+}
+```
+
+For a stdio-based local server, use the `stdio` type:
+
+```json
+{
+  "servers": {
+    "express-mcp-local": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/server.js"],
+      "env": {
+        "DATABASE_URL": "${env:DATABASE_URL}"
+      }
+    }
+  }
+}
+```
+
+Open Copilot Chat in **Agent mode** and your tools will be automatically discovered. The LLM can then call `get_product`, `get_weather`, or any tool you registered in your MCP server directly from the chat interface.
+
+### Connecting LLMs to Your MCP Server
+
+#### Local Connection (Claude Desktop or Cursor)
+
+Point your AI agent to your local Node.js MCP server by editing the agent's configuration file.
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "my-express-app": {
+      "command": "node",
+      "args": ["/path/to/your/server.js"]
+    }
+  }
+}
+```
+
+**Cursor** (`.cursor/mcp.json` in your project root):
+
+```json
+{
+  "mcpServers": {
+    "my-express-app": {
+      "command": "node",
+      "args": ["dist/server.js"],
+      "cwd": "/path/to/your/project"
+    }
+  }
+}
+```
+
+#### Remote Connection
+
+Point an MCP-compatible agent to your deployed Express server's URL. For a server hosted on Azure Container Apps or any cloud provider, update `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "express-mcp-remote": {
+      "type": "http",
+      "url": "https://your-app.azurecontainerapps.io/mcp"
+    }
+  }
+}
+```
+
+For OpenAI-based clients, connect to a remote MCP server programmatically:
+
+```typescript
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
+const mcpClient = new Client({ name: "remote-client", version: "1.0.0" });
+const transport = new StreamableHTTPClientTransport(
+  new URL("https://your-app.azurecontainerapps.io/mcp")
+);
+await mcpClient.connect(transport);
+
+// List available tools and pass them to the LLM
+const { tools } = await mcpClient.listTools();
+```
+
 ## Model Context Protocol (MCP)
 
 **Model Context Protocol (MCP)** is an open-source standard for connecting AI applications to external systems. Using MCP, AI applications like Claude or ChatGPT can connect to data sources (local files, databases), tools (search engines, calculators), and workflows — enabling them to access key information and perform tasks on behalf of users.
@@ -432,12 +894,12 @@ MCP matters because it:
 ### MCP Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│                   MCP Host                        │
-│  (Claude / GitHub Copilot / Custom AI Agent)      │
-│  ┌─────────────┐    ┌─────────────┐              │
-│  │ MCP Client  │    │ MCP Client  │  ...         │
-│  └──────┬──────┘    └──────┬──────┘              │
+┌────────────────────────────────────────────────┐
+│                   MCP Host                     │
+│  (Claude / GitHub Copilot / Custom AI Agent)   │
+│  ┌─────────────┐    ┌─────────────┐            │
+│  │ MCP Client  │    │ MCP Client  │  ...       │
+│  └──────┬──────┘    └──────┬──────┘            │
 └─────────┼─────────────────┼────────────────────┘
           │  MCP Protocol   │  MCP Protocol
           ▼                 ▼
