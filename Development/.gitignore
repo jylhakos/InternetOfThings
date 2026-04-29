@@ -1,0 +1,99 @@
+# ─── Virtual Environments ────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+virtualenv/
+.virtualenv/
+
+# ─── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# ─── MicroPython / Embedded ──────────────────────────────────────────────────
+*.mpy
+*.bin
+*.hex
+*.elf
+*.uf2
+*.map
+*.lst
+
+# ─── C / C++ ─────────────────────────────────────────────────────────────────
+*.o
+*.a
+*.so
+*.out
+*.exe
+*.dll
+*.lib
+*.obj
+*.d
+
+# ─── JavaScript / Node.js ────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.npm/
+.node_repl_history
+
+# ─── IDE / Editor ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Secrets & Credentials ───────────────────────────────────────────────────
+.env
+*.env
+secrets.py
+config_local.py
+credentials.json
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ─── Logs & Temporary Files ──────────────────────────────────────────────────
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# ─── Archives ────────────────────────────────────────────────────────────────
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.rar
+*.7z

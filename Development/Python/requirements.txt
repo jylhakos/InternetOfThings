@@ -1,0 +1,5 @@
+# Python dependencies for IoT development (AWS IoT Core via MQTT)
+# Install with: pip install -r Python/requirements.txt
+
+# AWS IoT Device SDK for Python v1
+AWSIoTPythonSDK>=1.5.0
