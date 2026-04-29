@@ -1,0 +1,15 @@
+{
+  "name": "js-concurrency",
+  "version": "1.0.0",
+  "description": "JavaScript and TypeScript Concurrency Examples",
+  "main": "dist/race-condition.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/race-condition.js",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
