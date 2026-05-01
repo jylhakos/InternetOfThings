@@ -5,8 +5,14 @@
 langchain>=1.2.0,<2.0.0
 langchain-core>=1.2.0,<2.0.0
 
-# OpenAI integration for LangChain
+# LangGraph — required for create_react_agent (replaces initialize_agent in 1.x)
+langgraph>=1.1.0,<2.0.0
+
+# OpenAI integration for LangChain (cloud provider)
 langchain-openai>=1.1.0,<2.0.0
+
+# Ollama integration for LangChain (local inference)
+langchain-ollama>=0.2.0
 
 # Environment variable management
 python-dotenv>=1.2.0
@@ -15,7 +21,7 @@ python-dotenv>=1.2.0
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 
-# HTTP client (for potential API calls in tools)
+# HTTP client (for potential API calls in tools and Ollama health checks)
 httpx>=0.28.0
 requests>=2.32.0
 
@@ -26,6 +32,5 @@ requests>=2.32.0
 
 # Optional: Advanced features (uncomment as needed)
 # langsmith>=0.1.0  # For observability and tracing
-# langgraph>=1.1.0  # For complex stateful workflows
 # duckduckgo-search>=6.0.0  # For web search tool
 # wikipedia>=1.4.0  # For Wikipedia search tool

@@ -1,0 +1,151 @@
+# ==============================
+# Virtual Environments
+# ==============================
+venv/
+.venv/
+env/
+ENV/
+.env/
+virtualenv/
+
+# ==============================
+# Environment Variables / Secrets
+# ==============================
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# ==============================
+# Python Bytecode & Cache
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ==============================
+# Distribution / Packaging
+# ==============================
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+*.whl
+
+# ==============================
+# Large Language Model Files
+# ==============================
+# GGUF model files (can be several GB)
+*.gguf
+*.ggml
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ot
+*.onnx
+
+# Ollama model cache (local Ollama data)
+.ollama/
+ollama_models/
+models/
+
+# Hugging Face cache
+.cache/huggingface/
+hub/
+
+# ==============================
+# Logs & Temporary Files
+# ==============================
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+logs/
+tmp/
+
+# ==============================
+# IDE & Editor Files
+# ==============================
+.idea/
+.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==============================
+# OS Files
+# ==============================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# ==============================
+# Testing & Coverage
+# ==============================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+
+# ==============================
+# Docker
+# ==============================
+.docker/
+
+# ==============================
+# LangSmith / Observability
+# ==============================
+langsmith_traces/
+
+# Stray files from malformed pip install commands (shell redirection artefacts)
+# e.g. pip install langchain>=1.0 without quotes creates a file named =1.0
+=*
+
+# ==============================
+# LangChain Package Binaries
+# ==============================
+# pip-installed LangChain package directories that may appear if installed
+# outside a venv or copied into the project folder directly
+langchain/
+langchain_core/
+langchain_community/
+langchain_ollama/
+langchain_openai/
+langchain_anthropic/
+langchain_google_genai/
+langchain_text_splitters/
+langgraph/
+langsmith/
+
+# Compiled C extensions produced by LangChain / pydantic / tokenizers
+*.so
+*.pyd
+*.dll
+
+# Wheel and sdist archives
+*.whl
+*.tar.gz
+
+# pip download cache
+pip_cache/
+.pip/
+
+# Package metadata directories written next to source by some installers
+*.dist-info/
+*.egg-info/

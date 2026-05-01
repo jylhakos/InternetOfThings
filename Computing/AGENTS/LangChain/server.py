@@ -22,9 +22,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from langchain.agents import initialize_agent, AgentType
-from langchain_core.tools import Tool
-from langchain_openai import ChatOpenAI
+from langchain_core.tools import tool
+from langgraph.prebuilt import create_react_agent
 import uvicorn
 
 # Load environment variables
@@ -78,81 +77,75 @@ class HealthResponse(BaseModel):
     """Response model for health check"""
     status: str
     message: str
+    llm_provider: str
     api_key_configured: bool
+
+
+def create_llm(verbose_mode: bool = False):
+    """
+    Create the LLM based on the LLM_PROVIDER environment variable.
+    Supports "ollama" (default, local) and "openai" (cloud).
+    """
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+    if provider == "openai":
+        from langchain_openai import ChatOpenAI
+        model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+        return ChatOpenAI(model_name=model, temperature=0)
+    else:
+        from langchain_ollama import ChatOllama
+        model = os.getenv("OLLAMA_MODEL", "llama3.2")
+        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        return ChatOllama(model=model, base_url=base_url, temperature=0)
 
 
 # ===== Agent Tools =====
 
+@tool
 def get_weather(city: str) -> str:
-    """Get weather information for a city"""
+    """Get the current weather for a given city name."""
     weather_data = {
         "San Francisco": "It's foggy and cool, 15°C",
         "New York": "Sunny and warm, 22°C",
         "London": "Rainy and cold, 10°C",
         "Tokyo": "Clear skies, 18°C",
         "Paris": "Partly cloudy, 17°C",
-        "Sydney": "Beautiful sunny day, 24°C"
+        "Sydney": "Beautiful sunny day, 24°C",
     }
     return weather_data.get(city, f"Weather data not available for {city}. It's probably nice though!")
 
 
-def calculate(expression: str) -> str:
-    """Perform mathematical calculations"""
+@tool
+def calculator(expression: str) -> str:
+    """Evaluate a mathematical expression such as '2+2' or '10*5-3'."""
     try:
-        result = eval(expression)
+        result = eval(expression)  # noqa: S307
         return f"The result of {expression} is {result}"
     except Exception as e:
         return f"Error calculating {expression}: {str(e)}"
 
 
-# Define tools
-tools = [
-    Tool(
-        name="GetWeather",
-        func=get_weather,
-        description="Use this tool to get the weather for a specific city. Input should be a city name."
-    ),
-    Tool(
-        name="Calculator",
-        func=calculate,
-        description="Use this tool to perform mathematical calculations. Input should be a mathematical expression."
-    )
-]
+tools = [get_weather, calculator]
 
 
 # ===== Initialize Agent =====
 
 def create_agent(verbose: bool = False):
     """
-    Create and return a LangChain agent instance.
-    
+    Create and return a LangGraph ReAct agent.
+
     Args:
-        verbose: Whether to enable verbose output
-        
+        verbose: Unused (kept for API compatibility); LangGraph uses streaming for verbosity.
+
     Returns:
-        Initialized LangChain agent
+        Compiled LangGraph agent graph.
     """
-    # Check for API key
-    if not os.getenv("OPENAI_API_KEY"):
-        raise ValueError("OPENAI_API_KEY not found in environment variables")
-    
-    # Initialize LLM
-    llm = ChatOpenAI(
-        model_name="gpt-4o",
-        temperature=0
-    )
-    
-    # Create agent
-    agent = initialize_agent(
-        tools=tools,
-        llm=llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=verbose,
-        handle_parsing_errors=True,
-        max_iterations=5  # Prevent infinite loops
-    )
-    
-    return agent
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+
+    if provider == "openai" and not os.getenv("OPENAI_API_KEY"):
+        raise ValueError("LLM_PROVIDER=openai but OPENAI_API_KEY is not set")
+
+    llm = create_llm(verbose_mode=verbose)
+    return create_react_agent(llm, tools)
 
 
 # ===== API Endpoints =====
@@ -162,12 +155,14 @@ async def health_check():
     """
     Health check endpoint to verify the service is running.
     """
-    api_key_configured = bool(os.getenv("OPENAI_API_KEY"))
-    
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+    api_key_configured = provider != "openai" or bool(os.getenv("OPENAI_API_KEY"))
+
     return HealthResponse(
         status="healthy" if api_key_configured else "warning",
-        message="LangChain AI Agent API is running" if api_key_configured 
+        message="LangChain AI Agent API is running" if api_key_configured
                 else "API is running but OPENAI_API_KEY is not configured",
+        llm_provider=provider,
         api_key_configured=api_key_configured
     )
 
@@ -187,19 +182,20 @@ async def query_agent(request: QueryRequest):
         HTTPException: If there's an error processing the request
     """
     try:
-        # Check for API key
-        if not os.getenv("OPENAI_API_KEY"):
+        # Check provider-specific requirements
+        provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+        if provider == "openai" and not os.getenv("OPENAI_API_KEY"):
             raise HTTPException(
                 status_code=500,
-                detail="OPENAI_API_KEY not configured. Please set it in your .env file."
+                detail="LLM_PROVIDER=openai but OPENAI_API_KEY is not configured."
             )
         
         # Create agent executor
         agent_executor = create_agent(verbose=request.verbose)
-        
+
         # Invoke the agent with the question
-        response = agent_executor.invoke({"input": request.question})
-        answer = response['output']
+        result = agent_executor.invoke({"messages": [("human", request.question)]})
+        answer = result["messages"][-1].content
         
         return QueryResponse(
             question=request.question,
@@ -223,17 +219,14 @@ async def query_agent(request: QueryRequest):
 async def list_tools():
     """
     List available tools the agent can use.
-    
-    Returns:
-        List of tool names and descriptions
     """
     return {
         "tools": [
             {
-                "name": tool.name,
-                "description": tool.description
+                "name": t.name,
+                "description": t.description
             }
-            for tool in tools
+            for t in tools
         ]
     }
 
@@ -241,16 +234,22 @@ async def list_tools():
 # ===== Main Execution =====
 
 if __name__ == "__main__":
-    # Check for API key before starting server
-    if not os.getenv("OPENAI_API_KEY"):
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+
+    if provider == "openai" and not os.getenv("OPENAI_API_KEY"):
         print("\n" + "=" * 60)
-        print("WARNING: OPENAI_API_KEY not found!")
+        print("WARNING: LLM_PROVIDER=openai but OPENAI_API_KEY not found!")
         print("=" * 60)
         print("\nThe server will start, but agent queries will fail.")
         print("\nTo fix this:")
         print("1. Copy .env.example to .env")
-        print("2. Add your OpenAI API key to .env")
+        print("2. Set OPENAI_API_KEY in .env")
         print("3. Restart the server\n")
+    elif provider == "ollama":
+        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2")
+        print(f"\nUsing Ollama at {ollama_url} with model: {ollama_model}")
+        print("Ensure Ollama is running (see README for Docker instructions)\n")
     
     # Start the server
     print("\n" + "=" * 60)

@@ -1,0 +1,70 @@
+# ============================================================
+# docker-compose.yml — LangChain Agent + Ollama
+# ============================================================
+# Starts two services:
+#   ollama         — Ollama LLM inference server
+#   langchain-agent — FastAPI server powered by LangChain
+#
+# Quick start:
+#   docker compose up -d
+#   docker compose exec ollama ollama pull llama3.2
+#
+# Stop:
+#   docker compose down
+#
+# Destroy volumes (removes downloaded models):
+#   docker compose down -v
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # Ollama — local LLM inference server (llama.cpp based)
+  # ----------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist downloaded models across container restarts
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    # Uncomment the lines below to enable NVIDIA GPU acceleration:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ----------------------------------------------------------
+  # LangChain Agent — FastAPI REST API
+  # ----------------------------------------------------------
+  langchain-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: langchain-agent
+    ports:
+      - "8000:8000"
+    environment:
+      # Use Ollama for local inference (no API key required)
+      LLM_PROVIDER: "ollama"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "llama3.2"
+      # Uncomment to use OpenAI instead:
+      # LLM_PROVIDER: "openai"
+      # OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      # OPENAI_MODEL: "gpt-3.5-turbo"
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+# ----------------------------------------------------------
+# Named volumes
+# ----------------------------------------------------------
+volumes:
+  ollama_data:
+    driver: local
