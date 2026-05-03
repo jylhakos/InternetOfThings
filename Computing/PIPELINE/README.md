@@ -2,6 +2,45 @@
 
 This repository contains machine learning pipelines built with different orchestration tools: **Apache Airflow**, **Dagster**, **Kubeflow**, and **MLflow**. Each implementation demonstrates best practices for building, deploying, and managing AI workflows on both local environments and Amazon AWS cloud infrastructure.
 
+## Introduction
+
+Pipeline tools like Apache Airflow and Dagster adapt the pre-training of Large Language Models (LLMs) on the cloud by orchestrating complex, distributed, and long-running workflows across ephemeral cloud infrastructure. They act as the "glue" between data ingestion, data preprocessing, model training on GPU clusters, and model artifact management. While Airflow is "task-centric" and often used for scheduling batch jobs, Dagster is "asset-centric," providing better visibility into data lineage and training artifacts (e.g., tokenized datasets, checkpoints).
+
+Dagster is popular for LLM development due to its "asset-based" model, which allows engineers to treat trained models as data assets, improving reproducibility. Airflow remains a strong standard for organizations needing to merge traditional ETL workflows with new AI training pipelines due to its mature, expansive ecosystem.
+
+### 1. Cloud Native Orchestration & Scaling
+
+▸ **Resource allocation**: Both tools leverage Kubernetes, enabling them to spin up large GPU clusters (like AWS EC2, GCP Compute Engine) only when needed, and shutting them down to save costs.
+
+▸ **Cloud integrations**: They natively integrate with cloud storage (S3, GCS) for storing terabytes of pre-training data and model checkpoints, and with training services like Databricks, AWS SageMaker, or Ray.
+
+### 2. Managing Pre-Training Complexity
+
+▸ **Data preprocessing pipelines**: They manage heavy ETL processes (e.g., using Spark or Ray) to clean, filter, and tokenize massive datasets (Common Crawl, Wikipedia) before training begins.
+
+▸ **Asset lineage (Dagster)**: Dagster tracks the "software-defined assets" (raw data → clean data → tokenized data → trained model). If a dataset changes, Dagster knows exactly which models need retraining.
+
+### LLM Pre-Training Workflow
+
+▪ **Ingestion**: Airflow/Dagster triggers Spark jobs to collect data from web scrapes.
+▪ **Transformation**: Data is cleaned, deduplicated, and converted to parquet files.
+▪ **Tokenization**: Large datasets are tokenized using Spark/Ray, storing output on S3.
+▪ **Training**: The orchestrator launches a Kubernetes pod or interacts with SageMaker to start the multi-node GPU pre-training job.
+▪ **Monitoring**: The tool tracks the job status and logs artifacts (loss, learning rate) via integration with MLflow or Weights & Biases.
+▪ **Cleanup**: Setup and teardown tasks release the GPU instances after training.
+
+### References
+
+- [Apache Airflow](https://airflow.apache.org/) - Official Airflow documentation
+- [Dagster](https://dagster.io/) - Official Dagster documentation
+- [AWS SageMaker](https://aws.amazon.com/sagemaker/) - Managed ML service for training and deployment
+- [Ray on AWS](https://aws.amazon.com/blogs/opensource/scaling-ai-and-machine-learning-workloads-with-ray-on-aws/) - Scaling AI workloads with Ray
+- [LLM experimentation at scale using SageMaker Pipelines and MLflow](https://aws.amazon.com/blogs/machine-learning/llm-experimentation-at-scale-using-amazon-sagemaker-pipelines-and-mlflow/)
+- [Weights & Biases](https://wandb.ai/site) - Experiment tracking and model monitoring
+- [MLflow](https://mlflow.org/) - Open-source ML lifecycle management
+- [LLM training pipelines with Langchain, Airbyte, and Dagster](https://dagster.io/blog/training-llms) - Tutorial on combining LangChain, Airbyte, and Dagster to build maintainable and scalable pipelines for training LLMs: data ingestion via Airbyte, asset orchestration in Dagster, embedding generation, and a retrieval QA application with LangChain
+- [ML Pipelines: 5 Components and 5 Critical Best Practices](https://dagster.io/learn/ml) - A guide covering what ML pipelines are, their key components (data ingestion, preprocessing, feature engineering, model training, evaluation, deployment), sequential vs. parallel processing, common challenges, and best practices for orchestrating ML pipelines with Dagster
+
 ## 📁 Directory Structure
 
 ```
