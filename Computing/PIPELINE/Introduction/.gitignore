@@ -1,0 +1,93 @@
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# Distribution and packaging
+dist/
+build/
+*.egg-info/
+*.egg
+*.whl
+*.spec
+
+# Compiled C extensions
+*.so
+*.dll
+*.dylib
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Training artifacts and checkpoints
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+
+# Dataset and tokenizer artefacts
+data/
+tokenizer/
+
+# Weights & Biases run artefacts
+wandb/
+
+# Model output directories
+output/
+outputs/
+runs/
+
+# Logs
+*.log
+logs/
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# VS Code workspace settings
+.vscode/settings.json
+.vscode/*.code-workspace
+
+# Environment variable files
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# CUDA profiling output
+*.nvvp
+*.nvprof
+*.qdrep
+
+# Archive files
+*.zip
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.7z
+*.rar
