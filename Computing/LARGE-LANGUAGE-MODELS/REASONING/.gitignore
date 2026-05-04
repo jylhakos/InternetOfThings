@@ -1,0 +1,110 @@
+# Virtual environment directories
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution and packaging
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Pip and package manager files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Training outputs and model checkpoints
+outputs/
+runs/
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+
+# LoRA adapter files saved during training
+grpo_saved_lora/
+model/
+*_lora/
+
+# Large model weight files
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*.ipynb
+
+# CUDA and compiled binaries
+*.so
+*.dll
+*.dylib
+*.cu.o
+*.nvcc
+
+# HuggingFace cache (can be very large)
+.cache/
+huggingface/
+
+# Dataset cache directories
+~/.cache/huggingface/datasets/
+
+# Weights and Biases logs
+wandb/
+
+# TensorBoard logs
+logs/
+tensorboard_logs/
+
+# Environment variable files (may contain API tokens)
+.env
+.env.local
+.env.production
+*.env
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Docker volumes (if stored locally)
+docker_volumes/
+ollama_data/
+open_webui_data/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+
+# Test outputs
+test_results/
+evaluation_outputs/
