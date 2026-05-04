@@ -15,6 +15,7 @@ Large Language Models (LLMs) are advanced artificial intelligence systems built 
 ├── 📁 ORCHESTRATION/
 ├── 📁 PROMPTS/
 ├── 📁 RAG/
+├── 📁 REASONING/
 ├── 📁 SECURITY/
 └── 📁 VECTOR-DATABASES/
 ```
@@ -49,6 +50,14 @@ Retrieval-Augmented Generation (RAG) pipeline implementations combining LLMs wit
 - Document processing and chunking
 - LlamaIndex framework examples
 - Agent implementations with tool usage
+
+### REASONING
+Theoretical foundations and practical training methodologies for building reasoning-capable LLMs. Covers chain-of-thought (CoT) reasoning, reinforcement learning techniques, and fine-tuning approaches. Includes:
+- **GRPO Training** (`grpo_train.py`): Group Relative Policy Optimization training script using the Unsloth and TRL libraries, fine-tuning a model on the GSM8K grade-school math dataset to produce structured chain-of-thought outputs
+- **Reinforcement Learning Methods**: Coverage of RLHF, PPO, GRPO, and Reinforcement Learning with Verifiable Rewards (RLVR)
+- **Four Training Paradigms**: Inference-time scaling, pure RL, SFT + RL, and pure supervised fine-tuning with distillation
+- **Inference Server Setup**: Instructions for deploying reasoning models locally with Ollama and Open WebUI via Docker
+- **Hardware Guidance**: QLoRA 4-bit quantization configurations for consumer GPUs (7–15 GB VRAM)
 
 ### SECURITY
 Common security resources focused on protecting LLM applications from prompt injection attacks and other vulnerabilities. This folder provides in-depth coverage of:
