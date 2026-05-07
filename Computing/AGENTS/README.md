@@ -240,10 +240,10 @@ flowchart TD
     MA -->|No| MULTI[Multi-Agent System]
     MA -->|Yes| SUB[Sub-Agent Architecture]
 
-    style CHAIN fill:#2d4a22,color:#e0e0e0
-    style SA fill:#1a3a5c,color:#e0e0e0
-    style MULTI fill:#4a1a5c,color:#e0e0e0
-    style SUB fill:#5c3a1a,color:#e0e0e0
+    style CHAIN fill:#a8d5a2,color:#1a1a1a
+    style SA fill:#a8c5e8,color:#1a1a1a
+    style MULTI fill:#d4a8e8,color:#1a1a1a
+    style SUB fill:#e8c4a8,color:#1a1a1a
 ```
 
 ---
@@ -285,9 +285,9 @@ flowchart LR
     T2 -->|Observation| LLM
     LLM -->|Done| R([Final Response])
 
-    style LLM fill:#1a3a5c,color:#e0e0e0
-    style T1 fill:#16213e,color:#e0e0e0
-    style T2 fill:#16213e,color:#e0e0e0
+    style LLM fill:#a8c5e8,color:#1a1a1a
+    style T1 fill:#b8d4f0,color:#1a1a1a
+    style T2 fill:#b8d4f0,color:#1a1a1a
 ```
 
 ---
@@ -340,10 +340,10 @@ flowchart TD
         A3
     end
 
-    style MGR fill:#4a1a5c,color:#e0e0e0
-    style A1 fill:#16213e,color:#e0e0e0
-    style A2 fill:#16213e,color:#e0e0e0
-    style A3 fill:#16213e,color:#e0e0e0
+    style MGR fill:#d4a8e8,color:#1a1a1a
+    style A1 fill:#b8d4f0,color:#1a1a1a
+    style A2 fill:#b8d4f0,color:#1a1a1a
+    style A3 fill:#b8d4f0,color:#1a1a1a
 ```
 
 **Key insight from Anthropic (Claude Research system):** Multi-agent systems excel especially for breadth-first queries that involve pursuing multiple independent directions simultaneously. They work mainly because they allow spending enough tokens to solve problems that exceed the limits of single agents. For economic viability, the value of the task must be high enough to pay for the increased token cost.
@@ -398,10 +398,10 @@ flowchart TD
         SA3
     end
 
-    style COORD fill:#5c3a1a,color:#e0e0e0
-    style SA1 fill:#2d1a0e,color:#e0e0e0
-    style SA2 fill:#2d1a0e,color:#e0e0e0
-    style SA3 fill:#2d1a0e,color:#e0e0e0
+    style COORD fill:#e8c4a8,color:#1a1a1a
+    style SA1 fill:#f0d5b8,color:#1a1a1a
+    style SA2 fill:#f0d5b8,color:#1a1a1a
+    style SA3 fill:#f0d5b8,color:#1a1a1a
 ```
 
 **Nested sub-agents** are supported by frameworks and platforms (e.g., VS Code Copilot `chat.subagents.allowInvocationsFromSubagents`, LangGraph nested graphs). Sub-agents can spawn further sub-agents up to a configurable depth limit, enabling divide-and-conquer patterns for very large tasks.
@@ -548,11 +548,11 @@ flowchart TD
     SPEC -->|Direct response| OUT([Output])
     SUPER -->|Synthesise| OUT
 
-    style SUPER fill:#4a1a5c,color:#e0e0e0
-    style SPEC fill:#1a3a5c,color:#e0e0e0
-    style W1 fill:#16213e,color:#e0e0e0
-    style W2 fill:#16213e,color:#e0e0e0
-    style W3 fill:#16213e,color:#e0e0e0
+    style SUPER fill:#d4a8e8,color:#1a1a1a
+    style SPEC fill:#a8c5e8,color:#1a1a1a
+    style W1 fill:#b8d4f0,color:#1a1a1a
+    style W2 fill:#b8d4f0,color:#1a1a1a
+    style W3 fill:#b8d4f0,color:#1a1a1a
 ```
 
 ---
@@ -1156,7 +1156,7 @@ flowchart TD
     EA -->|Result| CREW
     CREW --> OUT([Final Output])
 
-    style OLL fill:#2d4a22,color:#e0e0e0
+    style OLL fill:#a8d5a2,color:#1a1a1a
 ```
 
 **Framework comparison for local deployment:**
