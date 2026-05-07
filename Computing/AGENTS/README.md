@@ -125,9 +125,9 @@ AGENTS/
 
 **An AI agent is three things combined:**
 
-▪ A **large language model** — the brain that reasons and makes decisions  
-▪ **Tools** — things it can do (search the web, run code, read files, call APIs)  
-▪ A **loop** — it keeps reasoning and acting until the task is done  
+· A **large language model** — the brain that reasons and makes decisions  
+· **Tools** — things it can do (search the web, run code, read files, call APIs)  
+· A **loop** — it keeps reasoning and acting until the task is done  
 
 **At their core, an AI agent is a combination of a model, tools, and a prompt** that work together to accomplish tasks autonomously.
 
@@ -202,18 +202,18 @@ Not every task requires the complexity of an agent. Understanding when to avoid 
 
 ▸ **Use a simple prompt → response if:**
 
-▪ Your task has a predictable, fixed set of steps  
-▪ You do not need the LLM to make decisions about what to do next  
-▪ A single prompt generates the required output  
-▪ The workflow is fully deterministic and the control flow can be written explicitly in code  
+· Your task has a predictable, fixed set of steps
+· You do not need the LLM to make decisions about what to do next
+· A single prompt generates the required output
+· The workflow is fully deterministic and the control flow can be written explicitly in code
 
 ▸ **Examples of tasks that do NOT need an agent:**
 
-▪ Summarizing a document (single prompt, single response)  
-▪ Classifying text into fixed categories  
-▪ Translating text from one language to another  
-▪ Generating a structured report from a template  
-▪ Running a fixed, pre-defined sequence of API calls  
+· Summarizing a document (single prompt, single response)
+· Classifying text into fixed categories
+· Translating text from one language to another
+· Generating a structured report from a template
+· Running a fixed, pre-defined sequence of API calls
 
 > "Don't add agent complexity where a chain works." — A prompt → response handles many cases effectively.
 
@@ -254,9 +254,9 @@ A single agent is **one LLM running one loop** with a specific set of tools and 
 
 ### Single-Agent Architecture
 
-▸ **Structure**: One LLM + one system prompt + a defined set of tools  
-▸ **Best For**: Well-defined, sequential workflows where a single reasoning loop is sufficient  
-▸ **Key Benefit**: Low operational complexity, easy to debug, cost-effective  
+▸ **Structure**: One LLM + one system prompt + a defined set of tools
+▸ **Best For**: Well-defined, sequential workflows where a single reasoning loop is sufficient
+▸ **Key Benefit**: Low operational complexity, easy to debug, cost-effective
 
 Single-agent systems are ideal for simple, sequential tasks like personal assistants, local RAG pipelines, coding assistants, and system-administration monitors.
 
@@ -298,9 +298,9 @@ A multi-agent system is **multiple LLMs, each with their own tools and instructi
 
 ### Multi-Agent Architecture
 
-▸ **Structure**: Multiple specialised agents, each with a role, tools, and instructions  
-▸ **Best For**: Projects that require parallel processing, specialised domain expertise, or tasks exceeding a single context window  
-▸ **Key Benefit**: Scalability, fault tolerance, and parallel execution in process-driven environments  
+▸ **Structure**: Multiple specialised agents, each with a role, tools, and instructions
+▸ **Best For**: Projects that require parallel processing, specialised domain expertise, or tasks exceeding a single context window
+▸ **Key Benefit**: Scalability, fault tolerance, and parallel execution in process-driven environments
 
 Multi-agent systems distribute work across specialised agents, improving scalability and enabling complex, cross-functional workflows that would overwhelm a single agent's context window.
 
@@ -356,9 +356,9 @@ Sub-agents are **context-isolated agents spawned by a main agent** to handle spe
 
 A sub-agent is not a persistent entity — it is **short-lived** and task-focused: spawned for one purpose, completes it, then returns results to the calling agent. This prevents memory leaks, manages token usage, and enables parallelism within a single, complex phase.
 
-▸ **Structure**: A coordinator agent spawns child agents for granular work  
-▸ **Best For**: Deep research into specific sub-topics, tool-calling sub-tasks, or specialised parsing/execution roles within a larger workflow  
-▸ **Key Benefit**: Prevents context contamination, enables parallel execution, reduces token overhead  
+▸ **Structure**: A coordinator agent spawns child agents for granular work
+▸ **Best For**: Deep research into specific sub-topics, tool-calling sub-tasks, or specialised parsing/execution roles within a larger workflow
+▸ **Key Benefit**: Prevents context contamination, enables parallel execution, reduces token overhead
 
 ### Sub-Agent Use Cases
 
@@ -374,10 +374,10 @@ A sub-agent is not a persistent entity — it is **short-lived** and task-focuse
 | Feature Builder | Reviewer Agent | Check implementation |
 
 **Use Sub-Agents when you need to:**
-▪ Prevent memory leaks and context contamination  
-▪ Manage token usage by clearing context between phases  
-▪ Parallelise a single, complex phase (e.g., parallel code review from multiple perspectives)  
-▪ Delegate to a specialised model without bloating the main agent's context  
+· Prevent memory leaks and context contamination
+· Manage token usage by clearing context between phases
+· Parallelise a single, complex phase (e.g., parallel code review from multiple perspectives)
+· Delegate to a specialised model without bloating the main agent's context
 
 ### Sub-Agent Workflow
 
@@ -416,10 +416,10 @@ The following capabilities differentiate basic LLM pipelines from true agentic s
 
 **Tool use** is the foundational capability that turns an LLM into an agent. Without tools, the LLM can only generate text; with tools, it can act on the world.
 
-▪ **Function calling / tool use**: The LLM calls external Python functions, APIs, shell commands, or databases  
-▪ **MCP (Model Context Protocol)**: De facto standard for connecting agents to tool servers. A single MCP server can expose multiple tools to any compatible agent framework  
-▪ **MCP clients** are built into Open WebUI, Cursor, and VS Code Copilot  
-▪ **MCP servers** exist for file system, GitHub, databases, web search, shell, and more  
+· **Function calling / tool use**: The LLM calls external Python functions, APIs, shell commands, or databases
+· **MCP (Model Context Protocol)**: De facto standard for connecting agents to tool servers. A single MCP server can expose multiple tools to any compatible agent framework
+· **MCP clients** are built into Open WebUI, Cursor, and VS Code Copilot
+· **MCP servers** exist for file system, GitHub, databases, web search, shell, and more
 
 ```
 Agent  ──tool_call──▶  MCP Server  ──▶  Tool (web search, file, API…)
@@ -453,11 +453,11 @@ Agent  ──tool_call──▶  MCP Server  ──▶  Tool (web search, file, 
 
 Planning separates reactive agents (respond to each input independently) from deliberative agents (reason about a multi-step strategy):
 
-▪ **Chain-of-thought reasoning** — thinking step by step before acting
-▪ **Task decomposition** — breaking a large task into manageable sub-tasks
-▪ **Self-reflection** — checking its own work and adjusting
-▪ **Backtracking** — recognising it went down the wrong path and trying a different approach
-▪ **ReAct (Reason + Act)** — the most common pattern: Thought → Action → Observation → repeat
+· **Chain-of-thought reasoning** — thinking step by step before acting
+· **Task decomposition** — breaking a large task into manageable sub-tasks
+· **Self-reflection** — checking its own work and adjusting
+· **Backtracking** — recognising it went down the wrong path and trying a different approach
+· **ReAct (Reason + Act)** — the most common pattern: Thought → Action → Observation → repeat
 
 ### Multi-Agent Orchestration Patterns
 
@@ -494,10 +494,10 @@ flowchart LR
 
 In production, you rarely want agents running completely unsupervised. The ability to pause, inspect state, approve high-risk actions, and resume is what separates demos from real systems.
 
-▪ **Approval gates**: Pause before irreversible actions (file deletion, API calls, deployments)  
-▪ **State inspection**: Review agent memory, tool call history, and intermediate reasoning  
-▪ **Feedback injection**: Correct the agent's plan mid-execution  
-▪ **Annotation queues**: Human reviewers score agent outputs to build evaluation datasets  
+· **Approval gates**: Pause before irreversible actions (file deletion, API calls, deployments)
+· **State inspection**: Review agent memory, tool call history, and intermediate reasoning
+· **Feedback injection**: Correct the agent's plan mid-execution
+· **Annotation queues**: Human reviewers score agent outputs to build evaluation datasets
 
 Framework support: LangGraph checkpointing + `interrupt()`, AutoGen human proxy agent, Bedrock Guardrails + manual approval workflow.
 
@@ -511,10 +511,10 @@ Multi-agent collaboration refers to networks of specialised agents that communic
 
 **Why multi-agent collaboration?**
 
-▪ Tasks that require specialised domain expertise (one agent writes code, another tests it)  
-▪ Workflows that exceed a single context window  
-▪ Tasks that are inherently parallelisable (research across multiple sources simultaneously)  
-▪ Complex processes that benefit from separation of concerns and fault isolation  
+· Tasks that require specialised domain expertise (one agent writes code, another tests it)
+· Workflows that exceed a single context window
+· Tasks that are inherently parallelisable (research across multiple sources simultaneously)
+· Complex processes that benefit from separation of concerns and fault isolation
 
 **Single-agent vs. multi-agent:**
 
@@ -532,10 +532,10 @@ Multi-agent collaboration refers to networks of specialised agents that communic
 For long-horizon tasks, agents can summarise completed work phases and store essential information in external memory before proceeding to new tasks. When context limits approach, agents spawn fresh sub-agents with clean contexts while maintaining continuity through careful handoffs.
 
 **Multi-agent collaboration across industries (AWS Bedrock examples):**
-▪ Investment advisory — market trend, risk, and opportunity agents deliver personalised recommendations  
-▪ Retail operations — demand forecasting, inventory, pricing, and fulfilment agents work in parallel  
-▪ Fraud detection — transaction monitor, anomaly detector, and alert agents operate in real time  
-▪ Healthcare diagnosis — patient records, symptom recognition, imaging review, and treatment plan agents assist clinicians  
+· Investment advisory — market trend, risk, and opportunity agents deliver personalised recommendations
+· Retail operations — demand forecasting, inventory, pricing, and fulfilment agents work in parallel
+· Fraud detection — transaction monitor, anomaly detector, and alert agents operate in real time
+· Healthcare diagnosis — patient records, symptom recognition, imaging review, and treatment plan agents assist clinicians
 
 ```mermaid
 flowchart TD
@@ -1218,19 +1218,19 @@ flowchart LR
 ```
 
 **Implementation steps for a single Bedrock agent:**
-1. Create an agent in the Bedrock console; assign an IAM role and choose a foundation model  
-2. Write precise, step-by-step instructions (system prompt) defining the agent's persona and constraints  
-3. Associate an AWS Lambda function as an Action Group (the agent's toolbox)  
-4. Create a Knowledge Base (RAG) to give the agent access to company documents  
-5. Deploy an Agent Alias for staging/production version management  
-6. Enable Amazon Bedrock Guardrails for content filtering and PII protection  
+1. Create an agent in the Bedrock console; assign an IAM role and choose a foundation model
+2. Write precise, step-by-step instructions (system prompt) defining the agent's persona and constraints
+3. Associate an AWS Lambda function as an Action Group (the agent's toolbox)
+4. Create a Knowledge Base (RAG) to give the agent access to company documents
+5. Deploy an Agent Alias for staging/production version management
+6. Enable Amazon Bedrock Guardrails for content filtering and PII protection
 
 ### Multi-Agent on AWS
 
 Amazon Bedrock **Multi-Agent Collaboration** enables a supervisor agent to coordinate specialised sub-agents. Two collaboration modes are available:
 
-▪ **Supervisor Mode** — supervisor breaks down complex requests, assigns tasks, consolidates results  
-▪ **Supervisor with Routing Mode** — simple queries route directly to a relevant sub-agent; complex queries trigger full orchestration  
+· **Supervisor Mode** — supervisor breaks down complex requests, assigns tasks, consolidates results
+· **Supervisor with Routing Mode** — simple queries route directly to a relevant sub-agent; complex queries trigger full orchestration
 
 ```mermaid
 flowchart TD
@@ -1251,19 +1251,19 @@ flowchart TD
 ```
 
 **Implementation steps:**
-1. Define individual sub-agents, each with a limited set of tools and a bounded context  
-2. In the Bedrock console under "Multi-Agent Collaboration", create a Supervisor Agent  
-3. Add the sub-agents as collaborators; provide instructions on when and how to delegate  
-4. Choose collaboration mode (Supervisor or Supervisor with Routing)  
-5. Enable shared conversation history for context-aware collaboration across agents  
+1. Define individual sub-agents, each with a limited set of tools and a bounded context
+2. In the Bedrock console under "Multi-Agent Collaboration", create a Supervisor Agent
+3. Add the sub-agents as collaborators; provide instructions on when and how to delegate
+4. Choose collaboration mode (Supervisor or Supervisor with Routing)
+5. Enable shared conversation history for context-aware collaboration across agents
 
 ### Sub-Agents on AWS
 
 Sub-agents in Bedrock are specialised agents with a **bounded context** — limited tools and a narrow scope to improve performance and reduce cost.
 
-▪ Each sub-agent has access only to the data required for its role (principle of least privilege)  
-▪ An agent can invoke another agent as a tool ("Agents as Tools" pattern)  
-▪ Sub-agent settings are configured in the Bedrock console under each agent's instructions  
+· Each sub-agent has access only to the data required for its role (principle of least privilege)
+· An agent can invoke another agent as a tool ("Agents as Tools" pattern)
+· Sub-agent settings are configured in the Bedrock console under each agent's instructions
 
 ### AWS Deployment Methods
 
@@ -1325,11 +1325,11 @@ A well-structured system prompt has five parts:
 ```
 
 **Design principles:**
-▪ Be specific and unambiguous — the LLM will interpret ambiguity in unexpected ways
-▪ Include explicit stop conditions — when should the agent stop and return?
-▪ Define escalation rules — when should the agent ask for human input?
-▪ Specify tool usage order when it matters
-▪ Use numbered, step-by-step instructions rather than prose paragraphs
+· Be specific and unambiguous — the LLM will interpret ambiguity in unexpected ways
+· Include explicit stop conditions — when should the agent stop and return?
+· Define escalation rules — when should the agent ask for human input?
+· Specify tool usage order when it matters
+· Use numbered, step-by-step instructions rather than prose paragraphs
 
 ### Prompt Templates per Agent Type
 
@@ -1983,7 +1983,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 llm = ChatOllama(model="llama3", base_url="http://localhost:11434")
 
 
-# ── Sub-Agent Graph (isolated context) ──────────────────────────────────────
+# ── Sub-Agent Graph (isolated context)
 
 class SubState(TypedDict):
     topic: str
@@ -2009,7 +2009,7 @@ sub_graph_builder.add_edge("research", END)
 sub_agent_graph = sub_graph_builder.compile()
 
 
-# ── Coordinator Graph ────────────────────────────────────────────────────────
+# ── Coordinator Graph
 
 class CoordState(TypedDict):
     user_input: str
@@ -2098,14 +2098,14 @@ from langchain_ollama import ChatOllama
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+# ── Configuration
 DOCS_DIR = "./documents"          # place PDFs and .txt files here
 CHROMA_DIR = "./chroma_db"        # persisted vector store
 EMBED_MODEL = "llama3"            # Ollama model used for embeddings
 CHAT_MODEL = "llama3"             # Ollama model used for answers
 OLLAMA_URL = "http://localhost:11434"
 
-# ── Load and split documents ──────────────────────────────────────────────────
+# ── Load and split documents
 def load_documents(docs_dir: str):
     docs = []
     for path in Path(docs_dir).glob("**/*"):
@@ -2116,7 +2116,7 @@ def load_documents(docs_dir: str):
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     return splitter.split_documents(docs)
 
-# ── Build or load vector store ────────────────────────────────────────────────
+# ── Build or load vector store
 embeddings = OllamaEmbeddings(model=EMBED_MODEL, base_url=OLLAMA_URL)
 
 if Path(CHROMA_DIR).exists():
@@ -2132,7 +2132,7 @@ else:
     vectorstore.persist()
     print(f"Embedded {len(chunks)} chunks into {CHROMA_DIR}")
 
-# ── Build RAG chain ───────────────────────────────────────────────────────────
+# ── Build RAG chain
 llm = ChatOllama(model=CHAT_MODEL, base_url=OLLAMA_URL, temperature=0)
 
 SYSTEM_PROMPT = PromptTemplate.from_template("""
@@ -2154,7 +2154,7 @@ qa_chain = RetrievalQA.from_chain_type(
     return_source_documents=True,
 )
 
-# ── Interactive loop ──────────────────────────────────────────────────────────
+# ── Interactive loop
 if __name__ == "__main__":
     print("Local RAG Agent — ask questions about your documents (type 'exit' to quit)")
     while True:
