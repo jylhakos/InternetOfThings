@@ -5,6 +5,14 @@ This project demonstrates **Feature Learning** and **Feature Engineering** techn
 ## Table of Contents
 
   - [Quick Start](#quick-start)
+  - [Feature Selection & Feature Learning: Core Concepts](#feature-selection--feature-learning-core-concepts)
+    - [Feature Selection](#feature-selection)
+    - [Feature Learning](#feature-learning)
+    - [Relationship Between Feature Selection and Feature Learning](#relationship-between-feature-selection-and-feature-learning)
+    - [Comparison Table](#comparison-table)
+  - [Processing Unknown Datasets](#processing-unknown-datasets)
+    - [Workflow Overview](#workflow-overview)
+    - [PyTorch Techniques for Unknown Data](#pytorch-techniques-for-unknown-data)
   - [Feature Engineering](#feature-engineering)
     - [1. Convolutional Neural Networks (CNNs)](#convolutional-neural-networks-cnns)
     - [2. Recurrent Neural Networks (RNNs)](#recurrent-neural-networks-rnns)
@@ -68,6 +76,680 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 ```
 
 > **Note**: All scripts work on CPU-only systems but will be slower. See [Troubleshooting](#-troubleshooting) for detailed CUDA setup instructions.
+
+---
+
+## Feature Selection & Feature Learning: Core Concepts
+
+Understanding the distinction between **Feature Selection** and **Feature Learning** is fundamental to building effective machine learning pipelines. Both are dimensionality reduction strategies, but they differ fundamentally in how they treat the original feature space.
+
+---
+
+### Feature Selection
+
+**Feature Selection** (also called *Manual Subset Selection*) is the process of identifying and retaining only the most relevant input variables (features/columns) from a dataset, while discarding irrelevant or redundant ones.
+
+#### Definition
+
+> Feature selection is the process of selecting a subset of relevant features for use in model construction. It involves identifying and using only those features in your data that contribute most to the prediction variable or output in which you are interested. The original features are **preserved and untouched** — selection simply decides which to keep and which to discard.
+
+#### Mechanism
+
+- Does **not** transform or combine features — it only selects or rejects them.
+- Reduces the dimensionality of the feature space by choosing a meaningful subset.
+- Improves model interpretability and reduces computational cost.
+
+#### Types of Feature Selection Methods
+
+| Method Type | Description | Example Algorithms |
+|---|---|---|
+| **Filter Methods** | Apply a statistical measure to score each feature independently of any model. Features are ranked and kept or removed. Generally used as a preprocessing step. | Correlation, Chi-squared, Information Gain, Variance Threshold |
+| **Wrapper Methods** | Evaluate subsets of features by training a model and measuring performance. More accurate but computationally expensive. | Recursive Feature Elimination (RFE), Forward/Backward Selection |
+| **Embedded Methods** | Feature selection occurs *during* model training. The model learns which features are relevant as part of its optimization process. | LASSO (L1 regularization), Decision Tree feature importance, Ridge Regression |
+
+> **Filter methods** are notable for being independent of the learning algorithm, making them a common preprocessing step before applying more complex selection techniques or training models. Unlike wrapper and embedded methods, filter methods do not consider interactions with the model itself.
+
+#### Best Used For
+
+- Tabular and structured datasets with many explicit features
+- Scenarios where **interpretability** is a priority (knowing which original features matter)
+- Reducing noise in high-dimensional data before training traditional ML models
+- Example: You have 100 features and need to identify which 10 are most predictive
+
+#### PyTorch Implementation: Embedded Feature Selection
+
+In PyTorch, feature selection is most naturally implemented using **Embedded Methods**, where selection occurs as part of the model's training process through L1 (LASSO) regularization.
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+class LASSOFeatureSelector(nn.Module):
+    """
+    Embedded Feature Selection using L1 regularization (LASSO).
+    Forces irrelevant feature weights toward zero during training,
+    effectively performing automatic feature selection.
+    """
+    def __init__(self, input_dim: int, output_dim: int):
+        super().__init__()
+        # The input layer weights are the feature selectors
+        self.input_layer = nn.Linear(input_dim, output_dim)
+        self.relu = nn.ReLU()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.relu(self.input_layer(x))
+
+    def l1_penalty(self) -> torch.Tensor:
+        """Return the L1 norm of input layer weights for LASSO regularization."""
+        return torch.sum(torch.abs(self.input_layer.weight))
+
+
+def train_with_lasso(model: LASSOFeatureSelector,
+                     X: torch.Tensor,
+                     y: torch.Tensor,
+                     lambda_l1: float = 1e-3,
+                     epochs: int = 100) -> list[float]:
+    """
+    Train model with L1 regularization to drive irrelevant feature
+    weights to zero, performing embedded feature selection.
+
+    Args:
+        model:      LASSOFeatureSelector instance
+        X:          Input tensor, shape [n_samples, n_features]
+        y:          Target tensor, shape [n_samples]
+        lambda_l1:  L1 regularization strength (higher = more features zeroed out)
+        epochs:     Number of training epochs
+
+    Returns:
+        List of training loss values per epoch
+    """
+    optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    criterion = nn.MSELoss()
+    loss_history = []
+
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+        predictions = model(X)
+        task_loss = criterion(predictions.squeeze(), y)
+        # Add L1 penalty to encourage sparse input weights
+        total_loss = task_loss + lambda_l1 * model.l1_penalty()
+        total_loss.backward()
+        optimizer.step()
+        loss_history.append(total_loss.item())
+
+    return loss_history
+
+
+def get_selected_features(model: LASSOFeatureSelector,
+                          threshold: float = 1e-4) -> list[int]:
+    """
+    Return indices of features whose weights are above the threshold
+    after LASSO training (i.e., features the model selected).
+    """
+    with torch.no_grad():
+        weight_magnitudes = torch.abs(model.input_layer.weight).mean(dim=0)
+    selected = (weight_magnitudes > threshold).nonzero(as_tuple=True)[0].tolist()
+    print(f"Selected {len(selected)} features out of {weight_magnitudes.shape[0]}: {selected}")
+    return selected
+
+
+# --- Example usage ---
+torch.manual_seed(42)
+n_samples, n_features = 500, 76   # e.g. 76-feature unknown dataset
+X_train = torch.randn(n_samples, n_features)
+# Only first 10 features are actually predictive
+y_train = X_train[:, :10].sum(dim=1) + 0.1 * torch.randn(n_samples)
+
+model = LASSOFeatureSelector(input_dim=n_features, output_dim=32)
+losses = train_with_lasso(model, X_train, y_train, lambda_l1=5e-3, epochs=200)
+selected_features = get_selected_features(model, threshold=1e-4)
+# Expected: mostly features 0-9 selected; others near zero
+```
+
+---
+
+### Feature Learning
+
+**Feature Learning** (also called *Representation Learning* or *Automated Feature Extraction/Transformation*) is the process by which a model **automatically discovers** useful representations from raw input data, without requiring manual specification of which features matter.
+
+#### Definition
+
+> Feature learning enables algorithms to automatically learn new, meaningful features (representations) from raw data to improve predictions. Unlike feature selection, it **creates new features** by combining or transforming original ones, often resulting in lower-dimensional but highly expressive representations. Deep learning excels at feature learning.
+
+#### Mechanism
+
+- **Early layers** in a deep network extract fundamental, low-level features (edges, tones, n-grams).
+- **Later layers** combine these into complex, high-level, abstract features (shapes, topics, semantic meanings).
+- The network implicitly performs both feature extraction **and** selection internally: relevant features receive large weights; irrelevant ones are suppressed through training.
+- Produces new feature vectors that do **not** correspond 1-to-1 with original input variables — they are learned transformations.
+
+#### Types of Feature Learning
+
+| Technique | Description | Best Data Type |
+|---|---|---|
+| **Convolutional Neural Networks (CNNs)** | Learn spatial hierarchies of features from grid-structured data (images) | Images, spectrograms |
+| **Recurrent Neural Networks (RNNs/LSTMs)** | Learn sequential temporal patterns from ordered data | Time-series, text |
+| **Transformers / Self-Attention** | Learn contextual relationships across entire sequences via attention | Text, multimodal |
+| **Autoencoders** | Learn compressed latent representations via encoder-decoder bottleneck | Any unstructured data |
+| **Principal Component Analysis (PCA)** | Linear dimensionality reduction into orthogonal components | Tabular, structured |
+| **Contrastive Learning** | Learn representations that group similar samples together | Self-supervised settings |
+
+#### Best Used For
+
+- Unstructured data: images, raw text, audio, sensor signals
+- Complex tasks where hand-crafted features are insufficient
+- Situations where labeled data is scarce (unsupervised/self-supervised feature learning)
+- Example: Analyzing pixel data from images to detect shapes, edges, or objects
+
+#### PyTorch Implementation: CNN Feature Learning
+
+```python
+import torch
+import torch.nn as nn
+
+class CNNFeatureLearner(nn.Module):
+    """
+    CNN that automatically learns hierarchical spatial features.
+    Early layers: edges and textures.
+    Later layers: shapes and semantic patterns.
+    """
+    def __init__(self, in_channels: int = 1, feature_dim: int = 128):
+        super().__init__()
+        self.feature_extractor = nn.Sequential(
+            # Layer 1: learns low-level features (edges, corners)
+            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            # Layer 2: learns mid-level features (shapes, textures)
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            # Layer 3: learns high-level features (semantic patterns)
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool2d((4, 4)),
+        )
+        self.projection = nn.Linear(128 * 4 * 4, feature_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        features = self.feature_extractor(x)
+        features = features.view(features.size(0), -1)
+        return self.projection(features)
+
+
+# Extract learned features (no labels needed — unsupervised extraction)
+model = CNNFeatureLearner(in_channels=1, feature_dim=128)
+sample_images = torch.randn(8, 1, 28, 28)   # 8 grayscale 28×28 images
+learned_features = model(sample_images)
+print(f"Learned feature vectors: {learned_features.shape}")  # [8, 128]
+```
+
+---
+
+### Relationship Between Feature Selection and Feature Learning
+
+Feature Selection and Feature Learning are **complementary** dimensionality reduction strategies that can work together in a pipeline. They differ fundamentally in what they produce and when they are applied.
+
+#### How They Relate
+
+1. **Both reduce dimensionality** — Feature selection shrinks the number of input variables; feature learning creates a compact latent representation.
+2. **Sequential use in pipelines** — In complex tasks, feature selection can **reduce the initial dataset size** (removing obvious noise and irrelevant columns), while feature learning then **creates new, more efficient representations** from the filtered input.
+3. **Deep networks unify both** — Deep neural networks internally perform an implicit version of both processes: attention mechanisms and learned weights suppress irrelevant inputs (selection), while stacked layers transform inputs into new representations (learning).
+4. **Feature selection improves feature learning** — Removing redundant columns before training reduces the input space, which can speed up convergence and improve the quality of learned representations.
+5. **Feature learning can validate selection** — Attention weights and feature importance scores from trained networks can confirm or refine which original features were truly predictive.
+
+#### Key Differences
+
+| Dimension | Feature Selection | Feature Learning (Extraction) |
+|---|---|---|
+| **Output** | Subset of original features | New, transformed feature vectors |
+| **Original Features** | Preserved (untouched) | Transformed / combined |
+| **Process** | Subset selection | Feature transformation |
+| **Best For** | Tabular / structured data | Unstructured data (images, text) |
+| **Interpretability** | High — original variables kept | Lower — latent representations |
+| **Automation** | Manual or semi-automated | Fully automated via training |
+| **PyTorch Approach** | Embedded methods (L1/LASSO) | CNNs, RNNs, Autoencoders, Transformers |
+
+#### When to Use Which
+
+- **Use Feature Selection** when you have 100 tabular features and need to identify which 10 are most predictive, or when model interpretability is critical.
+- **Use Feature Learning** when you are analyzing raw images, text sequences, or sensor streams where hand-crafted features are insufficient.
+- **Use Both Together** when you have a large structured dataset with many columns *and* complex interactions that benefit from deep representation learning.
+
+```python
+# Combined pipeline: Feature Selection → Feature Learning
+import torch
+import torch.nn as nn
+
+class SelectThenLearnPipeline(nn.Module):
+    """
+    Two-stage pipeline:
+      Stage 1 — Feature Selection: L1-regularized gating selects relevant input columns.
+      Stage 2 — Feature Learning:  MLP learns nonlinear representations from selected features.
+    """
+    def __init__(self, input_dim: int, selected_dim: int, output_dim: int):
+        super().__init__()
+        # Stage 1: sparse gating (weights driven to zero by L1 regularization)
+        self.gate = nn.Linear(input_dim, selected_dim)
+        # Stage 2: deep representation learning on selected features
+        self.learner = nn.Sequential(
+            nn.ReLU(),
+            nn.Linear(selected_dim, 64),
+            nn.ReLU(),
+            nn.Linear(64, output_dim),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        selected = self.gate(x)          # Stage 1: dimensionality reduction
+        learned  = self.learner(selected)  # Stage 2: representation learning
+        return learned
+
+    def l1_gate_penalty(self) -> torch.Tensor:
+        return torch.sum(torch.abs(self.gate.weight))
+
+
+# Usage
+pipeline = SelectThenLearnPipeline(input_dim=76, selected_dim=20, output_dim=10)
+X = torch.randn(32, 76)
+output = pipeline(X)
+print(f"Pipeline output shape: {output.shape}")  # [32, 10]
+```
+
+---
+
+### Comparison Table
+
+| Feature | Feature Selection | Feature Learning (Extraction) |
+|---|---|---|
+| **Output** | Subset of original features | New, transformed features |
+| **Original Features** | Preserved (Untouched) | Transformed / Combined |
+| **Process** | Subset Selection | Feature Transformation |
+| **Best For** | Tabular / Structured data | Unstructured (Images, Text) |
+| **Interpretability** | High | Lower |
+| **Computational Cost** | Low to Medium | Medium to High |
+| **Requires Labels** | Optional (filter methods are unsupervised) | Optional (autoencoders are unsupervised) |
+| **PyTorch Primary Tool** | L1/LASSO regularization, attention weights | CNNs, RNNs, Autoencoders, Transformers |
+
+---
+
+## Processing Unknown Datasets
+
+When you encounter a **dataset with no prior knowledge** — unknown feature semantics, unlabeled data, or unclear structure — Feature Selection and Feature Learning are the primary tools for discovering relevant patterns and reducing dimensionality without requiring pre-existing domain expertise.
+
+### Workflow Overview
+
+The following workflow applies both Feature Selection and Feature Learning to an unknown dataset in PyTorch:
+
+```
+Unknown Dataset
+      │
+      ▼
+1. Preprocessing
+   ├── Normalize (StandardScaler / MinMaxScaler)
+   ├── Handle missing values (imputation or masking)
+   └── Convert to torch.Tensor
+      │
+      ▼
+2. Unsupervised Feature Learning
+   ├── Autoencoder → learns compressed latent representation
+   └── Contrastive Learning → groups similar samples together
+      │
+      ▼
+3. Feature Selection / Refinement
+   ├── L1 / LASSO regularization → zero out irrelevant weights
+   ├── Attention weights → rank feature importance dynamically
+   └── Reconstruction error analysis → identify informative dimensions
+      │
+      ▼
+4. Downstream Task
+   ├── Classification layer (if labels become available)
+   ├── Clustering (k-means on latent space)
+   └── Anomaly detection (reconstruction error threshold)
+```
+
+#### Step 1 — Preprocessing Unknown Data
+
+```python
+import torch
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+
+def preprocess_unknown_dataset(raw_data: np.ndarray) -> torch.Tensor:
+    """
+    Prepare an unknown dataset for feature learning.
+
+    Steps:
+      1. Impute missing values with column median
+      2. Standardize to zero mean / unit variance
+      3. Convert to float32 torch.Tensor
+
+    Args:
+        raw_data: NumPy array of shape [n_samples, n_features]
+
+    Returns:
+        Normalized tensor of shape [n_samples, n_features]
+    """
+    # 1. Handle missing values
+    imputer = SimpleImputer(strategy='median')
+    data_imputed = imputer.fit_transform(raw_data)
+
+    # 2. Standardize features
+    scaler = StandardScaler()
+    data_scaled = scaler.fit_transform(data_imputed)
+
+    # 3. Convert to PyTorch tensor
+    tensor = torch.tensor(data_scaled, dtype=torch.float32)
+    print(f"Preprocessed tensor shape: {tensor.shape}")
+    return tensor
+```
+
+#### Step 2 — Unsupervised Feature Learning with Autoencoder
+
+```python
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+
+class Autoencoder(nn.Module):
+    """
+    Autoencoder for unsupervised feature learning on unknown datasets.
+
+    The encoder compresses the input into a low-dimensional latent space,
+    forcing the network to learn the most informative representation.
+    The decoder reconstructs the original input from the latent code,
+    providing a training signal without requiring labels.
+
+    Architecture:
+        Input (n_features) → Encoder → Latent (latent_dim) → Decoder → Reconstructed Input
+    """
+    def __init__(self, input_dim: int, latent_dim: int = 32):
+        super().__init__()
+        hidden_dim = max(input_dim // 2, latent_dim * 2)
+
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.BatchNorm1d(hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(hidden_dim, latent_dim),
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, input_dim),
+        )
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        latent = self.encoder(x)
+        reconstructed = self.decoder(latent)
+        return reconstructed, latent
+
+    def encode(self, x: torch.Tensor) -> torch.Tensor:
+        """Extract learned feature representation (latent vector)."""
+        with torch.no_grad():
+            return self.encoder(x)
+
+
+def train_autoencoder(data_tensor: torch.Tensor,
+                      latent_dim: int = 32,
+                      epochs: int = 50,
+                      batch_size: int = 64,
+                      lr: float = 1e-3) -> tuple['Autoencoder', list[float]]:
+    """
+    Train an autoencoder on unknown data to learn feature representations.
+
+    Args:
+        data_tensor:  Preprocessed input tensor, shape [n_samples, n_features]
+        latent_dim:   Dimensionality of the learned latent space
+        epochs:       Training epochs
+        batch_size:   Mini-batch size
+        lr:           Learning rate
+
+    Returns:
+        Trained autoencoder and list of epoch losses
+    """
+    input_dim = data_tensor.shape[1]
+    model = Autoencoder(input_dim=input_dim, latent_dim=latent_dim)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.MSELoss()
+
+    dataset = TensorDataset(data_tensor)
+    loader  = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    loss_history = []
+
+    for epoch in range(epochs):
+        model.train()
+        epoch_loss = 0.0
+        for (batch,) in loader:
+            optimizer.zero_grad()
+            reconstructed, _ = model(batch)
+            loss = criterion(reconstructed, batch)
+            loss.backward()
+            optimizer.step()
+            epoch_loss += loss.item()
+        avg_loss = epoch_loss / len(loader)
+        loss_history.append(avg_loss)
+        if (epoch + 1) % 10 == 0:
+            print(f"Epoch {epoch + 1}/{epochs} | Reconstruction Loss: {avg_loss:.6f}")
+
+    return model, loss_history
+
+
+# --- Example: 76-feature unknown dataset ---
+torch.manual_seed(42)
+raw_unknown = np.random.randn(1000, 76)              # Simulate unknown dataset
+raw_unknown[10:15, 5:8] = np.nan                     # Introduce missing values
+
+X_tensor = preprocess_unknown_dataset(raw_unknown)
+autoencoder, losses = train_autoencoder(X_tensor, latent_dim=32, epochs=50)
+
+# Extract learned 32-dimensional feature representation
+learned_features = autoencoder.encode(X_tensor)
+print(f"Learned features shape: {learned_features.shape}")  # [1000, 32]
+```
+
+#### Step 3 — Feature Selection with L1 Regularization on Unknown Data
+
+```python
+class SparseFeatureSelector(nn.Module):
+    """
+    L1-regularized (LASSO) feature selector for unknown datasets.
+
+    Trains an input gating layer whose weights are driven toward zero by
+    L1 regularization. After training, features with near-zero weights
+    are identified as irrelevant and can be dropped.
+
+    Suitable for datasets where you want to identify e.g.
+    65 informative features out of 76 total without any labels.
+    """
+    def __init__(self, input_dim: int, hidden_dim: int = 64):
+        super().__init__()
+        self.gate   = nn.Linear(input_dim, hidden_dim)   # sparse input gating
+        self.output = nn.Linear(hidden_dim, hidden_dim)
+        self.relu   = nn.ReLU()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.relu(self.output(self.relu(self.gate(x))))
+
+    def l1_penalty(self) -> torch.Tensor:
+        return self.gate.weight.abs().sum()
+
+    def selected_feature_indices(self, threshold: float = 0.01) -> list[int]:
+        """
+        Return indices of features whose gate weights exceed the threshold.
+        These are the features selected by LASSO as informative.
+        """
+        magnitudes = self.gate.weight.abs().mean(dim=0)
+        return magnitudes.gt(threshold).nonzero(as_tuple=True)[0].tolist()
+
+
+def train_lasso_selector(data_tensor: torch.Tensor,
+                         lambda_l1: float = 1e-2,
+                         epochs: int = 100) -> 'SparseFeatureSelector':
+    """
+    Train sparse selector on unknown data.
+    Uses reconstruction loss on a self-supervised signal (input → input)
+    so no labels are required.
+    """
+    input_dim = data_tensor.shape[1]
+    model     = SparseFeatureSelector(input_dim=input_dim, hidden_dim=input_dim)
+    optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    criterion = nn.MSELoss()
+
+    # Reconstruction target = input itself (self-supervised)
+    output_proj = nn.Linear(input_dim, input_dim)
+    all_params  = list(model.parameters()) + list(output_proj.parameters())
+    optimizer   = optim.Adam(all_params, lr=1e-3)
+
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+        hidden = model(data_tensor)
+        recon  = output_proj(hidden)
+        task_loss  = criterion(recon, data_tensor)
+        total_loss = task_loss + lambda_l1 * model.l1_penalty()
+        total_loss.backward()
+        optimizer.step()
+
+    selected = model.selected_feature_indices(threshold=0.01)
+    print(f"LASSO selected {len(selected)} features out of {input_dim}: indices {selected[:10]}...")
+    return model
+
+
+lasso_model = train_lasso_selector(X_tensor, lambda_l1=1e-2, epochs=100)
+```
+
+#### Step 4 — Attention-Based Feature Importance
+
+Transformer attention mechanisms provide a dynamic, input-dependent way to rank features. For an unknown tabular dataset, a single-layer self-attention module reveals which features the model focuses on most:
+
+```python
+class AttentionFeatureRanker(nn.Module):
+    """
+    Multi-head self-attention module that dynamically weights input features,
+    making it possible to rank feature importance on unknown datasets.
+
+    The averaged attention weights across heads and samples indicate
+    which features are most influential for a given input.
+    """
+    def __init__(self, input_dim: int, num_heads: int = 4, embed_dim: int = 64):
+        super().__init__()
+        self.embedding   = nn.Linear(input_dim, embed_dim)
+        self.attention   = nn.MultiheadAttention(embed_dim=embed_dim,
+                                                  num_heads=num_heads,
+                                                  batch_first=True)
+        self.output_proj = nn.Linear(embed_dim, input_dim)
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Args:
+            x: Input tensor of shape [batch, n_features]
+
+        Returns:
+            output:           Attended representation, shape [batch, n_features]
+            attention_weights: Attention matrix, shape [batch, n_features, n_features]
+        """
+        # Treat each feature as a sequence token: [batch, seq_len=n_features, embed_dim]
+        embedded = self.embedding(x).unsqueeze(1)          # [batch, 1, embed_dim]
+        # Repeat to create a sequence of feature tokens
+        seq = embedded.expand(-1, x.size(1), -1)           # [batch, n_features, embed_dim]
+        attended, attn_weights = self.attention(seq, seq, seq)
+        output = self.output_proj(attended.mean(dim=1))    # aggregate
+        return output, attn_weights
+
+    def feature_importance(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Compute mean attention weight per input feature across the batch.
+        Higher score = more important feature for this dataset.
+
+        Returns:
+            importance: Tensor of shape [n_features] with importance scores
+        """
+        self.eval()
+        with torch.no_grad():
+            _, attn_weights = self.forward(x)
+        # Average over batch and attention heads
+        importance = attn_weights.mean(dim=(0, 1))         # [n_features]
+        return importance
+
+
+# Rank features on unknown dataset
+ranker     = AttentionFeatureRanker(input_dim=76, num_heads=4, embed_dim=64)
+importance = ranker.feature_importance(X_tensor)
+top_k      = 65  # Select top 65 features out of 76
+top_indices = importance.topk(top_k).indices.tolist()
+print(f"Top {top_k} important features (by attention): {sorted(top_indices)}")
+```
+
+### PyTorch Techniques for Unknown Data
+
+The table below summarizes the three main PyTorch techniques for processing unknown datasets and when to apply each:
+
+| Technique | PyTorch Tool | When to Use | Output |
+|---|---|---|---|
+| **Autoencoder** | `nn.Module` with encoder/decoder | Any unstructured or tabular unknown data; unsupervised representation learning | Compressed latent vector (new features) |
+| **L1 / LASSO Regularization** | `torch.optim` + L1 penalty on `nn.Linear` weights | Tabular data where you need to identify which original features are relevant | Sparse weight mask over original features |
+| **Attention Mechanism** | `nn.MultiheadAttention` | Sequential or tabular data; dynamic feature importance without retraining | Attention weight scores per feature |
+| **Contrastive Learning** | Custom loss (e.g., NT-Xent) | Self-supervised: no labels, large dataset | Discriminative latent representations |
+| **PCA (linear baseline)** | `torch.linalg.svd` or `sklearn.PCA` | Quick linear dimensionality reduction as a starting point | Principal components (new features) |
+
+#### Choosing the Right Approach
+
+```python
+def recommend_approach(n_samples: int,
+                       n_features: int,
+                       has_labels: bool,
+                       data_type: str) -> str:
+    """
+    Recommend a feature learning/selection approach for an unknown dataset.
+
+    Args:
+        n_samples:   Number of samples in the dataset
+        n_features:  Number of input features / columns
+        has_labels:  Whether labeled training examples are available
+        data_type:   One of 'tabular', 'image', 'text', 'timeseries'
+
+    Returns:
+        Recommendation string
+    """
+    if data_type in ('image', 'text'):
+        return ("Feature Learning: Use a CNN (images) or Transformer/BERT (text). "
+                "Deep networks automatically discover hierarchical representations.")
+
+    if data_type == 'timeseries':
+        return ("Feature Learning: Use an LSTM or Temporal Convolutional Network. "
+                "Learns temporal patterns without manual feature engineering.")
+
+    # Tabular data
+    if not has_labels:
+        if n_features > 50:
+            return (f"Start with Autoencoder (latent_dim={max(n_features//4, 16)}) "
+                    "to learn compact representation, then apply LASSO to refine "
+                    "which original features are most informative.")
+        else:
+            return ("LASSO feature selection with self-supervised reconstruction loss. "
+                    "Identifies relevant features without needing labels.")
+    else:
+        return ("Embedded method: train a classifier with L1 regularization. "
+                "Feature importance from model weights or SHAP values.")
+
+
+# Examples
+print(recommend_approach(1000, 76, has_labels=False, data_type='tabular'))
+# → "Start with Autoencoder (latent_dim=19) to learn compact representation..."
+
+print(recommend_approach(5000, 10, has_labels=True, data_type='tabular'))
+# → "Embedded method: train a classifier with L1 regularization..."
+
+print(recommend_approach(2000, 512, has_labels=False, data_type='image'))
+# → "Feature Learning: Use a CNN..."
+```
+
+---
 
 ## 🛠️ Installation & Setup
 
@@ -1291,7 +1973,7 @@ The fine-tuned model's performance is evaluated on the CoLA validation or test s
 
 ##  PyTorch Training & Evaluation Pipeline for CoLA
 
-**This section provides the comprehensive training and evaluation pipeline following PyTorch best practices with Matthews Correlation Coefficient (MCC) as the primary metric for CoLA evaluation.**
+**This section provides the training and evaluation pipeline following PyTorch best practices with Matthews Correlation Coefficient (MCC) as the primary metric for CoLA evaluation.**
 
 ### **🔧 PyTorch Metrics Implementation**
 
@@ -1716,7 +2398,7 @@ Why MCC for CoLA?
 1. Imbalanced Dataset: ~69% unacceptable, ~31% acceptable sentences
 2. Better than Accuracy: Handles class imbalance effectively
 3. GLUE Standard: Official metric for CoLA task evaluation
-4. Comprehensive: Considers all confusion matrix components
+4. Focus: Considers all confusion matrix components
 """
 
 def explain_glue_cola_relationship():
@@ -1964,7 +2646,7 @@ print("   • GLUE benchmark compliance")
 
 ## Matthews Correlation Coefficient (MCC) Calculation
 
-**The Matthews Correlation Coefficient is the gold standard metric for binary classification, especially crucial for imbalanced datasets like CoLA. Here's a comprehensive guide to calculating MCC using different methods.**
+**The Matthews Correlation Coefficient is the gold standard metric for binary classification, especially crucial for imbalanced datasets like CoLA. Here's a guide to calculating MCC using different methods.**
 
 ### **Understanding MCC Scores**
 
@@ -1985,7 +2667,7 @@ from torchmetrics import MatthewsCorrCoef
 import torch
 
 def demonstrate_torchmetrics_mcc():
-    """Comprehensive demonstration of MCC calculation using torchmetrics"""
+    """Demonstration of MCC calculation using torchmetrics"""
     print("🔍 Matthews Correlation Coefficient with TorchMetrics")
     print("=" * 60)
     
@@ -2138,7 +2820,7 @@ manual_mcc = calculate_mcc_manual(example_preds, example_targets)
 
 ```python
 """
-Comprehensive Comparison - TorchMetrics vs Manual vs Scikit-learn
+Comparison - TorchMetrics vs Manual vs Scikit-learn
 Validates consistency across different implementations
 """
 
@@ -2378,7 +3060,7 @@ class MCCBestPractices:
             },
             {
                 "practice": "Multiple Metric Tracking",
-                "description": "Track both MCC and accuracy for comprehensive evaluation",
+                "description": "Track both MCC and accuracy for evaluation",
                 "code": """
 metrics = {
     'accuracy': accuracy_metric(preds, targets),
@@ -2429,7 +3111,7 @@ MCCBestPractices.print_best_practices()
 
 ## **BERT Model MCC Evaluation on CoLA Dataset**
 
-**By calculating the MCC for BERT model on the CoLA dataset, you can evaluate its performance in classifying the grammatical acceptability of sentences. Here's a comprehensive implementation:**
+**By calculating the MCC for BERT model on the CoLA dataset, you can evaluate its performance in classifying the grammatical acceptability of sentences. Here's an implementation:**
 
 ### **CoLA BERT MCC Evaluation Pipeline**
 
@@ -2592,7 +3274,7 @@ class BERTCoLAMCCEvaluator:
         return list(sentences), list(labels)
     
     def evaluate_model_mcc(self, sentences, labels, batch_size=16):
-        """Comprehensive MCC evaluation of BERT model on CoLA data"""
+        """MCC evaluation of BERT model on CoLA data"""
         print(f"\n Evaluating BERT Model MCC on CoLA Dataset")
         print("=" * 60)
         
@@ -2662,7 +3344,7 @@ class BERTCoLAMCCEvaluator:
         # Detailed classification analysis
         self._detailed_classification_analysis(all_labels, all_predictions, sentences)
         
-        # Return comprehensive results
+        # Return results
         return {
             'mcc': final_mcc,
             'accuracy': final_accuracy,
@@ -2834,7 +3516,7 @@ why_mcc_for_cola()
 - **Real CoLA Dataset Integration** with grammatically acceptable/unacceptable sentences
 - **BERT Model Loading** and tokenization for sequence classification
 - **GPU-Accelerated MCC Calculation** using TorchMetrics
-- **Comprehensive Performance Analysis** with confusion matrix and classification reports
+- **Performance Analysis** with confusion matrix and classification reports
 
 ### **Linguistic Understanding Assessment:**
 - **MCC Score Interpretation** specifically for grammatical acceptability tasks
@@ -2846,7 +3528,7 @@ why_mcc_for_cola()
 - **Imbalanced Dataset Handling** (31% acceptable, 69% unacceptable)
 - **Batch Processing** for efficient evaluation
 - **Device Management** (CPU/GPU compatibility)
-- **Comprehensive Metrics** (MCC, Accuracy, F1-Score)
+- **Metrics** (MCC, Accuracy, F1-Score)
 
 ```python
 """
@@ -2968,7 +3650,7 @@ print("PyTorch CoLA BERT Transfer Learning Process Complete!")
 
 ### **README.md Coverage Confirmed:**
 -  **PyTorch Transfer Learning**: Complete tutorial with ResNet-18 and Hymenoptera dataset
--  **CoLA Dataset**: Comprehensive integration with official website information
+-  **CoLA Dataset**: An integration with official website information
 -  **BERT Implementation**: Full pipeline from tokenization to evaluation
 -  **Transfer Learning Process**: Step-by-step PyTorch CoLA pre-trained BERT workflow
 
@@ -3000,7 +3682,7 @@ print("PyTorch CoLA BERT Transfer Learning Process Complete!")
 - Complete PyTorch Transfer Learning pipeline
 - CoLA linguistic acceptability classification
 - BERT model fine-tuning best practices
-- Comprehensive evaluation metrics
+- Evaluation metrics
 - Educational code with detailed comments
 - Production-ready implementations
 
@@ -3011,7 +3693,7 @@ print("PyTorch CoLA BERT Transfer Learning Process Complete!")
 
 ## CoLA Dataset Deep Exploration
 
-**The Corpus of Linguistic Acceptability (CoLA) dataset is a comprehensive collection for single sentence classification, containing sentences labeled as grammatically correct or incorrect. Let's explore its structure in detail.**
+**The Corpus of Linguistic Acceptability (CoLA) dataset is a collection for single sentence classification, containing sentences labeled as grammatically correct or incorrect. Let's explore its structure in detail.**
 
 ### **CoLA Dataset Structure Analysis**
 
@@ -3047,7 +3729,7 @@ Column 4: SENTENCE TEXT
 # Detailed exploration of CoLA dataset structure
 def explore_cola_dataset_structure():
     """
-    Comprehensive exploration of CoLA dataset structure with real examples
+    Exploration of CoLA dataset structure with real examples
     """
     print("CoLA Dataset Structure Exploration")
     print("=" * 60)
@@ -3388,7 +4070,7 @@ class CoLADataProcessor:
         return train_data
     
     def process_all_columns(self, data):
-        """Process all CoLA columns for comprehensive analysis"""
+        """Process all CoLA columns for analysis"""
         processed = {
             'tokenized_sentences': [],
             'binary_labels': [],
@@ -4964,7 +5646,7 @@ python demo_comprehensive_feature_engineering.py
 
 ```
 Feature Learning/
-├── README.md                          # Project documentation with comprehensive guide
+├── README.md                          # Project documentation
 ├── PROJECT.md                        # Project completion summary
 ├── IMPLEMENTATION.md                 # Detailed implementation guide
 ├── .gitignore                        # Git ignore file
@@ -5269,7 +5951,7 @@ ls -lh datasets/
 
 ## Visualization and Analysis
 
-The project provides comprehensive visualization tools for understanding learned features:
+The project provides visualization tools for understanding learned features:
 
 ### Feature Visualization Types
 
@@ -5406,7 +6088,7 @@ create_interactive_plot(
 
 ### Visualization Gallery
 
-The project automatically generates a comprehensive visualization gallery:
+The project automatically generates a visualization gallery:
 
 ```
 results/
@@ -5443,7 +6125,7 @@ results/
 ### Reporting
 
 ```bash
-# Generate comprehensive feature analysis report
+# Generate feature analysis report
 python src/evaluation/generate_report.py
 
 # Create feature comparison dashboard
@@ -5834,7 +6516,7 @@ python src/utils/feature_extraction.py --model models/bert_squad.pth --extract_b
 
 ## Troubleshooting
 
-This section provides comprehensive troubleshooting guidance for common issues with CUDA, PyTorch, and the feature engineering scripts.
+This section provides troubleshooting guidance for common issues with CUDA, PyTorch, and the feature engineering scripts.
 
 ### CUDA and PyTorch Issues
 
@@ -6175,7 +6857,7 @@ train_loader = DataLoader(
 
 ### Quick Diagnostic Script
 
-Create a comprehensive diagnostic script:
+Create a diagnostic script:
 
 ```bash
 # Save this as diagnose_setup.py
